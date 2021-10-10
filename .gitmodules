@@ -1,0 +1,3 @@
+[submodule "cle-myeloseq"]
+	path = cle-myeloseq
+	url = git@github.com:genome/cle-myeloseq.git
