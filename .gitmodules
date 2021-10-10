@@ -1,3 +1,6 @@
 [submodule "cle-myeloseq"]
 	path = cle-myeloseq
 	url = git@github.com:genome/cle-myeloseq.git
+[submodule "WDL_examples/broad-prod-wgs-germline-snps-indels"]
+	path = WDL_examples/broad-prod-wgs-germline-snps-indels
+	url = git@github.com:gatk-workflows/broad-prod-wgs-germline-snps-indels.git
