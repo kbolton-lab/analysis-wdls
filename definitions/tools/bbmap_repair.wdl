@@ -22,9 +22,9 @@ task bbmap_repair {
     >>>
 
     output {
-        Array[File] fastqs = [R1.fixed.fastq.gz, R2.fixed.fastq.gz]
-        File fastq1 = "R1.fixed.fastq.gz"
-        File fastq2 = "R2.fixed.fastq.gz"
+        Array[File] fastqs = ["R1.fixed.fastq.gz", "R2.fixed.fastq.gz"]
+        File fastq1_repair = "R1.fixed.fastq.gz"
+        File fastq2_repair = "R2.fixed.fastq.gz"
     }
 }
 

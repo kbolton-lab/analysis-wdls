@@ -12,6 +12,8 @@ task fpFilter {
     String output_vcf_basename = "fpfilter"
     String sample_name = "TUMOR"
     Float min_var_freq = 0.05
+
+    File fastq1
   }
 
   Int space_needed_gb = 10 + round(size(vcf, "GB")*2 + size([reference, reference_fai, reference_dict, bam], "GB"))
@@ -24,6 +26,7 @@ task fpFilter {
 
   String output_vcf = output_vcf_basename + ".vcf"
   command <<<
+    cp ~{fastq1}
     /usr/bin/perl /usr/bin/fpfilter.pl --bam-readcount /usr/bin/bam-readcount --samtools /opt/samtools/bin/samtools --output ~{output_vcf} --reference ~{reference} --bam-file ~{bam} --vcf-file ~{vcf} --sample ~{sample_name} --min-var-freq ~{min_var_freq}
   >>>
 
