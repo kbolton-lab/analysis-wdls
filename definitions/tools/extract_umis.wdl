@@ -23,7 +23,7 @@ task extractUmis {
 
         PAIRED = ~{umi_paired}
         BAM = "~{bam}"
-        READ_STRUCUTRE = "~{read_structure}"
+        READ_STRUCUTRE = "~{sep=", " read_structure}"
 
         if [[ "$PAIRED" == true ]]; then
             /usr/local/bin/fgbio ExtractUmisFromBam --molecular-index-tags ZA ZB --single-tag RX --input $BAM --read-structure $READ_STRUCUTRE --output umi_extracted.bam
