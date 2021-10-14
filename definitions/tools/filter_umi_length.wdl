@@ -1,20 +1,20 @@
 version 1.0
 
-task filter_umi_length {
+task filterUmiLength {
     input {
         File? fastq1
         File? fastq2
         Int umi_length
     }
 
-    Int cores = 8
+    Int cores = 2
     Float data_size = size([fastq1, fastq2], "GB")
 
     runtime {
         docker: "ubuntu:xenial"
         memory: "4GB"
         cpu: cores
-        bootDiskSizeGb: 10 + round(5*data_size)
+        bootDiskSizeGb: 10
         disks: "local-disk ~{10 + round(5*data_size)} SSD"
     }
 
@@ -44,7 +44,7 @@ workflow wf {
         File? fastq2
         Int umi_length
     }
-    call filter_umi_length {
+    call filterUmiLength {
         input:
         fastq1 = fastq1,
         fastq2 = fastq2,

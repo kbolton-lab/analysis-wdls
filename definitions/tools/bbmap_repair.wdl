@@ -1,6 +1,6 @@
 version 1.0
 
-task bbmap_repair {
+task bbmapRepair {
     input {
         File fastq1
         File fastq2
@@ -33,7 +33,7 @@ workflow wf {
         File fastq1
         File fastq2
     }
-    call bbmap_repair {
+    call bbmapRepair {
         input:
         fastq1 = fastq1,
         fastq2 = fastq2
