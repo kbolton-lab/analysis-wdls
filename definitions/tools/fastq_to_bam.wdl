@@ -1,6 +1,6 @@
 version 1.0
 
-task bbmap_repair {
+task fastqToBam {
     input {
         File fastq1
         File fastq2
@@ -39,7 +39,7 @@ workflow wf {
         String platform_unit
         String platform
     }
-    call bbmap_repair {
+    call fastqToBam {
         input:
         fastq1 = fastq1,
         fastq2 = fastq2,
