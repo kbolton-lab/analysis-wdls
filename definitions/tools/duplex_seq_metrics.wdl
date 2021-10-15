@@ -46,7 +46,7 @@ task duplexSeqMetrics {
     >>>
 
     output {
-        Array[File] duplex_seq_metrics = "duplex_seq.metrics.*"
+        Array[File] duplex_seq_metrics = glob("duplex_seq.metrics.*")
     }
 }
 
