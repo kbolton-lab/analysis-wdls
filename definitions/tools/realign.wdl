@@ -31,7 +31,7 @@ task realign {
 
     output {
         File consensus_aligned_bam = "realigned.bam"
-        File consensus_aligned_bam_bai = "realign.bam.bai"
+        File consensus_aligned_bam_bai = "realign.bai"
     }
 }
 

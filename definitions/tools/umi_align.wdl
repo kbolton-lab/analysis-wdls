@@ -34,7 +34,7 @@ task umiAlign {
 
     output {
         File aligned_bam = "aligned.bam"
-        File aligned_bam_bai = "aligned.bam.bai"
+        File aligned_bam_bai = "aligned.bai"
     }
 }
 

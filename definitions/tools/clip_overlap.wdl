@@ -26,7 +26,7 @@ task clipOverlap {
 
     output {
         File clipped_bam = "clipped.bam"
-        File clipped_bam_bai = "clipped.bam.bai"
+        File clipped_bam_bai = "clipped.bai"
     }
 }
 

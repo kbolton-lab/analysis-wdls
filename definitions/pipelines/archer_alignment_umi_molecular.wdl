@@ -33,24 +33,24 @@ workflow archer_alignment_umi_molecular {
     }
 
     scatter(seq_data in sequence) {
-        call fqf.archer_fastq_format as format_fastq {
+        call fqf.archerFastqFormat as format_fastq {
             input:
             sequence = seq_data,
             umi_length = umi_length
         }
+
+        call ftb.fastqToBam as fastq_to_bam {
+            input:
+            fastq1 = format_fastq.fastq1,
+            fastq2 = format_fastq.fastq2,
+            sample_name = sample_name,
+            library_name = "Library",
+            platform_unit = "Illumina",
+            platform = "ArcherDX"
+        }
     }
 
-    call ftb.fastq_to_bam as fastq_to_bam {
-        input:
-        read1_fastq = format_fastq.fastq1,
-        read2_fastq = format_fastq.fastq2,
-        sample_name = sample_name,
-        library_name = "Library",
-        platform_unit = "Illumina",
-        platform = "ArcherDX"
-    }
-
-    call ma.molecular_alignment as alignment_workflow {
+    call ma.molecularAlignment as alignment_workflow {
         input:
         bam = fastq_to_bam.bam,
         sample_name = sample_name,
@@ -72,23 +72,22 @@ workflow archer_alignment_umi_molecular {
         max_no_call_fraction = max_no_call_fraction
     }
 
-    call btc.bam_to_cram as bam_to_cram {
+    call btc.bamToCram as bam_to_cram {
         input:
         bam = alignment_workflow.aligned_bam,
-        bam_bai = alignment_workflow.aligned_bam_bai,
         reference = reference,
         reference_fai = reference_fai,
         reference_dict = reference_dict,
     }
 
-    call ic.index_cram as index_cram {
+    call ic.indexCram as index_cram {
         input:
         cram = bam_to_cram.cram
     }
 
     output {
         File aligned_cram = index_cram.indexed_cram
-        File aligned_cram_crai = index_cram_crai.indexed_cram_crai
+        File aligned_cram_crai = index_cram.indexed_cram_crai
         Array[File] adapter_histogram = alignment_workflow.adapter_histogram
         Array[File] duplex_seq_metrics = alignment_workflow.duplex_seq_metrics
     }
