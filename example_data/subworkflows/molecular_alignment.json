@@ -6,7 +6,7 @@
   "molecularAlignment.reference_amb": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.amb",
   "molecularAlignment.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
   "molecularAlignment.reference_ann": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.ann",
-  "molecularAlignment.bam": "/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/unaligned.bam",
+  "molecularAlignment.bam": ["/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/unaligned.bam"],
   "molecularAlignment.reference_bwt": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.bwt",
   "molecularAlignment.sample_name": "Sample",
   "molecularAlignment.read_structure": ["8M13S+T", "+T"],

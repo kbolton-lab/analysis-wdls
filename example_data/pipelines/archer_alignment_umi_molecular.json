@@ -1,0 +1,26 @@
+{
+  "archer_alignment_umi_molecular.reference_ann": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.ann",
+  "archer_alignment_umi_molecular.read_structure": "Array[String]",
+  "archer_alignment_umi_molecular.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
+  "archer_alignment_umi_molecular.max_read_error_rate": "0.05",
+  "archer_alignment_umi_molecular.max_no_call_fraction": "0.5",
+  "archer_alignment_umi_molecular.reference_amb": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.amb",
+  "archer_alignment_umi_molecular.sequence": {
+      "sequence": {
+        "fastq1": "/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/Sample_R1.fastq.gz",
+        "fastq2": "/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/Sample_R2.fastq.gz"
+      },
+      "readgroup": "RG\tRD:Normal\tSM:Normal\tPL:Illumina\tCN:Archer"
+  },
+  "archer_alignment_umi_molecular.umi_length": "8",
+  "archer_alignment_umi_molecular.reference_sa": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.sa",
+  "archer_alignment_umi_molecular.min_base_quality": "1",
+  "archer_alignment_umi_molecular.sample_name": "Sample",
+  "archer_alignment_umi_molecular.reference_pac": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.pac",
+  "archer_alignment_umi_molecular.reference_bwt": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.bwt",
+  "archer_alignment_umi_molecular.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "archer_alignment_umi_molecular.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+  "archer_alignment_umi_molecular.umi_paired": "false",
+  "archer_alignment_umi_molecular.min_reads": ["1"],
+  "archer_alignment_umi_molecular.max_base_error_rate": "0.1"
+}
