@@ -31,6 +31,7 @@ task filterConsensus {
 
     output {
         File filtered_bam = "consensus_filtered.bam"
+        File filtered_bam_bai = "consensus_filtered.bai"
     }
 }
 
