@@ -3,7 +3,7 @@ version 1.0
 import "umi_alignment.wdl" as ua
 
 import "../tools/merge_bams.wdl" as mb
-import "../tools/group_reads_test.wdl" as gr     #test
+import "../tools/group_reads.wdl" as gr     #test
 import "../tools/call_molecular_consensus.wdl" as cmc
 import "../tools/realign.wdl" as r
 import "../tools/filter_consensus.wdl" as fc
@@ -103,7 +103,7 @@ workflow molecularAlignment {
     call dsm.duplexSeqMetrics as collect_duplex_seq_metrics {
         input:
         bam = group_reads_by_umi.grouped_bam,
-        intervals = target_intervals,
+        target_intervals = target_intervals,
         description = sample_name,
         umi_paired = umi_paired
     }
