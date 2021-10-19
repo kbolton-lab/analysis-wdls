@@ -72,7 +72,7 @@ task mskGetBaseCountsWithArray {
 
         bam_string=""
 
-        for bam in ~{normal_bams}; do
+        for bam in ~{sep=" " normal_bams}; do
             sample_name=`samtools view -H $bam | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq`
             bam_string="$bam_string --bam $sample_name:$bam"
         done
