@@ -30,7 +30,9 @@ task mutect {
     set -o pipefail
     set -o errexit
 
-    if [ -z ~{normal_bam} ]; then
+    NORMAL_BAM=~{normal_bam}
+
+    if [ -z ${NORMAL_BAM+x} ]; then
         /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} \
         -I ~{tumor_bam} --read-index ~{tumor_bam_bai} --max-reads-per-alignment-start 0
     else
