@@ -1,11 +1,11 @@
 {
-  "reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
-  "reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
-  "baseq": 5,
-  "mapq": 5,
-  "reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
-  "sample_name": "Sample",
-  "bam": [
+  "wf.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
+  "wf.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+  "wf.baseq": 5,
+  "wf.mapq": 5,
+  "wf.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "wf.sample_name": "Sample",
+  "wf.bam": [
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/11108_14__S46_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/11108_17__S47_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/11108_22__S48_Normal.bam",
@@ -34,5 +34,5 @@
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1657_S406_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1658_S407_Normal.bam"
   ],
-  "vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz"
+  "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz"
 }
