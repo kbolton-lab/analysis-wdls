@@ -29,7 +29,7 @@ task mskGetBaseCountsWithFile {
 
         if [[ ~{vcf} == *.vcf.gz ]]; then
             bgzip -d ~{vcf}
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf basename(~{vcf}, ".gz") --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf $(basename ~{vcf} .gz) --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         else
             /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         fi
@@ -78,7 +78,7 @@ task mskGetBaseCountsWithArray {
 
         if [[ ~{vcf} == *.vcf.gz ]]; then
             bgzip -d ~{vcf}
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf basename(~{vcf}, ".gz") --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf $(basename ~{vcf} .gz) --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         else
             /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         fi
