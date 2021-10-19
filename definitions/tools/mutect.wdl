@@ -32,7 +32,7 @@ task mutect {
 
     NORMAL_BAM=~{normal_bam}
 
-    if [ -z ${NORMAL_BAM+x} ]; then
+    if [ -z ${NORMAL_BAM} ]; then
         /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} \
         -I ~{tumor_bam} --read-index ~{tumor_bam_bai} --max-reads-per-alignment-start 0
     else
