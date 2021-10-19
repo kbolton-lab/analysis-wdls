@@ -27,7 +27,12 @@ task mskGetBaseCounts {
     command <<<
         set -eou pipefail
 
-        /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+        if [[ ~{vcf} == *.vcf.gz ]]; then
+            bgzip -d ~{vcf}
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf basename(~{vcf}, ".gz") --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+        else
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+        fi
         bgzip ~{sample_name}.pileup.vcf && tabix ~{sample_name}.pileup.vcf.gz
         bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t[%RD]\t[%AD]\n' ~{sample_name}.pileup.vcf.gz > ~{sample_name}.pileup.txt
     >>>
