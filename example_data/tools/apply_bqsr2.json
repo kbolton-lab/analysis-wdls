@@ -4,5 +4,5 @@
   "wf.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
   "wf.bam_bai": "/storage1/fs1/bolton/Active/data/TEST_DATA/aligned.bam.bai",
   "wf.bqsr_table": "/storage1/fs1/bolton/Active/data/TEST_DATA/bqsr.table",
-  "wf.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+  "wf.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict"
 }
