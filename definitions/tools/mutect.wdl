@@ -9,8 +9,8 @@ task mutect {
     File tumor_bam
     File tumor_bam_bai
 
-    File normal_bam
-    File normal_bam_bai
+    File? normal_bam
+    File? normal_bam_bai
 
     File interval_list
   }
@@ -30,12 +30,17 @@ task mutect {
     set -o pipefail
     set -o errexit
 
-    NORMAL=`samtools view -H ~{normal_bam} | perl -nE 'say $1 if /^\@RG.+\tSM:([ -~]+)/' | head -n 1`
-    TUMOR=`samtools view -H ~{tumor_bam} | perl -nE 'say $1 if /^\@RG.+\tSM:([ -~]+)/' | head -n 1`
+    if [ -z ~{normal_bam} ]; then
+        /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} \
+        -I ~{tumor_bam} --read-index ~{tumor_bam_bai} --max-reads-per-alignment-start 0
+    else
+        NORMAL=`samtools view -H ~{normal_bam} | perl -nE 'say $1 if /^\@RG.+\tSM:([ -~]+)/' | head -n 1`
+        TUMOR=`samtools view -H ~{tumor_bam} | perl -nE 'say $1 if /^\@RG.+\tSM:([ -~]+)/' | head -n 1`
 
-    /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} \
-      -I ~{tumor_bam} --read-index ~{tumor_bam_bai} -tumor "$TUMOR" \
-      -I ~{normal_bam} --read-index ~{normal_bam_bai} -normal "$NORMAL"
+        /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} \
+          -I ~{tumor_bam} --read-index ~{tumor_bam_bai} -tumor "$TUMOR" \
+          -I ~{normal_bam} --read-index ~{normal_bam_bai} -normal "$NORMAL" \
+          --max-reads-per-alignment-start 0
 
     /gatk/gatk FilterMutectCalls -R ~{reference} -V mutect.vcf.gz -O ~{output_vcf} #Running FilterMutectCalls on the output vcf.
   >>>
@@ -53,8 +58,8 @@ workflow wf {
     File reference_dict
     File tumor_bam
     File tumor_bam_bai
-    File normal_bam
-    File normal_bam_bai
+    File? normal_bam
+    File? normal_bam_bai
     File interval_list
   }
 
