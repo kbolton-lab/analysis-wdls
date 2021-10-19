@@ -2,7 +2,7 @@
   "wf.platform_unit": "Illumina",
   "wf.library_name": "Library",
   "wf.platform": "ArcherDX",
-  "wf.fastq2": "/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/R1.fixed.fastq.gz",
-  "wf.fastq1": "/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/R2.fixed.fastq.gz",
+  "wf.fastq2": "/storage1/fs1/bolton/Active/data/TEST_DATA/R1.fixed.fastq.gz",
+  "wf.fastq1": "/storage1/fs1/bolton/Active/data/TEST_DATA/R2.fixed.fastq.gz",
   "wf.sample_name": "Sample"
 }

@@ -1,5 +1,5 @@
 {
   "wf.umi_length": 8,
-  "wf.fastq1": "/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/Sample_R1.fastq.gz",
-  "wf.fastq2": "/storage1/fs1/bolton/Active/data/presets/FASTQ_TEST/Sample_R2.fastq.gz"
+  "wf.fastq1": "/storage1/fs1/bolton/Active/data/TEST_DATA/Sample_R1.fastq.gz",
+  "wf.fastq2": "/storage1/fs1/bolton/Active/data/TEST_DATA/Sample_R2.fastq.gz"
 }
