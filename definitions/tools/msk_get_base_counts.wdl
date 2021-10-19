@@ -18,7 +18,7 @@ task mskGetBaseCountsWithFile {
     Float vcf_size = size(vcf, "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + vcf_size)
     runtime {
-      docker: "kboltonlab/msk_getbasecounts:1.0"
+      docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
       memory: "64GB"
       disks: "local-disk ~{space_needed_gb} SSD"
@@ -61,7 +61,7 @@ task mskGetBaseCountsWithArray {
     Float vcf_size = size(vcf, "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + vcf_size)
     runtime {
-      docker: "kboltonlab/msk_getbasecounts:1.0"
+      docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
       memory: "64GB"
       disks: "local-disk ~{space_needed_gb} SSD"
@@ -71,10 +71,9 @@ task mskGetBaseCountsWithArray {
         set -eou pipefail
 
         bam_string=""
-
         for bam in ~{sep=" " normal_bams}; do
-            sample_name=`samtools view -H $bam | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq`
-            bam_string="$bam_string --bam $sample_name:$bam"
+            sample_name=$(samtools view -H $bam | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq)
+            bam_string="$bam_string --bam ${sample_name}:$bam"
         done
 
         if [[ ~{vcf} == *.vcf.gz ]]; then
