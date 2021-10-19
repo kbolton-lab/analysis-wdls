@@ -30,12 +30,16 @@ task mutect {
     set -o pipefail
     set -o errexit
 
+    echo "Testing" > output.txt
+
     NORMAL_BAM=~{normal_bam}
 
     if [ -z ${NORMAL_BAM} ]; then
+        echo "No Normal" >> output.txt
         /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} \
         -I ~{tumor_bam} --read-index ~{tumor_bam_bai} --max-reads-per-alignment-start 0
     else
+        echo "Normal" >> output.txt
         NORMAL=`samtools view -H ~{normal_bam} | perl -nE 'say $1 if /^\@RG.+\tSM:([ -~]+)/' | head -n 1`
         TUMOR=`samtools view -H ~{tumor_bam} | perl -nE 'say $1 if /^\@RG.+\tSM:([ -~]+)/' | head -n 1`
 
