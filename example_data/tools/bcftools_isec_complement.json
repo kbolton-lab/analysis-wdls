@@ -1,6 +1,6 @@
 {
   "wf.exclude_vcf_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz.tbi",
   "wf.vcf_tbi": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz.tbi",
-  "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz.tbi",
+  "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz",
   "wf.exclude_vcf": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz"
 }
