@@ -1,0 +1,7 @@
+{	
+    "ProcessHaloplexHS.JobGroup":"/cle/wdl/haloplex",
+    "ProcessHaloplexHS.SampleSheet":"PATH",
+    "ProcessHaloplexHS.OutputDir":"PATH",
+    "ProcessHaloplexHS.IlluminaDir":"PATH",
+    "ProcessHaloplexHS.Queue":"compute-mgi-cle"
+}
