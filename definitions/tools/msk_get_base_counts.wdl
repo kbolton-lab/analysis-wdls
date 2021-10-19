@@ -5,7 +5,7 @@ task mskGetBaseCounts {
         File reference
         File reference_fai
         File reference_dict
-        Array[String] bam
+        File normal_bams
         String sample_name
         File vcf
         Int mapq
@@ -14,7 +14,7 @@ task mskGetBaseCounts {
 
     Int cores = 4
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
-    Float bam_size = size(bam, "GB")
+    Float bam_size = size(normal_bams, "GB")
     Float vcf_size = size(vcf, "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + vcf_size)
     runtime {
@@ -27,7 +27,7 @@ task mskGetBaseCounts {
     command <<<
         set -eou pipefail
 
-        /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} ~{sep='--bam ' bam} --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+        /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         bgzip ~{sample_name}.pileup.vcf && tabix ~{sample_name}.pileup.vcf.gz
         bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t[%RD]\t[%AD]\n' ~{sample_name}.pileup.vcf.gz > ~{sample_name}.pileup.txt
     >>>
@@ -43,7 +43,7 @@ workflow wf {
         File reference
         File reference_fai
         File reference_dict
-        Array[String] bam
+        File normal_bams
         String sample_name
         File vcf
         Int mapq
@@ -55,7 +55,7 @@ workflow wf {
         reference = reference,
         reference_fai = reference_fai,
         reference_dict = reference_dict,
-        bam = bam,
+        normal_bams = normal_bams,
         sample_name = sample_name,
         vcf = vcf,
         mapq = mapq,
