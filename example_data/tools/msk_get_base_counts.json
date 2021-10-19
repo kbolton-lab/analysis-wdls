@@ -32,7 +32,7 @@
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1655_S404_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1656_S405_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1657_S406_Normal.bam",
-    "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1658_S407_Normal.bam",
+    "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1658_S407_Normal.bam"
   ],
   "vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz"
 }

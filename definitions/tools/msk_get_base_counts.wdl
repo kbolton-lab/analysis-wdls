@@ -37,3 +37,28 @@ task mskGetBaseCounts {
         File pileup_counts = "~{sample_name}.pileup.txt"
     }
 }
+
+workflow wf {
+    input {
+        File reference
+        File reference_fai
+        File reference_dict
+        Array[String] bam
+        String sample_name
+        File vcf
+        Int mapq
+        Int baseq
+    }
+
+    call mskGetBaseCounts {
+        input:
+        reference = reference,
+        reference_fai = reference_fai,
+        reference_dict = reference_dict,
+        bam = bam,
+        sample_name = sample_name,
+        vcf = vcf,
+        mapq = mapq,
+        baseq = baseq
+    }
+}
