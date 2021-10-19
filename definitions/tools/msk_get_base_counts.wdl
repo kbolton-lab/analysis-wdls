@@ -1,0 +1,39 @@
+version 1.0
+
+task mskGetBaseCounts {
+    input {
+        File reference
+        File reference_fai
+        File reference_dict
+        Array[String] bam
+        String sample_name
+        File vcf
+        Int mapq
+        Int baseq
+    }
+
+    Int cores = 4
+    Float reference_size = size([reference, reference_fai, reference_dict], "GB")
+    Float bam_size = size(bam, "GB")
+    Float vcf_size = size(vcf, "GB")
+    Int space_needed_gb = 10 + round(reference_size + 2*bam_size + vcf_size)
+    runtime {
+      docker: "kboltonlab/msk_getbasecounts:1.0"
+      cpu: cores
+      memory: "64GB"
+      disks: "local-disk ~{space_needed_gb} SSD"
+    }
+
+    command <<<
+        set -eou pipefail
+
+        /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} ~{sep='--bam ' bam} --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+        bgzip ~{sample_name}.pileup.vcf && tabix ~{sample_name}.pileup.vcf.gz
+        bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t[%RD]\t[%AD]\n' ~{sample_name}.pileup.vcf.gz > ~{sample_name}.pileup.txt
+    >>>
+
+    output {
+        File pileup = "~{sample_name}.pileup.vcf.gz"
+        File pileup_counts = "~{sample_name}.pileup.txt"
+    }
+}
