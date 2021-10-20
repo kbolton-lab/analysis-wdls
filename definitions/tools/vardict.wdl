@@ -47,7 +47,7 @@ task vardictNormal {
 
         /usr/bin/bgzip ~{output_name}.vcf && /usr/bin/tabix ~{output_name}.vcf.gz
         # extract tumor before bcbio filter or both normal and tumor will be canidates for the filter
-        /usr/bin/bcftools view \
+        /usr/bin/bcftools view -h \
             -s ~{tumor_sample_name} \
             --threads 64 ~{output_name}.vcf.gz \
             -Oz -o ~{output_name}.sample.vcf.gz
@@ -96,7 +96,7 @@ task vardictTumorOnly {
             -U -G ~{reference} \
             -f ~{min_var_freq} \
             -N ~{tumor_sample_name} \
-            -b "~{tumor_bam}" \
+            -b ~{tumor_bam} \
             -c 1 -S 2 -E 3 -g 4 ~{interval_bed} \
             -th 64 | \
         /opt/VarDictJava/build/install/VarDict/bin/teststrandbias.R | \
