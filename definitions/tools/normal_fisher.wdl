@@ -12,7 +12,7 @@ task normalFisher {
 
     Int space_needed_gb = 100 + round(size([vcf, pon, pon_tbi], "GB"))
     runtime {
-      docker: "kboltonlab/bst:latest"
+      docker: "kboltonlab/sam_bcftools_tabix_bgzip:1.0"
       memory: "32GB"
       disks: "local-disk ~{space_needed_gb} SSD"
     }
