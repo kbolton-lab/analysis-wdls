@@ -1,0 +1,7 @@
+{
+  "wf.pon_tbi": "/storage1/fs1/bolton/Active/data/TEST_DATA/pon.pileup.vcf.gz.tbi",
+  "wf.pon": "/storage1/fs1/bolton/Active/data/TEST_DATA/pon.pileup.vcf.gz",
+  "wf.p_value": "4.098606e-08",
+  "wf.caller": "mutect",
+  "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz"
+}
