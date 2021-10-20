@@ -9,8 +9,8 @@ task mutectNormal {
     File tumor_bam
     File tumor_bam_bai
 
-    File normal_bam
-    File normal_bam_bai
+    File? normal_bam
+    File? normal_bam_bai
 
     File interval_list
   }
@@ -98,33 +98,33 @@ workflow mutect {
   }
 
   if (tumor_only) {
-      call mutectTumorOnly {
-        input:
-            reference=reference,
-            reference_fai=reference_fai,
-            reference_dict=reference_dict,
-            tumor_bam=tumor_bam,
-            tumor_bam_bai=tumor_bam_bai,
-            normal_bam=normal_bam,
-            normal_bam_bai=normal_bam_bai,
-            interval_list=interval_list
-      }
+    call mutectTumorOnly {
+      input:
+        reference=reference,
+        reference_fai=reference_fai,
+        reference_dict=reference_dict,
+        tumor_bam=tumor_bam,
+        tumor_bam_bai=tumor_bam_bai,
+        interval_list=interval_list
+    }
   }
 
   if (!tumor_only) {
-      call mutectNormal {
-        input:
-            reference=reference,
-            reference_fai=reference_fai,
-            reference_dict=reference_dict,
-            tumor_bam=tumor_bam,
-            tumor_bam_bai=tumor_bam_bai,
-            interval_list=interval_list
-      }
+    call mutectNormal {
+      input:
+        reference=reference,
+        reference_fai=reference_fai,
+        reference_dict=reference_dict,
+        tumor_bam=tumor_bam,
+        tumor_bam_bai=tumor_bam_bai,
+        normal_bam=normal_bam,
+        normal_bam_bai=normal_bam_bai,
+        interval_list=interval_list
+    }
   }
 
   output {
-      File vcf = select_first([mutectNormal.vcf, mutectTumorOnly.vcf])
-      File vcf = select_first([mutectNormal.vcf_tbi, mutectTumorOnly.vcf_tbi])
+    File vcf = select_first([mutectNormal.vcf, mutectTumorOnly.vcf])
+    File vcf_tbi = select_first([mutectNormal.vcf_tbi, mutectTumorOnly.vcf_tbi])
   }
 }

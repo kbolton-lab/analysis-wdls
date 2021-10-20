@@ -21,7 +21,7 @@ workflow gnomadAndPoNFilter {
         Int? baseq = 5
         String? pon_final_name = "pon.pileup"
         String? pon_pvalue = "0.05"
-        Boolean? arrayMode = false
+        Boolean arrayMode = false
     }
 
     call bic.bcftoolsIsecComplement as isec_complement_gnomAD {

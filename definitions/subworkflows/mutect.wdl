@@ -16,6 +16,7 @@ workflow mutect {
     File tumor_bam_bai
 
     # both or neither
+    Boolean tumor_only = false
     File? normal_bam
     File? normal_bam_bai
 
@@ -41,7 +42,8 @@ workflow mutect {
       tumor_bam_bai=tumor_bam_bai,
       normal_bam=normal_bam,
       normal_bam_bai=normal_bam_bai,
-      interval_list=segment
+      interval_list=segment,
+      tumor_only=tumor_only
     }
   }
 
