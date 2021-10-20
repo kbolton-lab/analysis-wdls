@@ -16,6 +16,7 @@ workflow gnomadAndPoNFilter {
         File gnomAD_exclude_vcf
         File gnomAD_exclude_vcf_tbi
         File normal_bams
+        Array[String] bams
         Int? mapq = 5
         Int? baseq = 5
         String? pon_final_name = "pon.pileup"
@@ -36,6 +37,7 @@ workflow gnomadAndPoNFilter {
     call mgbc.mskGetBaseCounts as get_pileup_counts {
         input:
             normal_bams = normal_bams,
+            bams = bams,
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
