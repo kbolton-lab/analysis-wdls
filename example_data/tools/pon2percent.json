@@ -1,0 +1,7 @@
+{
+  "wf.vcf2PON": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz",
+  "wf.caller": "mutect",
+  "wf.vcf2PON_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz.tbi",
+  "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect.gnomAD_AF_filter.filtered.pileup.fisherPON.vcf.gz",
+  "wf.sample_name": "String (optional, default = \"tumor\")"
+}
