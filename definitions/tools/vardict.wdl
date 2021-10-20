@@ -4,6 +4,7 @@ task vardictNormal {
     input {
         File reference
         File reference_fai
+        File reference_dict
         File tumor_bam
         File tumor_bam_bai
         String tumor_sample_name = "TUMOR"
@@ -62,6 +63,7 @@ task vardictTumorOnly {
     input {
         File reference
         File reference_fai
+        File reference_dict
         File tumor_bam
         File tumor_bam_bai
         String tumor_sample_name = "TUMOR"
@@ -116,6 +118,7 @@ workflow vardict {
     input {
         File reference
         File reference_fai
+        File reference_dict
         File tumor_bam
         File tumor_bam_bai
         String tumor_sample_name = "TUMOR"
@@ -132,6 +135,7 @@ workflow vardict {
             input:
                 reference = reference,
                 reference_fai = reference_fai,
+                reference_dict = reference_dict,
                 tumor_bam = tumor_bam,
                 tumor_bam_bai = tumor_bam_bai,
                 normal_bam = normal_bam,
@@ -147,6 +151,7 @@ workflow vardict {
             input:
                 reference = reference,
                 reference_fai = reference_fai,
+                reference_dict = reference_dict,
                 tumor_bam = tumor_bam,
                 tumor_bam_bai = tumor_bam_bai,
                 normal_bam = normal_bam,
