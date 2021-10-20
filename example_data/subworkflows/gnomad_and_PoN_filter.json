@@ -4,7 +4,7 @@
   "gnomadAndPoNFilter.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
   "gnomadAndPoNFilter.gnomAD_exclude_vcf_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz.tbi",
   "gnomadAndPoNFilter.caller_vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz",
-  "gnomadAndPoNFilter.arrayMode": true,
+  "gnomadAndPoNFilter.arrayMode": false,
   "gnomadAndPoNFilter.gnomAD_exclude_vcf": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz",
   "gnomadAndPoNFilter.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
   "gnomadAndPoNFilter.bams": [

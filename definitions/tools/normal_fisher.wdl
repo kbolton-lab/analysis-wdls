@@ -79,7 +79,7 @@ task normalFisher {
             ' > fisherTestInput.R
             bcftools annotate --threads 32 -a RD_AD.vcf.gz -h pileup.header -c PON_RefDepth,PON_AltCounts $name.sample.vcf -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%RD]\t[%AD]\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
-        elif [[ $caller =~ $patt ]]
+        elif [[ ~{caller} =~ $patt ]]
         then
             echo '
             #!/usr/bin/env Rscript
