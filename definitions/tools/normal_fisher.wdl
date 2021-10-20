@@ -58,7 +58,7 @@ task normalFisher {
             df = read.table(args[1], header=F)
 
             if (length(colnames(df)) != 8) {
-            stop("Must supply file with 8 columns: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltCounts\t[%RD]\t[%AD]", call.=FALSE)
+            stop("Must supply file with 8 columns: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%RD]\t[%AD]", call.=FALSE)
             }
 
             df$fisher.exact.pval <- apply(df, 1, function(x) {
@@ -77,7 +77,7 @@ task normalFisher {
             })
             write.table(df, file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -h pileup.header -c PON_RefDepth,PON_AltCounts $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate --threads 32 -a RD_AD.vcf.gz -h pileup.header -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%RD]\t[%AD]\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
         elif [[ ~{caller} =~ $patt ]]
         then
@@ -99,7 +99,7 @@ task normalFisher {
             df <- cbind(df, data.frame(do.call("rbind", strsplit(as.character(df$V7), ",", fixed = TRUE))))[,-7]
 
             if (length(colnames(df)) < 8) {
-            stop("Must supply file with 7 columns to split to 8: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltCounts\t%INFO/DP4", call.=FALSE)
+            stop("Must supply file with 7 columns to split to 8: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t%INFO/DP4", call.=FALSE)
             }
 
             df$fisher.exact.pval <- apply(df, 1, function(x) {
@@ -121,7 +121,7 @@ task normalFisher {
             })
             write.table(df[, -c(9:10)], file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -h pileup.header -c PON_RefDepth,PON_AltCounts $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate --threads 32 -a RD_AD.vcf.gz -h pileup.header -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t%INFO/DP4\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
         else
             echo '
@@ -141,7 +141,7 @@ task normalFisher {
             #https://statisticsglobe.com/split-data-frame-variable-into-multiple-columns-in-r
             df <- cbind(df, data.frame(do.call("rbind", strsplit(as.character(df$V7), ",", fixed = TRUE))))[,-7]
             if (length(colnames(df)) != 8) {
-            stop("Must supply file with 7 columns to split to 8: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltCounts\t[%AD]", call.=FALSE)
+            stop("Must supply file with 7 columns to split to 8: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%AD]", call.=FALSE)
             }
 
             df$fisher.exact.pval <- apply(df, 1, function(x) {
@@ -160,7 +160,7 @@ task normalFisher {
             })
             write.table(df, file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -h pileup.header -c PON_RefDepth,PON_AltCounts $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate --threads 32 -a RD_AD.vcf.gz -h pileup.header -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%AD]\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
 
         fi
