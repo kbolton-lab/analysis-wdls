@@ -10,18 +10,21 @@ workflow vardict {
   input {
     File reference
     File reference_fai
+    File reference_dict
 
     File tumor_bam
     File tumor_bam_bai
-
+    String tumor_sample_name
     # both or neither
     File? normal_bam
     File? normal_bam_bai
+    String? normal_sample_name
 
     File interval_bed
     Int scatter_count
-    String tumor_sample_name
     Float? min_var_freq = 0.005
+
+    Boolean? tumor_only = false
   }
 
 #   call sil.splitIntervalListToBed {
@@ -53,30 +56,38 @@ workflow vardict {
 #     input: vcf=mergeVcf.merged_vcf
 #   }
 
-    call v.vardict as vardictTask {
+    call v.vardict as vardict {
         input:
-            reference=reference,
-            reference_fai=reference_fai,
-            tumor_bam=tumor_bam,
-            tumor_bam_bai=tumor_bam_bai,
-            normal_bam=normal_bam,
-            normal_bam_bai=normal_bam_bai,
-            interval_bed=segment,
-            min_var_freq=min_var_freq
+            reference = reference,
+            reference_fai = reference_fai,
+            tumor_bam = tumor_bam,
+            tumor_bam_bai = tumor_bam_bai,
+            normal_bam = normal_bam,
+            normal_bam_bai = normal_bam_bai,
+            interval_bed = interval_bed,
+            min_var_freq = min_var_freq,
+            tumor_sample_name = tumor_sample_name,
+            normal_sample_name = normal_sample_name,
+            tumor_only = tumor_only
+    }
+
+    call iv.indexVcf {
+        input:
+            vcf = vardict.vcf
     }
 
     call ff.fpFilter {
         input:
-            reference=reference,
-            reference_fai=reference_fai,
-            reference_dict=reference_dict,
-            bam=tumor_bam,
-            bam_bai=tumor_bam_bai,
-            vcf=indexVcf.indexed_vcf,
-            vcf_tbi=indexVcf.indexed_vcf_tbi,
-            variant_caller="mutect",
-            sample_name=tumor_sample_name,
-            min_var_freq=min_var_freq
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            bam = tumor_bam,
+            bam_bai = tumor_bam_bai,
+            vcf = indexVcf.indexed_vcf,
+            vcf_tbi = indexVcf.indexed_vcf_tbi,
+            variant_caller = "vardict",
+            sample_name = tumor_sample_name,
+            min_var_freq = min_var_freq
   }
 
   output {
