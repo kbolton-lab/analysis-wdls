@@ -22,7 +22,7 @@ workflow vardict {
 
     File interval_bed
     Int scatter_count
-    Float? min_var_freq = 0.005
+    Float? min_var_freq = 0.05
 
     Boolean? tumor_only = false
   }

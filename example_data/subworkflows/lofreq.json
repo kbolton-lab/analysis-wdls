@@ -1,0 +1,12 @@
+{
+  "lofreq.tumor_sample_name": "Sample",
+  "lofreq.min_var_freq": "0.005",
+  "lofreq.tumor_only": true,
+  "lofreq.interval_list": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.interval_list",
+  "lofreq.scatter_count": 30,
+  "lofreq.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+  "lofreq.tumor_bam_bai": "/storage1/fs1/bolton/Active/data/TEST_DATA/bqsr.bam.bai",
+  "lofreq.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
+  "lofreq.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "lofreq.tumor_bam": "/storage1/fs1/bolton/Active/data/TEST_DATA/bqsr.bam"
+}
