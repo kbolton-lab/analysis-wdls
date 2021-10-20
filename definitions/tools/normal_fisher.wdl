@@ -33,7 +33,7 @@ task normalFisher {
         bcftools view -H ~{vcf} | awk -v sampleID=$sample '{print $1, $2, $3, $4, $5, sampleID}' OFS='\t' > $sample.name;
         bgzip $sample.name;
         tabix $sample.name.gz -s1 -b2 -e2;
-        bcftools annotate -a $sample.name.gz -h sample.header -c CHROM,POS,-,REF,ALT,SAMPLE ~{vcf} -Oz -o $name.sample.vcf.gz;
+        bcftools annotate -a $sample.name.gz -h sample.header -c CHROM,POS,-,REF,ALT,SAMPLE ~{vcf} -Oz -o $name.sample.vcf.gz && tabix $name.sample.vcf.gz;
 
         ## Varscan has AD and RD instead of comma sep AD field
         ## you can't double quote for string match in bash like you can in zsh so need to make it a variable

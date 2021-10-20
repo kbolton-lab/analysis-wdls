@@ -16,7 +16,7 @@ workflow mutect {
     File tumor_bam_bai
 
     # both or neither
-    Boolean tumor_only = false
+    Boolean? tumor_only = false
     File? normal_bam
     File? normal_bam_bai
 
