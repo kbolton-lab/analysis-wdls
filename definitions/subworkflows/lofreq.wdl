@@ -5,7 +5,7 @@ import "../tools/index_vcf.wdl" as iv
 import "../tools/merge_vcf.wdl" as mv
 import "../tools/lofreq.wdl" as l
 import "../tools/lofreq_reformat.wdl" as lr
-import "../tools/split_interval_list.wdl" as sil
+import "../tools/split_interval_list_to_bed.wdl" as siltb
 
 workflow lofreq {
     input {
@@ -23,13 +23,13 @@ workflow lofreq {
         Boolean? tumor_only = false
     }
 
-    call sil.splitIntervalList {
+    call siltb.splitIntervalListToBed {
       input:
       interval_list = interval_list,
       scatter_count = scatter_count
     }
 
-    scatter(segment in splitIntervalList.split_interval_lists) {
+    scatter(segment in splitIntervalListToBed.split_beds) {
       call l.lofreq as lofreqTask {
         input:
             reference = reference,
