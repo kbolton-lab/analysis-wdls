@@ -6,10 +6,10 @@ task mskGetBaseCountsWithFile {
         File reference_fai
         File reference_dict
         File normal_bams
-        String sample_name
+        String? pon_final_name = "pon.pileup"
         File vcf
-        Int mapq
-        Int baseq
+        Int? mapq = 5
+        Int? baseq = 5
     }
 
     Int cores = 4
@@ -30,17 +30,16 @@ task mskGetBaseCountsWithFile {
         if [[ ~{vcf} == *.vcf.gz ]]; then
             bgzip -d ~{vcf}
             vcf_file=~{vcf}
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf "${vcf_file%.*}" --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         else
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam_fof ~{normal_bams} --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         fi
-        bgzip ~{sample_name}.pileup.vcf && tabix ~{sample_name}.pileup.vcf.gz
-        bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t[%RD]\t[%AD]\n' ~{sample_name}.pileup.vcf.gz > ~{sample_name}.pileup.txt
+        bgzip ~{pon_final_name}.vcf && tabix ~{pon_final_name}.vcf.gz
     >>>
 
     output {
-        File pileup = "~{sample_name}.pileup.vcf.gz"
-        File pileup_counts = "~{sample_name}.pileup.txt"
+        File pileup = "~{pon_final_name}.vcf.gz"
+        File pileup_tbi = "~{pon_final_name}.vcf.gz.tbi"
     }
 }
 
@@ -50,10 +49,10 @@ task mskGetBaseCountsWithArray {
         File reference_fai
         File reference_dict
         Array[String] normal_bams
-        String sample_name
+        String? pon_final_name = "pon.pileup"
         File vcf
-        Int mapq
-        Int baseq
+        Int? mapq = 5
+        Int? baseq = 5
     }
 
     Int cores = 4
@@ -80,21 +79,20 @@ task mskGetBaseCountsWithArray {
         if [[ ~{vcf} == *.vcf.gz ]]; then
             bgzip -d ~{vcf}
             vcf_file=~{vcf}
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf "${vcf_file%.*}" --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         else
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf ~{vcf} --output ~{sample_name}.pileup.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         fi
-        bgzip ~{sample_name}.pileup.vcf && tabix ~{sample_name}.pileup.vcf.gz
-        bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t[%RD]\t[%AD]\n' ~{sample_name}.pileup.vcf.gz > ~{sample_name}.pileup.txt
+        bgzip ~{pon_final_name}.vcf && tabix ~{pon_final_name}.vcf.gz
     >>>
 
     output {
-        File pileup = "~{sample_name}.pileup.vcf.gz"
-        File pileup_counts = "~{sample_name}.pileup.txt"
+        File pileup = "~{pon_final_name}.vcf.gz"
+        File pileup_tbi = "~{pon_final_name}.vcf.gz.tbi"
     }
 }
 
-workflow wf {
+workflow mskGetBaseCounts {
     input {
         File reference
         File reference_fai
@@ -102,10 +100,10 @@ workflow wf {
         Boolean arrayMode = false
         File normal_bams
         Array[String] bams
-        String sample_name
+        String? pon_final_name = "pon.pileup"
         File vcf
-        Int mapq
-        Int baseq
+        Int? mapq = 5
+        Int? baseq = 5
     }
     if (arrayMode) {
         call mskGetBaseCountsWithArray {
@@ -114,7 +112,7 @@ workflow wf {
             reference_fai = reference_fai,
             reference_dict = reference_dict,
             normal_bams = bams,
-            sample_name = sample_name,
+            pon_final_name = pon_final_name,
             vcf = vcf,
             mapq = mapq,
             baseq = baseq
@@ -127,10 +125,15 @@ workflow wf {
             reference_fai = reference_fai,
             reference_dict = reference_dict,
             normal_bams = normal_bams,
-            sample_name = sample_name,
+            pon_final_name = pon_final_name,
             vcf = vcf,
             mapq = mapq,
             baseq = baseq
         }
+    }
+
+    output {
+        File pileup = select_first([mskGetBaseCountsWithArray.pileup, mskGetBaseCountsWithFile.pileup])
+        File pileup_tbi = select_first([mskGetBaseCountsWithArray.pileup_tbi, mskGetBaseCountsWithFile.pileup_tbi])
     }
 }
