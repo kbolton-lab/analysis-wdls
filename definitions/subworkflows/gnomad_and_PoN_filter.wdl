@@ -31,7 +31,7 @@ workflow gnomadAndPoNFilter {
         exclude_vcf = gnomAD_exclude_vcf,
         exclude_vcf_tbi = gnomAD_exclude_vcf_tbi,
         output_vcf_name = caller_prefix + ".gnomAD_AF_filter.vcf",
-        output_type = "v"
+        output_type = "z"
     }
 
     call mgbc.mskGetBaseCounts as get_pileup_counts {
