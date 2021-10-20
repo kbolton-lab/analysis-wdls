@@ -63,7 +63,7 @@ task normalFisher {
 
             df$fisher.exact.pval <- apply(df, 1, function(x) {
             x <- as.numeric(x[-c(1,2,3,4)])
-            if (x[1]+x[2]==0 | x[3]+x[4]==0){
+            if ((x[1]+x[2]==0) | (x[3]+x[4]==0)){
                 return(0)
             } else if (x[2]==0 & x[1]!=0) {
                 return(0)
@@ -107,7 +107,7 @@ task normalFisher {
             # Remember, Lofreq splits DP4 into RefFwd, RefRev and AltFwd, AltRev so technically ref = x[3] + x[4] and alt = x[5] + x[6]
             ref = x[3] + x[4]
             alt = x[5] + x[6]
-            if (x[1]+x[2]==0 | x[3]+x[4]==0){
+            if ((x[1]+x[2]==0) | (ref+alt==0)){
                 return(0)
             } else if (x[2]==0 & x[1]!=0) {
                 return(0)
@@ -146,7 +146,7 @@ task normalFisher {
 
             df$fisher.exact.pval <- apply(df, 1, function(x) {
             x <- as.numeric(x[-c(1,2,3,4)])
-            if (x[1]+x[2]==0 | x[3]+x[4]==0){
+            if ((x[1]+x[2]==0) | (x[3]+x[4]==0)){
                 return(0)
             } else if (x[2]==0 & x[1]!=0) {
                 return(0)
