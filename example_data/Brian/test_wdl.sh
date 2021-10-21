@@ -9,6 +9,7 @@ bsub -G compute-bolton -g /bwileytest3 -oo vardict_test.log -eo vardict_error.lo
 /storage1/fs1/bolton/Active/data/presets/cromwell.config
 /storage1/fs1/bolton/Active/data/presets/cromwell.config
 
+
 /usr/bin/java \
     -Dconfig.file=/storage1/fs1/bolton/Active/data/presets/cromwell.config \
     -jar /opt/cromwell.jar run \
