@@ -3,6 +3,7 @@ version 1.0
 task bcftoolsFilterBcbio {
     input {
         File vcf
+        File vcf_tbi
         String filter_flag = "include"
         String filter_string
         String? output_vcf_name = "bcftools_filter.vcf.gz"

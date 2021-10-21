@@ -70,6 +70,7 @@ workflow vardict {
   call bfb.bcftoolsFilterBcbio as bcbio_filter {
       input:
         vcf = indexVcf.indexed_vcf,
+        vcf = indexVcf.indexed_vcf_tbi,
         filter_string = bcbio_filter_string,
         filter_flag = "include",
         output_type = "z",
