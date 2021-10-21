@@ -4,7 +4,6 @@ task vardictNormal {
     input {
         File reference
         File reference_fai
-        File reference_dict
         File tumor_bam
         File tumor_bam_bai
         String tumor_sample_name = "TUMOR"
@@ -15,7 +14,7 @@ task vardictNormal {
         Float? min_var_freq = 0.005
     }
 
-    Int cores = 32
+    Int cores = 4
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
@@ -59,11 +58,12 @@ task vardictNormal {
     }
 }
 
+
+
 task vardictTumorOnly {
     input {
         File reference
         File reference_fai
-        File reference_dict
         File tumor_bam
         File tumor_bam_bai
         String tumor_sample_name = "TUMOR"
@@ -74,7 +74,7 @@ task vardictTumorOnly {
         Float? min_var_freq = 0.005
     }
 
-    Int cores = 32
+    Int cores = 4
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
@@ -118,7 +118,6 @@ workflow vardict {
     input {
         File reference
         File reference_fai
-        File reference_dict
         File tumor_bam
         File tumor_bam_bai
         String tumor_sample_name = "TUMOR"
@@ -135,7 +134,6 @@ workflow vardict {
             input:
                 reference = reference,
                 reference_fai = reference_fai,
-                reference_dict = reference_dict,
                 tumor_bam = tumor_bam,
                 tumor_bam_bai = tumor_bam_bai,
                 normal_bam = normal_bam,
@@ -151,7 +149,6 @@ workflow vardict {
             input:
                 reference = reference,
                 reference_fai = reference_fai,
-                reference_dict = reference_dict,
                 tumor_bam = tumor_bam,
                 tumor_bam_bai = tumor_bam_bai,
                 normal_bam = normal_bam,
