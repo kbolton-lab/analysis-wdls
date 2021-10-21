@@ -20,7 +20,7 @@ task bcftoolsFilterBcbio {
 
     String ff = if filter_flag == "include" then "-i" else "-e"
     command <<<
-        /opt/bcftools/bin/bcftools filter ~{ff} ~{filter_string} ~{vcf} --output-type ~{output_type} --output ~{output_vcf_name} -s "BCBIO" -m+
+        /opt/bcftools/bin/bcftools filter ~{ff} "~{filter_string}" ~{vcf} --output-type ~{output_type} --output ~{output_vcf_name} -s "BCBIO" -m+
     >>>
 
     output {
