@@ -57,7 +57,7 @@
   "wf.ensembl_species": "homo_sapiens_merged",
   "wf.ensembl_version": "104",
   "wf.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
-  "wf.cache_dir_zip": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/ukbb_calls/pvcf/vep.zip",
+  "wf.cache_dir_zip": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/ukbb_calls/pvcf/vep_zip.zip",
   "wf.ensembl_assembly": "GRCh38",
   "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect.gnomAD_AF_filter.filtered.pileup.fisherPON.vcf.gz"
 }
