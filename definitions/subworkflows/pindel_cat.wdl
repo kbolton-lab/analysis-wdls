@@ -10,12 +10,13 @@ workflow pindelCat {
     File reference_dict
     File tumor_bam
     File tumor_bam_bai
-    File normal_bam
-    File normal_bam_bai
+    File? normal_bam
+    File? normal_bam_bai
     File region_file
     Int insert_size = 400
     String tumor_sample_name
-    String normal_sample_name
+    String? normal_sample_name
+    Boolean? tumor_only = false
   }
 
   call p.pindel {
@@ -30,7 +31,8 @@ workflow pindelCat {
     region_file=region_file,
     insert_size=insert_size,
     tumor_sample_name=tumor_sample_name,
-    normal_sample_name=normal_sample_name
+    normal_sample_name=normal_sample_name,
+    tumor_only = tumor_only
   }
 
   call co.catOut as cat {
