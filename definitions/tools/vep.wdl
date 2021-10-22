@@ -15,7 +15,7 @@ task vep {
     Array[String] plugins
     Boolean coding_only = false
     #Array[VepCustomAnnotation] custom_annotations = []
-    String custom_annotation_string
+    Array[String] custom_annotation_string =[""]
     Boolean everything = true
     # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
     String pick = "flag_pick"
@@ -36,9 +36,11 @@ task vep {
 
   String annotated_path = basename(basename(vcf, ".gz"), ".vcf") + "_annotated.vcf"
   String cache_dir = basename(cache_dir_zip, ".zip")
-  # TODO: custom annotations
+
   command <<<
-    unzip -qq ~{cache_dir_zip}
+    mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
+    #unzip -qq ~{cache_dir_zip}
+
 
     /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
     --format vcf \
@@ -63,7 +65,7 @@ task vep {
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
     --species ~{ensembl_species} \
-    ~{custom_annotation_string}
+    ~{sep=" " custom_annotation_string}
   >>>
 
   output {
@@ -74,16 +76,11 @@ task vep {
 
 task generateCustomString {
     input { VepCustomAnnotation custom_annotation }
+    runtime { docker: "ubuntu:xenial" }
     command <<<
-        custom_string="~{if custom_annotation.annotation.check_existing then "--check_existing " else ""} --custom ~{custom_annotation.annotation.file},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then "1" else "0"},~{sep="," custom_annotation.annotation.vcf_fields}"
+        /bin/echo '~{if custom_annotation.annotation.check_existing then "--check_existing" else ""} --custom ~{custom_annotation.annotation.file},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then "1" else "0"},~{sep="," custom_annotation.annotation.vcf_fields}'
     >>>
-    output { String custom_string = read_string("custom_string") }
-}
-
-task combineCustomString {
-    input { Array[String] custom_strings }
-    command <<< combined_string="~{sep=" " custom_strings}" >>>
-    output { String combined_string = read_string("combined_string") }
+    output { String custom_string = read_string(stdout()) }
 }
 
 workflow wf {
@@ -111,10 +108,6 @@ workflow wf {
       }
   }
 
-  call combineCustomString {
-      input: custom_strings = generateCustomString.custom_string
-  }
-
   call vep {
     input:
     vcf=vcf,
@@ -127,7 +120,7 @@ workflow wf {
     ensembl_version=ensembl_version,
     ensembl_species=ensembl_species,
     synonyms_file=synonyms_file,
-    custom_annotation_string = combineCustomString.combined_string,
+    custom_annotation_string = generateCustomString.custom_string,
     coding_only=coding_only,
     everything=everything,
     pick=pick

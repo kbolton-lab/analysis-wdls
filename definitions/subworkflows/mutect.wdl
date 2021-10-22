@@ -53,10 +53,6 @@ workflow mutect {
     vcf_tbis=mutectTask.vcf_tbi
   }
 
-  call iv.indexVcf {
-    input: vcf=mergeVcf.merged_vcf
-  }
-
   call ff.fpFilter {
     input:
     reference=reference,
@@ -64,8 +60,8 @@ workflow mutect {
     reference_dict=reference_dict,
     bam=tumor_bam,
     bam_bai=tumor_bam_bai,
-    vcf=indexVcf.indexed_vcf,
-    vcf_tbi=indexVcf.indexed_vcf_tbi,
+    vcf=mergeVcf.merged_vcf,
+    vcf_tbi=mergeVcf.merged_vcf_tbi,
     variant_caller="mutect",
     sample_name=tumor_sample_name,
     min_var_freq=min_var_freq

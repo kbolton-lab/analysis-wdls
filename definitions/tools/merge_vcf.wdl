@@ -9,7 +9,7 @@ task mergeVcf {
 
   Int space_needed_gb = 10 + round(2*(size(vcfs, "GB") + size(vcf_tbis, "GB")))
   runtime {
-    docker: "mgibio/bcftools-cwl:1.12"
+    docker: "kboltonlab/bst:latest"
     memory: "4GB"
     disks: "local-disk ~{space_needed_gb} SSD"
   }
@@ -17,9 +17,11 @@ task mergeVcf {
   String output_file = merged_vcf_basename + ".vcf.gz"
   command <<<
     /opt/bcftools/bin/bcftools concat --allow-overlaps --remove-duplicates --output-type z -o ~{output_file} ~{sep=" " vcfs}
+    /usr/bin/tabix ~{output_file}
   >>>
 
   output {
     File merged_vcf = output_file
+    File merged_vcf_tbi = "~{output_file}.tbi"
   }
 }

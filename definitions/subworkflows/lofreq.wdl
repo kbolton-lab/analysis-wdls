@@ -55,11 +55,6 @@ workflow lofreq {
             tumor_sample_name = tumor_sample_name
     }
 
-    call iv.indexVcf {
-      input:
-        vcf = reformat.reformat_vcf
-    }
-
     call ff.fpFilter {
       input:
           reference = reference,
@@ -67,8 +62,8 @@ workflow lofreq {
           reference_dict = reference_dict,
           bam = tumor_bam,
           bam_bai = tumor_bam_bai,
-          vcf = indexVcf.indexed_vcf,
-          vcf_tbi = indexVcf.indexed_vcf_tbi,
+          vcf = reformat.reformat_vcf,
+          vcf_tbi = reformat.reformat_vcf_tbi,
           variant_caller = "lofreq",
           sample_name = tumor_sample_name,
           min_var_freq = min_var_freq
