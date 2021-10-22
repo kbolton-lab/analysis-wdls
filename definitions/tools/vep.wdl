@@ -75,14 +75,14 @@ task vep {
 task generateCustomString {
     input { VepCustomAnnotation custom_annotation }
     command <<<
-        custom_string="~{if custom_annotation.annotation.check_existing then "--check_existing " else ""}" + "--custom " + "~{custom_annotation.annotation.file}" + "," + "~{custom_annotation.annotation.data_format}" + "," + "~{custom_annotation.method}" + "," + "~{if custom_annotation.force_report_coordinates then "1" else "0"}" + "," + "~{sep="," custom_annotation.annotation.vcf_fields}"
+        custom_string="~{if custom_annotation.annotation.check_existing then "--check_existing " else ""} --custom ~{custom_annotation.annotation.file},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then "1" else "0"},~{sep="," custom_annotation.annotation.vcf_fields}"
     >>>
     output { String custom_string = read_string("custom_string") }
 }
 
 task combineCustomString {
     input { Array[String] custom_strings }
-    command <<< combined_string=~{sep=" " custom_strings} >>>
+    command <<< combined_string="~{sep=" " custom_strings}" >>>
     output { String combined_string = read_string("combined_string") }
 }
 
