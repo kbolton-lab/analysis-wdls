@@ -38,8 +38,8 @@ task vep {
   String cache_dir = basename(cache_dir_zip, ".zip")
 
   command <<<
-    mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
-    #unzip -qq ~{cache_dir_zip}
+    #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
+    unzip -qq ~{cache_dir_zip}
 
 
     /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
