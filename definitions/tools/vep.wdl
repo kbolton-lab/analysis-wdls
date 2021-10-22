@@ -37,6 +37,33 @@ task vep {
   String cache_dir = basename(cache_dir_zip, ".zip")
   # TODO: custom annotations
   command <<<
+    custom=~{if defined(custom_annotations) then "true" else "false"}
+
+    if [ "$custom" == "true" ]; then
+        full_custom_string=""
+        custom_length=~{length(custom_annotations)}
+        for i in {1..$custom_length}
+        do
+            if [ "~{custom_annotations}[$1].annotation.check_existing" == true ]; then
+                custom_string="--check_existing"
+            else
+                custom_string=""
+            fi
+            custom_string=custom_string + " --custom" + ~{custom_annotations}[$i].annotation.file + "," + \
+            ~{custom_annotations}[$i].annotation.name + "," + \
+            ~{custom_annotations}[$i].annotation.data_format + "," + \
+            ~{custom_annotations}[$i].method + "," + \
+            ~{custom_annotations}[$i].force_report_coordinates
+
+            for fields in "~{custom_annotations}[$i].annotation.vcf_fields[@]"
+            do
+                custom_string=custom_string + "," + $fields
+            done
+            full_custom_string=full_custom_string + custom_string
+        done
+    fi
+    echo $full_custom_string > doesThisWork.txt
+
     unzip -qq ~{cache_dir_zip}
 
     /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
@@ -51,6 +78,8 @@ task vep {
     -o ~{annotated_path} \
     -i ~{vcf} \
     ~{if defined(synonyms_file) then "--synonyms ~{synonyms_file}" else ""} \
+    --sift p \
+    --polyphen p \
     --coding_only ~{coding_only} \
     --~{pick} \
     --dir ~{cache_dir} \
