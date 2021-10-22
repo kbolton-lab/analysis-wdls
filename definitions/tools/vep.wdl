@@ -42,6 +42,16 @@ task vep {
     if [ "$custom" == "true" ]; then
         full_custom_string=""
         custom_length=~{length(custom_annotations)}
+
+        for i in {1..$custom_length}
+        do
+            if [ "~{custom_annotations}[$1].annotation.check_existing" == true ]; then
+                custom_string="--check_existing"
+            else
+                custom_string=""
+            fi
+            full_custom_string=full_custom_string + custom_string
+        done
     fi
     echo $full_custom_string > doesThisWork.txt
 
