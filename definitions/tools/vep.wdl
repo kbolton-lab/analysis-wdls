@@ -14,7 +14,8 @@ task vep {
     String ensembl_species
     Array[String] plugins
     Boolean coding_only = false
-    Array[VepCustomAnnotation] custom_annotations = []
+    #Array[VepCustomAnnotation] custom_annotations = []
+    String custom_annotation_string
     Boolean everything = true
     # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
     String pick = "flag_pick"
@@ -37,24 +38,6 @@ task vep {
   String cache_dir = basename(cache_dir_zip, ".zip")
   # TODO: custom annotations
   command <<<
-    custom=~{if defined(custom_annotations) then "true" else "false"}
-
-    if [ "$custom" == "true" ]; then
-        full_custom_string=""
-        custom_length=~{length(custom_annotations)}
-
-        for i in {1..$custom_length}
-        do
-            if [ "~{custom_annotations}[$1].annotation.check_existing" == true ]; then
-                custom_string="--check_existing"
-            else
-                custom_string=""
-            fi
-            full_custom_string=full_custom_string + custom_string
-        done
-    fi
-    echo $full_custom_string > doesThisWork.txt
-
     unzip -qq ~{cache_dir_zip}
 
     /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
@@ -79,13 +62,43 @@ task vep {
     ~{if everything then "--everything" else ""} \
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
-    --species ~{ensembl_species}
+    --species ~{ensembl_species} \
+    ~{custom_annotation_string}
   >>>
 
   output {
     File annotated_vcf = annotated_path
     File vep_summary = annotated_path + "_summary.html"
   }
+}
+
+task generateCustomString {
+    input {
+        VepCustomAnnotation custom_annotation
+    }
+
+    command <<<
+        custom_string=~{if custom_annotation.annotation.check_existing then "--check_existing " else ""}
+        custom_string=custom_string + "--custom " + ~{custom_annotation.annotation.file} + "," + ~{custom_annotation.annotation.data_format} + "," + ~{custom_annotation.method} + "," + ~{if custom_annotation.force_report_coordinates then "1" else "0"} + "," + ~{sep="," custom_annotation.annotation.vcf_fields}
+    >>>
+
+    output {
+        String custom_string = "${custom_string}"
+    }
+}
+
+task combineCustomString {
+    input {
+        Array[String] custom_strings
+    }
+
+    command <<<
+        combined_string=~{sep=" " custom_strings}
+    >>>
+
+    output {
+        String combined_string = "$combined_string"
+    }
 }
 
 workflow wf {
@@ -107,6 +120,17 @@ workflow wf {
     String pick = "flag_pick"
   }
 
+  scatter(custom_annotation in custom_annotations) {
+      call generateCustomString {
+          input:
+            custom_annotation = custom_annotation
+      }
+  }
+
+  call combineCustomString {
+      input: custom_strings = generateCustomString.custom_string
+  }
+
   call vep {
     input:
     vcf=vcf,
@@ -119,7 +143,7 @@ workflow wf {
     ensembl_version=ensembl_version,
     ensembl_species=ensembl_species,
     synonyms_file=synonyms_file,
-    custom_annotations=custom_annotations,
+    custom_annotation_string = combineCustomString.combined_string,
     coding_only=coding_only,
     everything=everything,
     pick=pick
