@@ -16,6 +16,7 @@ task vep {
     Boolean coding_only = false
     #Array[VepCustomAnnotation] custom_annotations = []
     Array[String] custom_annotation_string =[""]
+    Array[File] custom_annotation_files = [""]
     Boolean everything = true
     # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
     String pick = "flag_pick"
@@ -41,6 +42,20 @@ task vep {
     #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
     unzip -qq ~{cache_dir_zip}
 
+    custom_files=()
+    for file_path in ~{sep=" " custom_annotation_files}; do
+        custom_files+=("$file_path")
+    done
+
+    custom_strings=()
+    for custom_string in ~{sep=" " custom_annotation_string}; do
+        custom_strings+=("$custom_string")
+    done
+
+    for i in $(seq 0 ~{length(custom_annotation_string)}); do
+        vep_string="${vep_string} $(sed 's/<CUSTOM_FILE>/${custom_files[$i]}' <<< ${custom_strings[$i]})"
+    done
+
 
     /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
     --format vcf \
@@ -65,7 +80,8 @@ task vep {
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
     --species ~{ensembl_species} \
-    ~{sep=" " custom_annotation_string}
+    ${vep_string}
+    #~{sep=" " custom_annotation_string}
   >>>
 
   output {
@@ -78,9 +94,12 @@ task generateCustomString {
     input { VepCustomAnnotation custom_annotation }
     runtime { docker: "ubuntu:xenial" }
     command <<<
-        /bin/echo '~{if custom_annotation.annotation.check_existing then "--check_existing" else ""} --custom ~{custom_annotation.annotation.file},~{custom_annotation.annotation.name},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then 1 else 0},~{sep="," custom_annotation.annotation.vcf_fields}'
+        /bin/echo '~{if custom_annotation.annotation.check_existing then "--check_existing" else ""} --custom <CUSTOM_FILE>,~{custom_annotation.annotation.name},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then 1 else 0},~{sep="," custom_annotation.annotation.vcf_fields}'
     >>>
-    output { String custom_string = read_string(stdout()) }
+    output {
+        String custom_string = read_string(stdout())
+        File custom_file = custom_annotation.annotation.file
+    }
 }
 
 workflow wf {
@@ -121,6 +140,7 @@ workflow wf {
     ensembl_species=ensembl_species,
     synonyms_file=synonyms_file,
     custom_annotation_string = generateCustomString.custom_string,
+    custom_annotation_files = generateCustomString.custom_file,
     coding_only=coding_only,
     everything=everything,
     pick=pick
