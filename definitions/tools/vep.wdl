@@ -39,15 +39,16 @@ task vep {
   String cache_dir = basename(cache_dir_zip, ".zip")
 
   command <<<
-    #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
-    unzip -qq ~{cache_dir_zip}
 
     custom_string="~{sep=" " custom_annotation_string}"
     for file_path in ~{sep=" " custom_annotation_files}; do
         echo ${file_path} >> testing.txt
-        vep_string=$(sed '0,/<CUSTOM_FILE>/s//${file_path}/' <<< ${custom_string})
+        custom_string=$(sed "0,/<CUSTOM_FILE>/s//${file_path}/" <<< ${custom_string})
     done
     echo ${vep_string} >> testing.txt
+
+    #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
+    unzip -qq ~{cache_dir_zip}
 
     /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
     --format vcf \
@@ -72,7 +73,7 @@ task vep {
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
     --species ~{ensembl_species} \
-    ${vep_string}
+    ${custom_string}
     #~{sep=" " custom_annotation_string}
   >>>
 
