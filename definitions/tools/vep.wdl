@@ -45,7 +45,7 @@ task vep {
     custom_string="~{sep=" " custom_annotation_string}"
     for file_path in ~{sep=" " custom_annotation_files}; do
         echo ${file_path} >> testing.txt
-        vep_string=$(sed '0,/<CUSTOM_FILE>/s//${file_path}' <<< ${custom_string})
+        vep_string=$(sed '0,/<CUSTOM_FILE>/s//${file_path}/' <<< ${custom_string})
     done
     echo ${vep_string} >> testing.txt
 
