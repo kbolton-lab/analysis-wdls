@@ -42,20 +42,10 @@ task vep {
     #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
     unzip -qq ~{cache_dir_zip}
 
-    custom_files=()
+    custom_string=~{sep=" " custom_annotation_string}
     for file_path in ~{sep=" " custom_annotation_files}; do
-        custom_files+=("$file_path")
+        vep_string=$(sed '0,/<CUSTOM_FILE>/s//${file_path}' <<< ${custom_string})
     done
-
-    custom_strings=()
-    for custom_string in ~{sep=" " custom_annotation_string}; do
-        custom_strings+=("$custom_string")
-    done
-
-    for i in $(seq 0 ~{length(custom_annotation_string)}); do
-        vep_string="${vep_string} $(sed 's/<CUSTOM_FILE>/${custom_files[$i]}' <<< ${custom_strings[$i]})"
-    done
-
 
     /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
     --format vcf \
