@@ -78,7 +78,7 @@ task generateCustomString {
     input { VepCustomAnnotation custom_annotation }
     runtime { docker: "ubuntu:xenial" }
     command <<<
-        /bin/echo '~{if custom_annotation.annotation.check_existing then "--check_existing" else ""} --custom ~{custom_annotation.annotation.file},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then 1 else 0},~{sep="," custom_annotation.annotation.vcf_fields}'
+        /bin/echo '~{if custom_annotation.annotation.check_existing then "--check_existing" else ""} --custom ~{custom_annotation.annotation.file},~{custom_annotation.annotation.name},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then 1 else 0},~{sep="," custom_annotation.annotation.vcf_fields}'
     >>>
     output { String custom_string = read_string(stdout()) }
 }
