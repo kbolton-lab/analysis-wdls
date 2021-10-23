@@ -42,10 +42,11 @@ task vep {
 
     custom_string="~{sep=" " custom_annotation_string}"
     for file_path in ~{sep=" " custom_annotation_files}; do
+        echo ${custom_string} >> testing.txt
         echo ${file_path} >> testing.txt
         custom_string=$(sed "0,/<CUSTOM_FILE>/s//${file_path}/" <<< ${custom_string})
     done
-    echo ${vep_string} >> testing.txt
+    echo ${custom_string} >> testing.txt
 
     #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
     unzip -qq ~{cache_dir_zip}
