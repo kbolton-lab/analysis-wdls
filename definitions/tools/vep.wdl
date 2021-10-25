@@ -68,7 +68,6 @@ task vep {
     --polyphen p \
     --coding_only ~{coding_only} \
     --~{pick} \
-    --pick \
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
