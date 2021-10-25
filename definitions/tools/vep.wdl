@@ -17,6 +17,7 @@ task vep {
     #Array[VepCustomAnnotation] custom_annotations = []
     Array[String] custom_annotation_string =[""]
     Array[File] custom_annotation_files = [""]
+    Array[Array[File]?] custom_annotation_files_tbi = [[""]]
     Boolean everything = true
     # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
     String pick = "flag_pick"
@@ -93,6 +94,7 @@ task generateCustomString {
     output {
         String custom_string = read_string(stdout())
         File custom_file = custom_annotation.annotation.file
+        Array[File]? custom_file_tbi = custom_annotation.annotation.secondary_files
     }
 }
 
@@ -135,6 +137,7 @@ workflow wf {
     synonyms_file=synonyms_file,
     custom_annotation_string = generateCustomString.custom_string,
     custom_annotation_files = generateCustomString.custom_file,
+    custom_annotation_files_tbi = generateCustomString.custom_file_tbi,
     coding_only=coding_only,
     everything=everything,
     pick=pick
