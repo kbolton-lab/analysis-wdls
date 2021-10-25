@@ -56,7 +56,7 @@ task vep {
     --format vcf \
     --vcf \
     --fork 4 \
-    --term SO \
+    --terms SO \
     --transcript_version \
     --offline \
     --cache \
@@ -68,6 +68,7 @@ task vep {
     --polyphen p \
     --coding_only ~{coding_only} \
     --~{pick} \
+    --pick \
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
