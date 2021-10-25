@@ -44,7 +44,7 @@ task vep {
     for file_path in ~{sep=" " custom_annotation_files}; do
         echo ${custom_string} >> testing.txt
         echo ${file_path} >> testing.txt
-        custom_string=$(sed "0,/<CUSTOM_FILE>/s//${file_path}/" <<< ${custom_string})
+        custom_string=$(awk -v srch="<CUSTOM_FILE>" -v repl="$file_path" '!x{x=sub(srch,repl)}{print $0}' <<< $custom_string)
     done
     echo ${custom_string} >> testing.txt
 
