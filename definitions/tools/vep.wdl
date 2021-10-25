@@ -43,11 +43,9 @@ task vep {
 
     custom_string="~{sep=" " custom_annotation_string}"
     for file_path in ~{sep=" " custom_annotation_files}; do
-        echo ${custom_string} >> testing.txt
-        echo ${file_path} >> testing.txt
         custom_string=$(awk -v srch="<CUSTOM_FILE>" -v repl="$file_path" '!x{x=sub(srch,repl)}{print $0}' <<< $custom_string)
     done
-    echo ${custom_string} >> testing.txt
+    echo ${custom_string} >> custom_string_validation.txt
 
     #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
     unzip -qq ~{cache_dir_zip}
@@ -112,8 +110,7 @@ workflow wf {
     Array[VepCustomAnnotation] custom_annotations = []
     Boolean coding_only = false
     Boolean everything = true
-    # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
-    String pick = "flag_pick"
+    String pick = "flag_pick"       # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
   }
 
   scatter(custom_annotation in custom_annotations) {
