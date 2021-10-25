@@ -15,9 +15,9 @@ task vep {
     Array[String] plugins
     Boolean coding_only = false
     #Array[VepCustomAnnotation] custom_annotations = []
-    Array[String] custom_annotation_string =[""]
-    Array[File] custom_annotation_files = [""]
-    Array[Array[File]?] custom_annotation_files_tbi = [[""]]
+    Array[String]? custom_annotation_string =[""]
+    Array[File]? custom_annotation_files = [""]
+    Array[Array[File]?]? custom_annotation_files_tbi = [[""]]
     Boolean everything = true
     # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
     String pick = "flag_pick"
@@ -76,7 +76,6 @@ task vep {
     --cache_version ~{ensembl_version} \
     --species ~{ensembl_species} \
     ${custom_string}
-    #~{sep=" " custom_annotation_string}
   >>>
 
   output {
