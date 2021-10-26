@@ -9,6 +9,12 @@ ${(z)CROMWELL} run \
     -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/vardict_tool_home.json \
     /Users/brian/test/WDL/analysis-wdls/definitions/tools/vardict.wdl
 
+${(z)CROMWELL} run \
+    -o /Users/brian/test/WDL/analysis-wdls/example_data/Brian/options/vep_options_home.json \
+    -t wdl \
+    -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/vep.json \
+    /Users/brian/test/WDL/analysis-wdls/definitions/tools/vep_brian.wdl
+
 docker run -it -v /Users/brian/Bolton/CWL_TESTS:/Users/brian/Bolton/CWL_TESTS kboltonlab/vardictjava:1.0
 
 /opt/VarDictJava/build/install/VarDict/bin/VarDict \
