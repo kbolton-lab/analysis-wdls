@@ -4,6 +4,7 @@ import "../tools/bgzip.wdl" as b
 import "../tools/fp_filter.wdl" as ff
 import "../tools/index_vcf.wdl" as iv
 import "../tools/normalize_variants.wdl" as nv
+import "../tools/bcftools_norm.wdl" as bn
 import "../tools/vcf_sanitize.wdl" as vs
 import "../tools/vt_decompose.wdl" as vd
 import "../tools/select_variants.wdl" as sv
@@ -26,19 +27,23 @@ workflow fpFilter {
     input: vcf=vcf
   }
 
-  call nv.normalizeVariants {
-    input:
-    reference=reference,
-    reference_fai=reference_fai,
-    reference_dict=reference_dict,
-    vcf=sanitizeVcf.sanitized_vcf,
-    vcf_tbi=sanitizeVcf.sanitized_vcf_tbi
+  call bn.bcftoolsNorm as normalize {
+      input:
+      reference=reference,
+      reference_fai=reference_fai,
+      reference_dict=reference_dict,
+      vcf=sanitizeVcf.sanitized_vcf,
+      vcf_tbi=sanitizeVcf.sanitized_vcf_tbi
+  }
+
+  call iv.indexVcf as indexNorm {
+      input: vcf=normalize.normalized_vcf
   }
 
   call vd.vtDecompose as decomposeVariants {
     input:
-    vcf=normalizeVariants.normalized_vcf,
-    vcf_tbi=normalizeVariants.normalized_vcf_tbi
+    vcf=indexNorm.indexed_vcf,
+    vcf_tbi=indexNorm.indexed_vcf_tbi
   }
 
   call iv.indexVcf as index {
