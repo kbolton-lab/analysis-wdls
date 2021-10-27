@@ -1,0 +1,14 @@
+{
+  "vardict.reference": "/Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa",
+  "vardict.reference_fai": "/Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa.fai",
+  "vardict.interval_bed": "/Users/brian/Bolton/CWL_TESTS/xgen_plus_spikein.GRCh38.chr22.bed",
+  "vardict.tumor_bam": "/Users/brian/Bolton/CWL_TESTS/1006108_23153_0_0_chr22.bam",
+  "vardict.tumor_bam_bai": "/Users/brian/Bolton/CWL_TESTS/1006108_23153_0_0_chr22.bam.bai",
+  "vardict.min_var_freq": 0.005,
+  "vardict.tumor_only": false,
+  "vardict.tumor_sample_name": "UKB_5181257_0229406506",
+  "vardict.normal_sample_name": "UKB_3716931_245493506",
+  "vardict.normal_bam": "/Users/brian/Bolton/CWL_TESTS/1010590_23153_0_0_chr22.bam",
+  "vardict.normal_bam_bai": "/Users/brian/Bolton/CWL_TESTS/1010590_23153_0_0_chr22.bam.bai"
+}
+

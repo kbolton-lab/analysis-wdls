@@ -6,7 +6,7 @@ task bcftoolsFilterBcbio {
         File vcf_tbi
         String filter_flag = "include"
         String filter_string
-        String? output_vcf_name = "bcftools_filter.vcf.gz"
+        String? output_vcf_name = "bcftools_filter"
         String output_type = "z"
     }
 
@@ -20,10 +20,14 @@ task bcftoolsFilterBcbio {
 
     String ff = if filter_flag == "include" then "-i" else "-e"
     command <<<
-        /opt/bcftools/bin/bcftools filter ~{ff} "~{filter_string}" ~{vcf} --output-type ~{output_type} --output ~{output_vcf_name} -s "BCBIO" -m+
+        /opt/bcftools/bin/bcftools filter ~{ff} "~{filter_string}" ~{vcf} --output-type ~{output_type} --output ~{output_vcf_name}.vcf.gz -s "BCBIO" -m+
+        
+        /usr/local/bin/tabix ~{output_vcf_name}.vcf.gz
+
     >>>
 
     output {
-        File filtered_vcf = output_vcf_name
+        File filtered_vcf = "~{output_vcf_name}.vcf.gz"
+        File filtered_vcf_tbi = "~{output_vcf_name}.vcf.gz.tbi"
     }
 }
