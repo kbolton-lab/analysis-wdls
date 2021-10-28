@@ -19,7 +19,7 @@ task bcftoolsNorm {
     }
 
     command <<<
-        /usr/local/bin/bcftools norm -m -any --output-type z --output ~{variant_caller}.bcftools_norm.vcf.gz ~{vcf} -f ~{reference}
+        /opt/bcftools/bin/bcftools norm --multiallelics -any --output-type z --output bcftools_norm.vcf.gz ~{vcf} -f ~{reference}
 
         /usr/local/bin/tabix ~{variant_caller}.bcftools_norm.vcf.gz
     >>>
