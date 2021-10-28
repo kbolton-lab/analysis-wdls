@@ -14,7 +14,7 @@ task vep {
     String ensembl_species
     Array[String] plugins
     Boolean coding_only = false
-    #Array[VepCustomAnnotation] custom_annotations = []
+    Array[VepCustomAnnotation] custom_annotations = []
     Array[String]? custom_annotation_string =[""]
     Array[File]? custom_annotation_files = [""]
     Array[Array[File]?]? custom_annotation_files_tbi = [[""]]
@@ -131,6 +131,7 @@ workflow wf {
     ensembl_version=ensembl_version,
     ensembl_species=ensembl_species,
     synonyms_file=synonyms_file,
+    custom_annotations = custom_annotations,
     custom_annotation_string = generateCustomString.custom_string,
     custom_annotation_files = generateCustomString.custom_file,
     custom_annotation_files_tbi = generateCustomString.custom_file_tbi,

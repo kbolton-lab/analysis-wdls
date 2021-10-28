@@ -1,0 +1,143 @@
+{
+  "archerdx.reference_pac": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.pac",
+  "archerdx.reference_ann": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.ann",
+  "archerdx.per_target_intervals": [],
+  "archerdx.scatter_count": 50,
+  "archerdx.summary_intervals": [],
+  "archerdx.vardict_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/vardict.merged.BQSR.2N.vcf.gz",
+  "archerdx.reference_sa": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.sa",
+  "archerdx.reference_bwt": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.bwt",
+  "archerdx.vep_ensembl_assembly": "GRCh38",
+  "archerdx.picard_metric_accumulation_level": "LIBRARY",
+  "archerdx.af_threshold":  0.0001,
+  "archerdx.vep_cache_dir_zip": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/ukbb_calls/pvcf/vep_zip.zip",
+  "archerdx.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
+  "archerdx.vep_ensembl_species": "homo_sapiens_merged",
+  "archerdx.variants_to_table_genotype_fields": ["GT","AD"],
+  "archerdx.normalized_gnomad_exclude": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz",
+  "archerdx.mutect_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz",
+  "archerdx.bcbio_filter_string": "((FMT/AF * FMT/DP < 6) && ( FMT/MQ < 55.0 || FMT/DP < 10 || FMT/QUAL < 45 ))",
+  "archerdx.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "archerdx.omni_vcf_tbi": "/storage1/fs1/bga/Active/gmsroot/gc2709/info/production_reference_GRCh38DH/accessory_vcf/omni25-ld-pruned-20000-2000-0.5-annotated.wchr.sites_only.b38.autosomes_only.vcf.gz.tbi",
+  "archerdx.arrayMode": false,
+  "archerdx.bams": [],
+  "archerdx.pon_normal_bams": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pon.sample.bam.txt",
+  "archerdx.annotate_coding_only": true,
+  "archerdx.omni_vcf": "/storage1/fs1/bga/Active/gmsroot/gc2709/info/production_reference_GRCh38DH/accessory_vcf/omni25-ld-pruned-20000-2000-0.5-annotated.wchr.sites_only.b38.autosomes_only.vcf.gz",
+  "archerdx.pindel_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pindel.merged.2percent.2N.vcf.gz.tbi",
+  "archerdx.lofreq_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.vcf.gz",
+  "archerdx.pon_pvalue": "4.098606e-08",
+  "archerdx.umi_length": 8,
+  "archerdx.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+  "archerdx.target_intervals": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.interval_list",
+  "archerdx.per_base_intervals": [],
+  "archerdx.bqsr_known_sites": [
+      "/storage1/fs1/bga/Active/gmsroot/gc2709/info/production_reference_GRCh38DH/accessory_vcf/omni25-ld-pruned-20000-2000-0.5-annotated.wchr.sites_only.b38.autosomes_only.vcf.gz",
+      "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-19443-e48c595a620a432c93e8dd29e4af64f2/snvs.hq.vcf.gz",
+      "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20211-26b393cc7ab04120ac68cc2cbd4a15df/indels.hq.vcf.gz",
+      "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20267-00cb8ff552914c17ad66d86031e10d30/indels.hq.vcf.gz"
+  ],
+  "archerdx.umi_paired": false,
+  "archerdx.vep_custom_annotations": [{
+      "force_report_coordinates" : true,
+      "method" : "exact",
+      "annotation" : {
+          "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz",
+          "secondary_files" : [
+              "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz.tbi"
+          ],
+          "data_format" : "vcf",
+          "name" : "gnomADe",
+          "vcf_fields" : [
+              "AF",
+              "AF_AFR",
+              "AF_AMR",
+              "AF_ASJ",
+              "AF_EAS",
+              "AF_FIN",
+              "AF_NFE",
+              "AF_OTH",
+              "AF_SAS"
+          ],
+          "gnomad_filter" : true,
+          "check_existing" : true
+      }
+      },
+      {
+          "force_report_coordinates" : true,
+          "method" : "exact",
+          "annotation" : {
+              "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz",
+              "secondary_files" : [
+                  "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz.tbi"
+              ],
+              "data_format" : "vcf",
+              "name" : "clinvar",
+              "vcf_fields" : [
+                  "CLINSIGN",
+                  "PHENOTYPE",
+                  "SCORE",
+                  "RCVACC",
+                  "TESTEDINGTR",
+                  "PHENOTYPELIST",
+                  "NUMSUBMIT",
+                  "GUIDELINES"
+              ],
+              "gnomad_filter" : true,
+              "check_existing" : true
+          }
+          }],
+  "archerdx.normalized_gnomad_exclude_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz.tbi",
+  "archerdx.vep_ensembl_version": "104",
+  "archerdx.tumor_sample_name": "sample",
+  "archerdx.target_bed": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.bed",
+  "archerdx.bqsr_known_sites_tbi": [
+      "/storage1/fs1/bga/Active/gmsroot/gc2709/info/production_reference_GRCh38DH/accessory_vcf/omni25-ld-pruned-20000-2000-0.5-annotated.wchr.sites_only.b38.autosomes_only.vcf.gz.tbi",
+      "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-19443-e48c595a620a432c93e8dd29e4af64f2/snvs.hq.vcf.gz.tbi",
+      "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20211-26b393cc7ab04120ac68cc2cbd4a15df/indels.hq.vcf.gz.tbi",
+      "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20267-00cb8ff552914c17ad66d86031e10d30/indels.hq.vcf.gz.tbi"
+  ],
+  "archerdx.vardict_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/vardict.merged.BQSR.2N.vcf.gz.tbi",
+  "archerdx.bait_intervals": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.interval_list",
+  "archerdx.sequence": [{
+      "sequence": {
+        "fastq1": "/storage1/fs1/bolton/Active/data/TEST_DATA/Sample_R1.fastq.gz",
+        "fastq2": "/storage1/fs1/bolton/Active/data/TEST_DATA/Sample_R2.fastq.gz"
+      },
+      "readgroup": "RG\tRD:Normal\tSM:Normal\tPL:Illumina\tCN:Archer"
+  }],
+  "archerdx.reference_amb": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.amb",
+  "archerdx.tumor_only": true,
+  "archerdx.lofreq_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.vcf.gz.tbi",
+  "archerdx.bqsr_intervals": [
+      "chr1",
+      "chr2",
+      "chr3",
+      "chr4",
+      "chr5",
+      "chr6",
+      "chr7",
+      "chr8",
+      "chr9",
+      "chr10",
+      "chr11",
+      "chr12",
+      "chr13",
+      "chr14",
+      "chr15",
+      "chr16",
+      "chr17",
+      "chr18",
+      "chr19",
+      "chr20",
+      "chr21",
+      "chr22",
+      "chrX",
+      "chrY",
+      "chrM"],
+  "archerdx.synonyms_file": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build50f99e75d14340ffb5b7d21b03887637/chromAlias.ensembl.txt",
+  "archerdx.vep_pick": "pick --pick_order canonical,mane,ccds,rank,appris,tsl,biotype,length",
+  "archerdx.pindel_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pindel.merged.2percent.2N.vcf.gz",
+  "archerdx.read_structure": ["8M13S+T", "+T"],
+  "archerdx.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz.tbi"
+}

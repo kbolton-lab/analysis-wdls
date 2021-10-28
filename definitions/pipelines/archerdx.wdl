@@ -20,6 +20,7 @@ import "../tools/index_bam.wdl" as ib
 import "../tools/interval_list_expand.wdl" as ile
 import "../tools/vep.wdl" as v
 import "../tools/pon2percent.wdl" as pp
+import "../tools/intervals_to_bed.wdl" as itb
 
 workflow archerdx {
     input {
@@ -31,7 +32,8 @@ workflow archerdx {
         Array[String] read_structure
         String? tumor_name = "tumor"
         String tumor_sample_name
-        File? target_intervals
+        File target_intervals
+        File target_bed
 
         # Reference
         File reference
@@ -70,7 +72,7 @@ workflow archerdx {
         Int? qc_minimum_base_quality = 0
 
         # Variant Calling
-        Boolean? arrayMode = false       # Decide if you would raather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
+        Boolean? arrayMode = false       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
         File pon_normal_bams
         Array[String] bams              # This is just an array of Files (as Strings)... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
@@ -81,7 +83,7 @@ workflow archerdx {
         String? ref_name = "GRCh38DH"
         String? ref_date = "20161216"
         Int? pindel_min_supporting_reads = 3
-        Float? af_threshold = 0.005
+        Float? af_threshold = 0.0001
         String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 2.0) || (FMT/DP < 10) || (INFO/QUAL < 45)))"
         String? pon_pvalue = "4.098606e-08"
 
@@ -117,7 +119,6 @@ workflow archerdx {
         File? synonyms_file
         Boolean? annotate_coding_only = true
         Array[VepCustomAnnotation] vep_custom_annotations
-        File limit_variant_intervals
         Array[String] variants_to_table_fields = ["CHROM","POS","ID","REF","ALT","set","AC","AF"]
         Array[String]? variants_to_table_genotype_fields = ["GT","AD"]
         Array[String]? vep_to_table_fields = ["HGVSc","HGVSp"]
@@ -141,7 +142,7 @@ workflow archerdx {
             input:
             fastq1 = format_fastq.fastq1,
             fastq2 = format_fastq.fastq2,
-            sample_name = sample_name,
+            sample_name = tumor_sample_name,
             library_name = "Library",
             platform_unit = "Illumina",
             platform = "ArcherDX"
@@ -151,7 +152,7 @@ workflow archerdx {
     call ma.molecularAlignment as alignment_workflow {
         input:
         bam = fastq_to_bam.bam,
-        sample_name = sample_name,
+        sample_name = tumor_sample_name,
         read_structure = read_structure,
         reference = reference,
         reference_fai = reference_fai,
@@ -254,20 +255,20 @@ workflow archerdx {
     call v.vep as mutect_annotate_variants {
         input:
         vcf = mutect_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = cache_dir_zip,
+        cache_dir_zip = vep_cache_dir_zip,
         reference = reference,
         reference_fai = reference_fai,
         reference_dict = reference_dict,
-        plugins = plugins,
-        ensembl_assembly = ensembl_assembly,
-        ensembl_version = ensembl_version,
-        ensembl_species = ensembl_species,
+        plugins = vep_plugins,
+        ensembl_assembly = vep_ensembl_assembly,
+        ensembl_version = vep_ensembl_version,
+        ensembl_species = vep_ensembl_species,
         synonyms_file = synonyms_file,
-        custom_annotations = custom_annotations,
+        custom_annotations = vep_custom_annotations,
         coding_only = annotate_coding_only,
         pick = vep_pick
     }
-    call pp.pon2percent as mutect_pon2 {
+    call pp.pon2Percent as mutect_pon2 {
         input:
         vcf = mutect_annotate_variants.annotated_vcf,
         vcf2PON = mutect_pon2_file,
@@ -284,8 +285,7 @@ workflow archerdx {
         reference_dict = reference_dict,
         tumor_bam = index_bam.indexed_bam,
         tumor_bam_bai = index_bam.indexed_bam_bai,
-        interval_list = target_intervals,
-        scatter_count = scatter_count,
+        interval_bed = target_bed,
         tumor_sample_name = tumor_sample_name,
         min_var_freq = af_threshold,
         bcbio_filter_string = bcbio_filter_string,
@@ -310,20 +310,20 @@ workflow archerdx {
     call v.vep as vardict_annotate_variants {
         input:
         vcf = vardict_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = cache_dir_zip,
+        cache_dir_zip = vep_cache_dir_zip,
         reference = reference,
         reference_fai = reference_fai,
         reference_dict = reference_dict,
-        plugins = plugins,
-        ensembl_assembly = ensembl_assembly,
-        ensembl_version = ensembl_version,
-        ensembl_species = ensembl_species,
+        plugins = vep_plugins,
+        ensembl_assembly = vep_ensembl_assembly,
+        ensembl_version = vep_ensembl_version,
+        ensembl_species = vep_ensembl_species,
         synonyms_file = synonyms_file,
-        custom_annotations = custom_annotations,
+        custom_annotations = vep_custom_annotations,
         coding_only = annotate_coding_only,
         pick = vep_pick
     }
-    call pp.pon2percent as vardict_pon2 {
+    call pp.pon2Percent as vardict_pon2 {
         input:
         vcf = vardict_annotate_variants.annotated_vcf,
         vcf2PON = vardict_pon2_file,
@@ -364,20 +364,20 @@ workflow archerdx {
     call v.vep as lofreq_annotate_variants {
         input:
         vcf = lofreq_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = cache_dir_zip,
+        cache_dir_zip = vep_cache_dir_zip,
         reference = reference,
         reference_fai = reference_fai,
         reference_dict = reference_dict,
-        plugins = plugins,
-        ensembl_assembly = ensembl_assembly,
-        ensembl_version = ensembl_version,
-        ensembl_species = ensembl_species,
+        plugins = vep_plugins,
+        ensembl_assembly = vep_ensembl_assembly,
+        ensembl_version = vep_ensembl_version,
+        ensembl_species = vep_ensembl_species,
         synonyms_file = synonyms_file,
-        custom_annotations = custom_annotations,
+        custom_annotations = vep_custom_annotations,
         coding_only = annotate_coding_only,
         pick = vep_pick
     }
-    call pp.pon2percent as lofreq_pon2 {
+    call pp.pon2Percent as lofreq_pon2 {
         input:
         vcf = lofreq_annotate_variants.annotated_vcf,
         vcf2PON = lofreq_pon2_file,
@@ -403,11 +403,51 @@ workflow archerdx {
             min_var_freq = af_threshold,
             tumor_only = tumor_only
     }
+    call gapf.gnomadAndPoNFilter as pindel_gnomad_pon_filters {
+        input:
+        reference = reference,
+        reference_fai = reference_fai,
+        reference_dict = reference_dict,
+        caller_vcf = pindel.unfiltered_vcf,
+        caller_vcf_tbi = pindel.unfiltered_vcf_tbi,
+        gnomAD_exclude_vcf = normalized_gnomad_exclude,
+        gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        caller_prefix = "pindel." + tumor_sample_name,
+        arrayMode = arrayMode,
+        normal_bams = pon_normal_bams,
+        bams = bams,
+        pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
+        pon_pvalue = pon_pvalue
+    }
+    call v.vep as pindel_annotate_variants {
+        input:
+        vcf = pindel_gnomad_pon_filters.processed_filtered_vcf,
+        cache_dir_zip = vep_cache_dir_zip,
+        reference = reference,
+        reference_fai = reference_fai,
+        reference_dict = reference_dict,
+        plugins = vep_plugins,
+        ensembl_assembly = vep_ensembl_assembly,
+        ensembl_version = vep_ensembl_version,
+        ensembl_species = vep_ensembl_species,
+        synonyms_file = synonyms_file,
+        custom_annotations = vep_custom_annotations,
+        coding_only = annotate_coding_only,
+        pick = vep_pick
+    }
+    call pp.pon2Percent as pindel_pon2 {
+        input:
+        vcf = pindel_annotate_variants.annotated_vcf,
+        vcf2PON = pindel_pon2_file,
+        vcf2PON_tbi = pindel_pon2_file_tbi,
+        caller = "pindel",
+        sample_name = tumor_sample_name
+    }
 
     output {
         # Alignments
         File aligned_bam = alignment_workflow.aligned_bam
-        File bqsr_bam = index_bam/indexed_bam
+        File bqsr_bam = index_bam.indexed_bam
 
         # Tumor QC
         File tumor_insert_size_metrics = tumor_qc.insert_size_metrics

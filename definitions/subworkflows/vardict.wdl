@@ -3,7 +3,7 @@ version 1.0
 import "../subworkflows/fp_filter.wdl" as ff
 # import "../tools/index_vcf.wdl" as iv
 import "../tools/vardict.wdl" as v
-import "../tools/intervals_to_bed.wdl" as itb
+# import "../tools/intervals_to_bed.wdl" as itb
 import "../tools/bcftools_filter_bcbio.wdl" as bfb
 
 workflow vardict {
@@ -24,7 +24,7 @@ workflow vardict {
     #Int scatter_count
     Float? min_var_freq = 0.05
 
-    ## does BQSR make all Vardict's FMT/NM = 0 ????? 
+    ## does BQSR make all Vardict's FMT/NM = 0 ?????
     String bcbio_filter_string = "((FMT/AF * FMT/DP < 3) && ( FMT/MQ < 55.0 || FMT/DP < 10 || FMT/QUAL < 30 ))"
     # String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((FMT/MQ < 55.0 && FMT/NM > 1.0) || (FMT/MQ < 60.0 && FMT/NM > 2.0) || (FMT/DP < 10) || (FMT/QUAL < 45)))" # AF=15, MQ=24, NM=27, DP=8, QUAL=20
     Boolean? tumor_only = false

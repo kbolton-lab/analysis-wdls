@@ -36,9 +36,10 @@ task mutectNormal {
     /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} \
       -I ~{tumor_bam} --read-index ~{tumor_bam_bai} -tumor "$TUMOR" \
       -I ~{normal_bam} --read-index ~{normal_bam_bai} -normal "$NORMAL" \
-      --max-reads-per-alignment-start 0
+      --f1r2-tar-gz mutect.f1r2.tar.gz --max-reads-per-alignment-start 0
 
-    /gatk/gatk FilterMutectCalls -R ~{reference} -V mutect.vcf.gz -O ~{output_vcf} #Running FilterMutectCalls on the output vcf.
+    /gatk/gatk LearnReadOrientationModel -I mutect.f1r2.tar.gz -O mutect.read-orientation-model.tar.gz
+    /gatk/gatk FilterMutectCalls -R ~{reference} -V mutect.vcf.gz --ob-priors mutect.read-orientation-model.tar.gz -O ~{output_vcf} #Running FilterMutectCalls on the output vcf.
   >>>
 
   output {
@@ -75,7 +76,8 @@ task mutectTumorOnly {
     set -o errexit
 
     /gatk/gatk Mutect2 --java-options "-Xmx20g" -O mutect.vcf.gz -R ~{reference} -L ~{interval_list} -I ~{tumor_bam} --read-index ~{tumor_bam_bai} --max-reads-per-alignment-start 0
-    /gatk/gatk FilterMutectCalls -R ~{reference} -V mutect.vcf.gz -O ~{output_vcf} #Running FilterMutectCalls on the output vcf.
+    /gatk/gatk LearnReadOrientationModel -I mutect.f1r2.tar.gz -O mutect.read-orientation-model.tar.gz
+    /gatk/gatk FilterMutectCalls -R ~{reference} -V mutect.vcf.gz --ob-priors mutect.read-orientation-model.tar.gz -O ~{output_vcf} #Running FilterMutectCalls on the output vcf.
   >>>
 
   output {
