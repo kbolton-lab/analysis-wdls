@@ -1,9 +1,6 @@
 version 1.0
 
-# import "../tools/bgzip.wdl" as b
 import "../tools/fp_filter.wdl" as ff
-import "../tools/index_vcf.wdl" as iv
-# import "../tools/normalize_variants.wdl" as nv
 import "../tools/bcftools_norm.wdl" as bn
 import "../tools/vcf_sanitize.wdl" as vs
 import "../tools/vt_decompose.wdl" as vd
@@ -30,47 +27,27 @@ workflow fpFilter {
   call bn.bcftoolsNorm as normalize {
       input:
       reference=reference,
-      variant_caller=variant_caller,
       reference_fai=reference_fai,
-      # reference_dict=reference_dict,
       vcf=sanitizeVcf.sanitized_vcf,
       vcf_tbi=sanitizeVcf.sanitized_vcf_tbi
   }
 
-  # call iv.indexVcf as indexNorm {
-  #     input: vcf=normalize.normalized_vcf
-  # }
-
   call vd.vtDecompose as decomposeVariants {
     input:
     vcf=normalize.normalized_vcf,
-    vcf_tbi=normalize.normalized_vcf_tbi,
-    variant_caller=variant_caller
-  }
-
-  call iv.indexVcf as index {
-    input: vcf=decomposeVariants.decomposed_vcf
+    vcf_tbi=normalize.normalized_vcf_tbi
   }
 
   call ff.fpFilter as firstFilter {
     input:
     reference=reference,
     reference_fai=reference_fai,
-    # reference_dict=reference_dict,
     bam=bam,
-    vcf=index.indexed_vcf,
+    vcf=decomposeVariants.decomposed_vcf,
     sample_name=sample_name,
     min_var_freq=min_var_freq,
     output_vcf_basename = variant_caller + "_full"
   }
-
-  # call b.bgzip as fpBgzip {
-  #   input: file=firstFilter.filtered_vcf
-  # }
-
-  # call iv.indexVcf as fpIndex {
-  #   input: vcf=fpBgzip.bgzipped_file
-  # }
 
   call sv.selectVariants as hardFilter {
     input:

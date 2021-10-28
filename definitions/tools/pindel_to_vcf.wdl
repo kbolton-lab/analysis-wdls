@@ -24,6 +24,6 @@ task pindelToVcf {
     >>>
 
     output {
-        File pindel_vcf = output_name
+        File pindel_vcf = "~{output_name}"
     }
 }
