@@ -14,7 +14,7 @@ task vardictNormal {
         Float? min_var_freq = 0.005
     }
 
-    Int cores = 4
+    Int cores = 16
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
@@ -82,7 +82,7 @@ task vardictTumorOnly {
         Float? min_var_freq = 0.005
     }
 
-    Int cores = 4
+    Int cores = 16
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))

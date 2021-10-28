@@ -20,18 +20,21 @@ workflow vardict {
     File? normal_bam_bai
     String? normal_sample_name
 
-    File interval_list
-    Int scatter_count
+    File interval_bed
+    #Int scatter_count
     Float? min_var_freq = 0.05
 
-    String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 2.0) || (FMT/DP < 10) || (INFO/QUAL < 45)))"
+    ## does BQSR make all Vardict's FMT/NM = 0 ????? 
+    String bcbio_filter_string = "((FMT/AF * FMT/DP < 3) && ( FMT/MQ < 55.0 || FMT/DP < 10 || FMT/QUAL < 30 ))"
+    # String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((FMT/MQ < 55.0 && FMT/NM > 1.0) || (FMT/MQ < 60.0 && FMT/NM > 2.0) || (FMT/DP < 10) || (FMT/QUAL < 45)))" # AF=15, MQ=24, NM=27, DP=8, QUAL=20
     Boolean? tumor_only = false
   }
 
-  call itb.intervalsToBed as interval_list_to_bed {
-      input:
-          interval_list = interval_list
-  }
+  # vardict multi-threading is best
+  # call itb.intervalsToBed as interval_list_to_bed {
+  #     input:
+  #         interval_list = interval_list
+  # }
 
   call v.vardict as vardictTask {
     input:
@@ -41,7 +44,7 @@ workflow vardict {
       tumor_bam_bai = tumor_bam_bai,
       normal_bam = normal_bam,
       normal_bam_bai = normal_bam_bai,
-      interval_bed = interval_list_to_bed.interval_bed,
+      interval_bed = interval_bed,
       min_var_freq = min_var_freq,
       tumor_sample_name = tumor_sample_name,
       normal_sample_name = normal_sample_name,
@@ -52,7 +55,7 @@ workflow vardict {
       input:
         reference = reference,
         reference_fai = reference_fai,
-        reference_dict = reference_dict,
+        reference_dict=reference_dict,
         bam = tumor_bam,
         bam_bai = tumor_bam_bai,
         vcf = vardictTask.vcf,

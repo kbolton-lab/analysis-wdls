@@ -46,10 +46,6 @@ workflow vardict {
             tumor_only = tumor_only
     }
 
-    call iv.indexVcf {
-        input:
-            vcf = vardict.vcf
-    }
 
     call ff.fpFilter {
         input:
@@ -58,34 +54,18 @@ workflow vardict {
             reference_dict = reference_dict,
             bam = tumor_bam,
             bam_bai = tumor_bam_bai,
-            vcf = indexVcf.indexed_vcf,
-            vcf_tbi = indexVcf.indexed_vcf_tbi,
-            variant_caller = "vardict",
+            vcf = varscanTask.vcf,
+            vcf_tbi = varscanTask.vcf_tbi,
+            variant_caller = "varscan",
             sample_name = tumor_sample_name,
             min_var_freq = min_var_freq
   }
 
-  call bfb.bcftoolsFilterBcbio as bcbio_filter {
-      input:
-        vcf = indexVcf.indexed_vcf,
-        vcf_tbi = indexVcf.indexed_vcf_tbi,
-        filter_string = bcbio_filter_string,
-        filter_flag = "include",
-        output_type = "z",
-        output_vcf_name = "bcbiofilter.vcf.gz"
-  }
-
-  call iv.indexVcf as index_bcbio {
-      input:
-        vcf = bcbio_filter.filtered_vcf
-  }
 
   output {
     File unfiltered_vcf = fpFilter.unfiltered_vcf
     File unfiltered_vcf_tbi = fpFilter.unfiltered_vcf_tbi
     File filtered_vcf = fpFilter.filtered_vcf
     File filtered_vcf_tbi = fpFilter.filtered_vcf_tbi
-    File bcbio_filtered_vcf = index_bcbio.indexed_vcf
-    File bcbio_filtered_vcf_tbi = index_bcbio.indexed_vcf_tbi
   }
 }

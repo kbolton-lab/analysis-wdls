@@ -27,8 +27,12 @@ workflow archerdx {
         Int scatter_count = 20
 
         # Sequence and BAM Information
-        Array[SequenceData] sequence
-        Array[String] read_structure
+        # Array[SequenceData] sequence
+        # Array[String] read_structure
+        File tumor_bam
+        File tumor_bai
+        File? normal_bam
+        File? normal_bai
         String? tumor_name = "tumor"
         String tumor_sample_name
         File? target_intervals

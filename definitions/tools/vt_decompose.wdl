@@ -4,21 +4,25 @@ task vtDecompose {
   input {
     File vcf
     File vcf_tbi
+    String variant_caller = "caller"
   }
 
   Int space_needed_gb = 10 + round(size([vcf, vcf_tbi], "GB")*2)
   runtime {
     memory: "4GB"
-    docker: "quay.io/biocontainers/vt:0.57721--hf74b74d_1"
+    docker: "kboltonlab/vt"
     disks: "local-disk ~{space_needed_gb} SSD"
   }
 
   command <<<
-    vt decompose -s -o decomposed.vcf.gz ~{vcf}
+    /opt/vt/vt decompose -s -o ~{variant_caller}.decomposed.vcf.gz ~{vcf}
+
+    /usr/bin/local/tabix ~{variant_caller}.decomposed.vcf.gz
   >>>
 
   output {
-    File decomposed_vcf = "decomposed.vcf.gz"
+    File decomposed_vcf = "~{variant_caller}.decomposed.vcf.gz"
+    File decomposed_vcf_tbi = "~{variant_caller}.decomposed.vcf.gz.tbi"
   }
 }
 
@@ -26,11 +30,13 @@ workflow wf {
   input {
     File vcf
     File vcf_tbi
+    String variant_caller = "caller"
   }
 
   call vtDecompose {
     input:
     vcf=vcf,
-    vcf_tbi=vcf_tbi
+    vcf_tbi=vcf_tbi,
+    variant_caller=variant_caller
   }
 }
