@@ -70,5 +70,7 @@ workflow gnomadAndPoNFilter {
         File processed_gnomAD_filtered_vcf_tbi = index_pon_vcf.indexed_vcf_tbi
         File processed_filtered_vcf = index_pon_filtered_vcf.indexed_vcf
         File processed_filtered_vcf_tbi = index_pon_filtered_vcf.indexed_vcf_tbi
+        File pon_total_counts = get_pileup_counts.pileup
+        File pon_total_counts_tbi = get_pileup_counts.pileup_tbi
     }
 }
