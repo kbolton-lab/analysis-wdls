@@ -62,7 +62,7 @@ task varscanNormal {
         
         /usr/bin/bgzip ~{output_name}.snp.vcf && /usr/bin/tabix ~{output_name}.snp.vcf.gz
         /usr/bin/bgzip ~{output_name}.indel.vcf && /usr/bin/tabix ~{output_name}.indel.vcf.gz
-        /usr/bin/bcftools concat ~{output_name}.snp.vcf.gz ~{output_name}.indel.vcf.gz -Oz -o ~{output_name}.vcf.gz && /usr/bin/tabix ~{output_name}.vcf.gz
+        /usr/bin/bcftools concat -a -D ~{output_name}.snp.vcf.gz ~{output_name}.indel.vcf.gz -Oz -o ~{output_name}.vcf.gz && /usr/bin/tabix ~{output_name}.vcf.gz
     >>>
 
     output {

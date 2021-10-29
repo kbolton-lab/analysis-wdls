@@ -21,7 +21,6 @@ workflow vardict {
     String? normal_sample_name
 
     File interval_bed
-    #Int scatter_count
     Float? min_var_freq = 0.05
 
     ## does BQSR make all Vardict's FMT/NM = 0 ?????

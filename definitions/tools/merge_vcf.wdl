@@ -16,8 +16,9 @@ task mergeVcf {
 
   String output_file = merged_vcf_basename + ".vcf.gz"
   command <<<
-    /opt/bcftools/bin/bcftools concat --allow-overlaps --remove-duplicates --output-type z -o ~{output_file} ~{sep=" " vcfs}
-    /usr/bin/tabix ~{output_file}
+    /usr/local/bin/bcftools concat --allow-overlaps --remove-duplicates --output-type z -o ~{output_file} ~{sep=" " vcfs}
+    
+    /usr/local/bin/tabix ~{output_file}
   >>>
 
   output {

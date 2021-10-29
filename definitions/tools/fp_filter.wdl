@@ -18,7 +18,7 @@ task fpFilter {
   runtime {
     memory: "6GB"
     bootDiskSizeGb: 25
-    docker: "mgibio/fp_filter-cwl:1.0.1"
+    docker: "kboltonlab/fp_filter-wdl"
     disks: "local-disk ~{space_needed_gb} SSD"
   }
 
@@ -26,7 +26,7 @@ task fpFilter {
   command <<<
     /usr/bin/perl /usr/bin/fpfilter.pl --bam-readcount /usr/bin/bam-readcount --samtools /opt/samtools/bin/samtools --output ~{output_vcf} --reference ~{reference} --bam-file ~{bam} --vcf-file ~{vcf} --sample ~{sample_name} --min-var-freq ~{min_var_freq}
 
-    /usr/local/bin/bgzip ~{output_vcf} && /usr/local/bin/tabix ~{output_vcf}.gz
+    /usr/bin/bgzip ~{output_vcf} && /usr/bin/tabix ~{output_vcf}.gz
   >>>
 
   output {
