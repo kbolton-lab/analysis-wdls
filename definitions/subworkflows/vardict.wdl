@@ -71,7 +71,7 @@ workflow vardict {
       filter_string = bcbio_filter_string,
       filter_flag = "include",
       output_type = "z",
-      output_vcf_name = "vardict.bcbiofilter.vcf.gz"
+      output_vcf_prefix = "vardict.bcbiofilter"
   }
 
   output {
