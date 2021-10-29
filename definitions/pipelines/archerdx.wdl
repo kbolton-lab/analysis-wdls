@@ -469,22 +469,22 @@ workflow archerdx {
         File mutect_pon_total_counts = mutect_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
 
         # Lofreq
-        #File lofreq_full = lofreq.unfiltered_vcf                                                                # Raw Lofreq Ouput
-        #File lofreq_pon_annotated_unfiltered_vcf = lofreq_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        #File lofreq_pon_annotated_filtered_vcf = lofreq_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        #File lofreq_pon_total_counts = lofreq_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File lofreq_full = lofreq.unfiltered_vcf                                                                # Raw Lofreq Ouput
+        File lofreq_pon_annotated_unfiltered_vcf = lofreq_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
+        File lofreq_pon_annotated_filtered_vcf = lofreq_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
+        File lofreq_pon_total_counts = lofreq_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
 
         # Vardict
-        #File vardict_full = vardict.unfiltered_vcf                                                                # Raw Vardict Ouput
-        #File vardict_pon_annotated_unfiltered_vcf = vardict_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        #File vardict_pon_annotated_filtered_vcf = vardict_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        #File vardict_pon_total_counts = vardict_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File vardict_full = vardict.unfiltered_vcf                                                                # Raw Vardict Ouput
+        File vardict_pon_annotated_unfiltered_vcf = vardict_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
+        File vardict_pon_annotated_filtered_vcf = vardict_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
+        File vardict_pon_total_counts = vardict_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
 
         # Pindel
-        #File pindel_full = pindel.unfiltered_vcf                                                                # Raw Pindel Ouput
-        #File pindel_pon_annotated_unfiltered_vcf = pindel_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        #File pindel_pon_annotated_filtered_vcf = pindel_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        #File pindel_pon_total_counts = pindel_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File pindel_full = pindel.unfiltered_vcf                                                                # Raw Pindel Ouput
+        File pindel_pon_annotated_unfiltered_vcf = pindel_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
+        File pindel_pon_annotated_filtered_vcf = pindel_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
+        File pindel_pon_total_counts = pindel_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
 
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 
