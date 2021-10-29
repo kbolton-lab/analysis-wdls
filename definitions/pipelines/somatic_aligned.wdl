@@ -18,7 +18,7 @@ import "../tools/bqsr.wdl" as b
 import "../tools/apply_bqsr.wdl" as ab
 import "../tools/index_bam.wdl" as ib
 import "../tools/interval_list_expand.wdl" as ile
-import "../tools/vep.wdl" as v
+import "../tools/vep.wdl" as vep
 import "../tools/pon2percent.wdl" as pp
 
 workflow archerdx {
@@ -133,46 +133,7 @@ workflow archerdx {
         File normalized_gnomad_exclude_tbi
         String filter_flag = "include"
     }
-
-    scatter(seq_data in sequence) {
-        call fqf.archerFastqFormat as format_fastq {
-            input:
-            sequence = seq_data,
-            umi_length = umi_length
-        }
-
-        call ftb.fastqToBam as fastq_to_bam {
-            input:
-            fastq1 = format_fastq.fastq1,
-            fastq2 = format_fastq.fastq2,
-            sample_name = sample_name,
-            library_name = "Library",
-            platform_unit = "Illumina",
-            platform = "ArcherDX"
-        }
-    }
-
-    call ma.molecularAlignment as alignment_workflow {
-        input:
-        bam = fastq_to_bam.bam,
-        sample_name = sample_name,
-        read_structure = read_structure,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        reference_amb = reference_amb,
-        reference_ann = reference_ann,
-        reference_bwt = reference_bwt,
-        reference_pac = reference_pac,
-        reference_sa = reference_sa,
-        target_intervals = target_intervals,
-        umi_paired = umi_paired,
-        min_reads = min_reads,
-        max_read_error_rate = max_read_error_rate,
-        max_base_error_rate = max_base_error_rate,
-        min_base_quality = min_base_quality,
-        max_no_call_fraction = max_no_call_fraction
-    }
+    
 
     call b.bqsr as bqsr {
         input:
@@ -255,7 +216,7 @@ workflow archerdx {
         pon_final_name = "mutect." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
-    call v.vep as mutect_annotate_variants {
+    call vep.vep as mutect_annotate_variants {
         input:
         vcf = mutect_gnomad_pon_filters.processed_filtered_vcf,
         cache_dir_zip = cache_dir_zip,
@@ -271,7 +232,7 @@ workflow archerdx {
         coding_only = annotate_coding_only,
         pick = vep_pick
     }
-    call pp.pon2percent as mutect_pon2 {
+    call pp.pon2Percent as mutect_pon2 {
         input:
         vcf = mutect_annotate_variants.annotated_vcf,
         vcf2PON = mutect_pon2_file,
@@ -311,7 +272,7 @@ workflow archerdx {
         pon_final_name = "vardict." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
-    call v.vep as vardict_annotate_variants {
+    call vep.vep as vardict_annotate_variants {
         input:
         vcf = vardict_gnomad_pon_filters.processed_filtered_vcf,
         cache_dir_zip = cache_dir_zip,
@@ -327,7 +288,7 @@ workflow archerdx {
         coding_only = annotate_coding_only,
         pick = vep_pick
     }
-    call pp.pon2percent as vardict_pon2 {
+    call pp.pon2Percent as vardict_pon2 {
         input:
         vcf = vardict_annotate_variants.annotated_vcf,
         vcf2PON = vardict_pon2_file,
@@ -365,7 +326,7 @@ workflow archerdx {
         pon_final_name = "lofreq." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
-    call v.vep as lofreq_annotate_variants {
+    call vep.vep as lofreq_annotate_variants {
         input:
         vcf = lofreq_gnomad_pon_filters.processed_filtered_vcf,
         cache_dir_zip = cache_dir_zip,
@@ -381,7 +342,7 @@ workflow archerdx {
         coding_only = annotate_coding_only,
         pick = vep_pick
     }
-    call pp.pon2percent as lofreq_pon2 {
+    call pp.pon2Percent as lofreq_pon2 {
         input:
         vcf = lofreq_annotate_variants.annotated_vcf,
         vcf2PON = lofreq_pon2_file,

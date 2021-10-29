@@ -4,8 +4,10 @@ import "../subworkflows/fp_filter.wdl" as ff
 import "../tools/varscan.wdl" as v
 import "../tools/intervals_to_bed.wdl" as itb
 import "../tools/bcftools_filter_bcbio.wdl" as bfb
+import "../tools/split_interval_list_to_bed.wdl" as siltb
+import "../tools/merge_vcf.wdl" as ca
 
-workflow vardict {
+workflow varscan {
   input {
     File reference
     File reference_fai
@@ -20,32 +22,41 @@ workflow vardict {
     String? normal_sample_name
 
     File interval_list
-    Int scatter_count
+    Int scatter_count = 30
     Float? min_var_freq = 0.05
 
     Boolean? tumor_only = false
   }
 
-    call itb.intervalsToBed as interval_list_to_bed {
-        input:
-            interval_list = interval_list
+    call siltb.splitIntervalListToBed {
+      input:
+      interval_list=interval_list,
+      scatter_count=scatter_count
     }
 
-    call v.varscan as varscanTask {
+  
+    scatter(region_file in splitIntervalListToBed.split_beds) {
+      call v.varscan as varscanTask {
         input:
-            reference = reference,
-            reference_fai = reference_fai,
-            tumor_bam = tumor_bam,
-            tumor_bam_bai = tumor_bam_bai,
-            normal_bam = normal_bam,
-            normal_bam_bai = normal_bam_bai,
-            interval_bed = interval_list_to_bed.interval_bed,
-            min_var_freq = min_var_freq,
-            tumor_sample_name = tumor_sample_name,
-            normal_sample_name = normal_sample_name,
-            tumor_only = tumor_only
+          reference = reference,
+          reference_fai = reference_fai,
+          tumor_bam = tumor_bam,
+          tumor_bam_bai = tumor_bam_bai,
+          normal_bam = normal_bam,
+          normal_bam_bai = normal_bam_bai,
+          interval_bed = region_file,
+          min_var_freq = min_var_freq,
+          tumor_sample_name = tumor_sample_name,
+          normal_sample_name = normal_sample_name,
+          tumor_only = tumor_only
+      }
     }
 
+    call ca.mergeVcf {
+      input: 
+        vcfs=varscanTask.vcf,
+        vcf_tbis=varscanTask.vcf_tbi
+    }
 
     call ff.fpFilter {
         input:
@@ -54,8 +65,8 @@ workflow vardict {
             reference_dict = reference_dict,
             bam = tumor_bam,
             bam_bai = tumor_bam_bai,
-            vcf = varscanTask.vcf,
-            vcf_tbi = varscanTask.vcf_tbi,
+            vcf = mergeVcf.merged_vcf,
+            vcf_tbi = mergeVcf.merged_vcf_tbi,
             variant_caller = "varscan",
             sample_name = tumor_sample_name,
             min_var_freq = min_var_freq

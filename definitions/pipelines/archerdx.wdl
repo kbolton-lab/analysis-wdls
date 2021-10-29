@@ -18,7 +18,7 @@ import "../tools/bqsr.wdl" as b
 import "../tools/apply_bqsr.wdl" as ab
 import "../tools/index_bam.wdl" as ib
 import "../tools/interval_list_expand.wdl" as ile
-import "../tools/vep.wdl" as v
+import "../tools/vep.wdl" as vep
 import "../tools/pon2percent.wdl" as pp
 import "../tools/intervals_to_bed.wdl" as itb
 
@@ -252,7 +252,7 @@ workflow archerdx {
         pon_final_name = "mutect." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
-    call v.vep as mutect_annotate_variants {
+    call vep.vep as mutect_annotate_variants {
         input:
         vcf = mutect_gnomad_pon_filters.processed_filtered_vcf,
         cache_dir_zip = vep_cache_dir_zip,
@@ -307,7 +307,7 @@ workflow archerdx {
         pon_final_name = "vardict." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
-    call v.vep as vardict_annotate_variants {
+    call vep.vep as vardict_annotate_variants {
         input:
         vcf = vardict_gnomad_pon_filters.processed_filtered_vcf,
         cache_dir_zip = vep_cache_dir_zip,
@@ -361,7 +361,7 @@ workflow archerdx {
         pon_final_name = "lofreq." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
-    call v.vep as lofreq_annotate_variants {
+    call vep.vep as lofreq_annotate_variants {
         input:
         vcf = lofreq_gnomad_pon_filters.processed_filtered_vcf,
         cache_dir_zip = vep_cache_dir_zip,
@@ -419,7 +419,7 @@ workflow archerdx {
         pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
-    call v.vep as pindel_annotate_variants {
+    call vep.vep as pindel_annotate_variants {
         input:
         vcf = pindel_gnomad_pon_filters.processed_filtered_vcf,
         cache_dir_zip = vep_cache_dir_zip,

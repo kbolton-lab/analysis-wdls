@@ -12,7 +12,7 @@ task bcftoolsFilterBcbio {
 
     Int space_needed_gb = 5 + round(size(vcf, "GB"))
     runtime {
-      docker: "mgibio/bcftools-cwl:1.9"
+      docker: "kboltonlab/bst:latest"
       memory: "4GB"
       bootDiskSizeGb: space_needed_gb
       disks: "local-disk ~{space_needed_gb} SSD"
@@ -20,7 +20,7 @@ task bcftoolsFilterBcbio {
 
     String ff = if filter_flag == "include" then "-i" else "-e"
     command <<<
-        /opt/bcftools/bin/bcftools filter ~{ff} "~{filter_string}" ~{vcf} --output-type ~{output_type} --output ~{output_vcf_name}.vcf.gz -s "BCBIO" -m+
+        /usr/local/bin/bcftools filter ~{ff} "~{filter_string}" ~{vcf} --output-type ~{output_type} --output ~{output_vcf_name}.vcf.gz -s "BCBIO" -m+
         
         /usr/local/bin/tabix ~{output_vcf_name}.vcf.gz
 

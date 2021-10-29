@@ -16,7 +16,7 @@ task vtDecompose {
   command <<<
     /opt/vt/vt decompose -s -o decomposed.vcf.gz ~{vcf}
 
-    /usr/bin/local/tabix decomposed.vcf.gz
+    /usr/bin/tabix decomposed.vcf.gz
   >>>
 
   output {
