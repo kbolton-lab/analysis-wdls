@@ -14,7 +14,9 @@ task varscanNormal {
         Float? min_var_freq = 0.005
         Float? p_value = 0.99
         String? tumor_sample_name = "TUMOR" # we don't use it in varscan somatic?
+        String tumor_name_replace = "TUMOR"
         String? normal_sample_name = "NORMAL" # we don't use it in varscan somatic?
+        String normal_name_replace = "NORMAL"
     }
 
     Int cores = 2
@@ -62,7 +64,12 @@ task varscanNormal {
         
         /usr/bin/bgzip ~{output_name}.snp.vcf && /usr/bin/tabix ~{output_name}.snp.vcf.gz
         /usr/bin/bgzip ~{output_name}.indel.vcf && /usr/bin/tabix ~{output_name}.indel.vcf.gz
-        /usr/bin/bcftools concat -a -D ~{output_name}.snp.vcf.gz ~{output_name}.indel.vcf.gz -Oz -o ~{output_name}.vcf.gz && /usr/bin/tabix ~{output_name}.vcf.gz
+        /usr/bin/bcftools concat -a -D ~{output_name}.snp.vcf.gz ~{output_name}.indel.vcf.gz -Oz -o ~{output_name}.concat.vcf.gz && /usr/bin/tabix ~{output_name}.concat.vcf.gz
+
+        printf "~{tumor_name_replace} ~{tumor_sample_name}\n~{normal_name_replace} ~{normal_sample_name}\n" > sample_update.txt
+        /usr/bin/bcftools reheader ~{output_name}.concat.vcf.gz -s sample_update.txt -o ~{output_name}.vcf.gz && /usr/bin/tabix -p vcf ~{output_name}.vcf.gz
+
+
     >>>
 
     output {

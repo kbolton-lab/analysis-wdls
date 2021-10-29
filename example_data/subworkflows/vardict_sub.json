@@ -1,0 +1,17 @@
+{
+  "vardict.reference": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/GCA_000001405.15_GRCh38_full_analysis_set.fna",
+  "vardict.reference_fai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/GCA_000001405.15_GRCh38_full_analysis_set.fna.fai",
+  "vardict.reference_dict": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/GCA_000001405.15_GRCh38_full_analysis_set.dict",
+  "vardict.interval_bed": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.bed",
+  "vardict.min_var_freq": 0.005,
+  "vardict.tumor_only": false,
+
+  "vardict.tumor_bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.bam",
+  "vardict.tumor_bam_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.bam.bai",
+  "vardict.tumor_sample_name": "DNA01917",
+
+  "vardict.normal_bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DevDNA.chr22.bam",
+  "vardict.normal_bam_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DevDNA.chr22.bam.bai",
+  "vardict.normal_sample_name": "DevDNA"
+}
+

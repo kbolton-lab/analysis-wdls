@@ -2,9 +2,10 @@
   "varscan.reference": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/GCA_000001405.15_GRCh38_full_analysis_set.fna",
   "varscan.reference_fai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/GCA_000001405.15_GRCh38_full_analysis_set.fna.fai",
   "varscan.reference_dict": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/GCA_000001405.15_GRCh38_full_analysis_set.dict",
-  "varscan.interval_list": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.interval_list",
+  "varscan.interval_list": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.chr22.interval_list",
   "varscan.min_var_freq": 0.005,
   "varscan.tumor_only": false,
+  "varscan.scatter_count": 5,
 
   "varscan.tumor_bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.bam",
   "varscan.tumor_bam_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.bam.bai",
