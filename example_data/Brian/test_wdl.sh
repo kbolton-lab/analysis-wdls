@@ -34,6 +34,14 @@ bsub -G compute-bolton -g /bwileytest3 -oo vardict_test.log -eo vardict_error.lo
     -jar /app/cromwell.jar run \
     -o /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/Brian/options/varscan_options.json \
     -t wdl \
+    -i /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/tools/varscan_tool.json \
+    /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/definitions/tools/varscan.wdl  
+
+/opt/java/openjdk/bin/java \
+    -Dconfig.file=/storage1/fs1/bolton/Active/data/presets/cromwell.config \
+    -jar /app/cromwell.jar run \
+    -o /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/Brian/options/varscan_options.json \
+    -t wdl \
     -i /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/subworkflows/varscan_sub.json \
     /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/definitions/subworkflows/varscan.wdl  
 
