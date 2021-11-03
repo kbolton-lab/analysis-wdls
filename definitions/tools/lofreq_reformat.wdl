@@ -6,7 +6,7 @@ task lofreqReformat {
         String tumor_sample_name
     }
 
-    Int space_needed_gb = 5 + round(size(vcf, "GB"))
+    Int space_needed_gb = 10 + round(size(vcf, "GB"))
     runtime {
       docker: "quay.io/biocontainers/samtools:1.11--h6270b1f_0"
       memory: "2GB"
