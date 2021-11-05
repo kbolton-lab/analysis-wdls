@@ -75,6 +75,7 @@ workflow archerdx {
         Boolean? arrayMode = true       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
         File pon_normal_bams            # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
         Array[File] bams                # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
+        Array[File] bams_bai
         Boolean tumor_only = true
         Boolean no_scatter = true
         Boolean mutect_artifact_detection_mode = false
@@ -251,6 +252,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "mutect." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -306,6 +308,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "vardict." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -360,6 +363,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "lofreq." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -418,6 +422,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }

@@ -49,6 +49,7 @@ task mskGetBaseCountsWithArray {
         File reference_fai
         File reference_dict
         Array[File] normal_bams
+        Array[File] normal_bams_bai
         String? pon_final_name = "pon.pileup"
         File vcf
         Int? mapq = 5
@@ -100,6 +101,7 @@ workflow mskGetBaseCounts {
         Boolean arrayMode = false
         File normal_bams
         Array[File] bams
+        Array[File] bams_bai
         String? pon_final_name = "pon.pileup"
         File vcf
         Int? mapq = 5
@@ -112,6 +114,7 @@ workflow mskGetBaseCounts {
             reference_fai = reference_fai,
             reference_dict = reference_dict,
             normal_bams = bams,
+            normal_bams_bai = bams_bai,
             pon_final_name = pon_final_name,
             vcf = vcf,
             mapq = mapq,
