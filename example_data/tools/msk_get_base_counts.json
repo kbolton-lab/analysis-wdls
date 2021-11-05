@@ -1,13 +1,13 @@
 {
-  "wf.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
-  "wf.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
-  "wf.baseq": 5,
-  "wf.mapq": 5,
-  "wf.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
-  "wf.sample_name": "Sample",
-  "wf.arrayMode": true,
-  "wf.normal_bams": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pon.sample.bam.txt",
-  "wf.bams": [
+  "mskGetBaseCounts.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
+  "mskGetBaseCounts.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+  "mskGetBaseCounts.baseq": 5,
+  "mskGetBaseCounts.mapq": 5,
+  "mskGetBaseCounts.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "mskGetBaseCounts.sample_name": "Sample",
+  "mskGetBaseCounts.arrayMode": true,
+  "mskGetBaseCounts.normal_bams": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pon.sample.bam.txt",
+  "mskGetBaseCounts.bams": [
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/11108_14__S46_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/11108_17__S47_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/11108_22__S48_Normal.bam",
@@ -36,5 +36,5 @@
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1657_S406_Normal.bam",
     "/storage1/fs1/bolton/Active/projects/ArcherPilot/hg38/BAM/1658_S407_Normal.bam"
   ],
-  "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz"
+  "mskGetBaseCounts.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz"
 }
