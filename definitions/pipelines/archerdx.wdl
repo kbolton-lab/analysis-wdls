@@ -72,9 +72,9 @@ workflow archerdx {
         Int? qc_minimum_base_quality = 0
 
         # Variant Calling
-        Boolean? arrayMode = false       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
-        File pon_normal_bams
-        Array[String] bams              # This is just an array of Files (as Strings)... if you have the bam_fof it's easier just to use above and set this to empty array []
+        Boolean? arrayMode = true       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
+        File pon_normal_bams            # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
+        Array[File] bams                # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
         Boolean no_scatter = true
         Boolean mutect_artifact_detection_mode = false

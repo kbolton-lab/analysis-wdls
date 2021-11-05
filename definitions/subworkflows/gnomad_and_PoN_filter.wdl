@@ -16,7 +16,7 @@ workflow gnomadAndPoNFilter {
         File gnomAD_exclude_vcf
         File gnomAD_exclude_vcf_tbi
         File normal_bams
-        Array[String] bams
+        Array[File] bams
         Int? mapq = 5
         Int? baseq = 5
         String? pon_final_name = "pon.pileup"
