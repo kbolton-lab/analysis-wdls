@@ -22,35 +22,53 @@ workflow mutect {
 
     File interval_list
     Int scatter_count
+    Boolean no_scatter = true
     String tumor_sample_name
     Float? min_var_freq = 0.05
   }
 
-  call sil.splitIntervalList {
-    input:
-    interval_list=interval_list,
-    scatter_count=scatter_count
+  if (no_scatter) {
+      call m.mutect as mutectTaskNoScatter {
+        input:
+        reference=reference,
+        reference_fai=reference_fai,
+        reference_dict=reference_dict,
+        tumor_bam=tumor_bam,
+        tumor_bam_bai=tumor_bam_bai,
+        normal_bam=normal_bam,
+        normal_bam_bai=normal_bam_bai,
+        interval_list=interval_list,
+        tumor_only=tumor_only
+      }
   }
 
-  scatter(segment in splitIntervalList.split_interval_lists) {
-    call m.mutect as mutectTask {
-      input:
-      reference=reference,
-      reference_fai=reference_fai,
-      reference_dict=reference_dict,
-      tumor_bam=tumor_bam,
-      tumor_bam_bai=tumor_bam_bai,
-      normal_bam=normal_bam,
-      normal_bam_bai=normal_bam_bai,
-      interval_list=segment,
-      tumor_only=tumor_only
-    }
-  }
+  if (!no_scatter) {
+      call sil.splitIntervalList {
+        input:
+        interval_list=interval_list,
+        scatter_count=scatter_count
+      }
 
-  call mv.mergeVcf {
-    input:
-    vcfs=mutectTask.vcf,
-    vcf_tbis=mutectTask.vcf_tbi
+      scatter(segment in splitIntervalList.split_interval_lists) {
+        call m.mutect as mutectTask {
+          input:
+          reference=reference,
+          reference_fai=reference_fai,
+          reference_dict=reference_dict,
+          tumor_bam=tumor_bam,
+          tumor_bam_bai=tumor_bam_bai,
+          normal_bam=normal_bam,
+          normal_bam_bai=normal_bam_bai,
+          interval_list=segment,
+          tumor_only=tumor_only
+        }
+      }
+
+      call mv.mergeVcf {
+        input:
+        vcfs=mutectTask.vcf,
+        vcf_tbis=mutectTask.vcf_tbi
+      }
   }
 
   call ff.fpFilter {
@@ -60,8 +78,8 @@ workflow mutect {
     reference_dict=reference_dict,
     bam=tumor_bam,
     bam_bai=tumor_bam_bai,
-    vcf=mergeVcf.merged_vcf,
-    vcf_tbi=mergeVcf.merged_vcf_tbi,
+    vcf=select_first([mergeVcf.merged_vcf, mutectTaskNoScatter.vcf]),
+    vcf_tbi=select_first([mergeVcf.merged_vcf_tbi, mutectTaskNoScatter.vcf_tbi]),
     variant_caller="mutect",
     sample_name=tumor_sample_name,
     min_var_freq=min_var_freq

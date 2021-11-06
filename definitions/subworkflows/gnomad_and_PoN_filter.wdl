@@ -16,7 +16,8 @@ workflow gnomadAndPoNFilter {
         File gnomAD_exclude_vcf
         File gnomAD_exclude_vcf_tbi
         File normal_bams
-        Array[String] bams
+        Array[File] bams
+        Array[File] bams_bai
         Int? mapq = 5
         Int? baseq = 5
         String? pon_final_name = "pon.pileup"
@@ -38,6 +39,7 @@ workflow gnomadAndPoNFilter {
         input:
             normal_bams = normal_bams,
             bams = bams,
+            bams_bai = bams_bai,
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,

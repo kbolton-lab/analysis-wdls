@@ -72,10 +72,12 @@ workflow archerdx {
         Int? qc_minimum_base_quality = 0
 
         # Variant Calling
-        Boolean? arrayMode = false       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
-        File pon_normal_bams
-        Array[String] bams              # This is just an array of Files (as Strings)... if you have the bam_fof it's easier just to use above and set this to empty array []
+        Boolean? arrayMode = true       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
+        File pon_normal_bams            # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
+        Array[File] bams                # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
+        Array[File] bams_bai
         Boolean tumor_only = true
+        Boolean no_scatter = true
         Boolean mutect_artifact_detection_mode = false
         Float? mutect_max_alt_allele_in_normal_fraction
         Int? mutect_max_alt_alleles_in_normal_count
@@ -234,7 +236,8 @@ workflow archerdx {
         scatter_count = scatter_count,
         tumor_sample_name = tumor_sample_name,
         min_var_freq = af_threshold,
-        tumor_only = tumor_only
+        tumor_only = tumor_only,
+        no_scatter = no_scatter
     }
     call gapf.gnomadAndPoNFilter as mutect_gnomad_pon_filters {
         input:
@@ -249,6 +252,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "mutect." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -304,6 +308,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "vardict." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -358,6 +363,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "lofreq." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -416,6 +422,7 @@ workflow archerdx {
         arrayMode = arrayMode,
         normal_bams = pon_normal_bams,
         bams = bams,
+        bams_bai = bams_bai,
         pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
