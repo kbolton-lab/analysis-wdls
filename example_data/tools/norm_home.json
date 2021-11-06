@@ -1,0 +1,7 @@
+{
+  "vcf": "/Users/brian/test/1010590_23153_0_0.mapq0.soft-filtered.vcf.gz",
+  "vcf_tbi": "/Users/brian/test/1010590_23153_0_0.mapq0.soft-filtered.vcf.gz.tbi",
+  "reference": "/Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa",
+  "reference_fai": "/Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa"
+}
+

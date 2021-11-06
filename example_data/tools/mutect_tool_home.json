@@ -1,0 +1,17 @@
+{
+  "mutect.reference": "/Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa",
+  "mutect.reference_fai": "/Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa.fai",
+  "mutect.reference_dict": "/Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.dict",
+  "mutect.interval_list": "/Users/brian/Bolton/CWL_TESTS/xgen_plus_spikein.GRCh38_chr22.interval_list",
+  "mutect.tumor_bam": "/Users/brian/Bolton/CWL_TESTS/1006108_23153_0_0_chr22.bam",
+  "mutect.tumor_bam_bai": "/Users/brian/Bolton/CWL_TESTS/1006108_23153_0_0_chr22.bam.bai",
+  "mutect.tumor_only": false,
+  "mutect.normal_bam": "/Users/brian/Bolton/CWL_TESTS/1010590_23153_0_0_chr22.bam",
+  "mutect.normal_bam_bai": "/Users/brian/Bolton/CWL_TESTS/1010590_23153_0_0_chr22.bam.bai",
+  "mutect.pon": "/Users/brian/test/1000G_omni2.5.hg38.vcf.gz",
+  "mutect.pon_tbi": "/Users/brian/test/1000G_omni2.5.hg38.vcf.gz.tbi",
+  "mutect.gnomad": "/Users/brian/test/af-only-gnomad.biallelic.hg38.UKBB_intervals.vcf.chr22.bgz",
+  "mutect.gnomad_tbi": "/Users/brian/test/af-only-gnomad.biallelic.hg38.UKBB_intervals.vcf.chr22.bgz.tbi"
+  
+}
+
