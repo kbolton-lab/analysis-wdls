@@ -77,7 +77,6 @@ workflow archerdx {
         Array[File] bams                # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
         Array[File] bams_bai
         Boolean tumor_only = true
-        Boolean no_scatter = true
         Boolean mutect_artifact_detection_mode = false
         Float? mutect_max_alt_allele_in_normal_fraction
         Int? mutect_max_alt_alleles_in_normal_count
@@ -124,7 +123,7 @@ workflow archerdx {
         Array[String] variants_to_table_fields = ["CHROM","POS","ID","REF","ALT","set","AC","AF"]
         Array[String]? variants_to_table_genotype_fields = ["GT","AD"]
         Array[String]? vep_to_table_fields = ["HGVSc","HGVSp"]
-        String vep_pick = "flag_pick"
+        String vep_pick = "pick"
 
         # gnomAD
         Float filter_gnomADe_maximum_population_allele_frequency = 0.005
@@ -237,7 +236,6 @@ workflow archerdx {
         tumor_sample_name = tumor_sample_name,
         min_var_freq = af_threshold,
         tumor_only = tumor_only,
-        no_scatter = no_scatter
     }
     call gapf.gnomadAndPoNFilter as mutect_gnomad_pon_filters {
         input:
