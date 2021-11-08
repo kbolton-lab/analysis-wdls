@@ -15,7 +15,7 @@ task vep {
     Array[String] plugins
     Boolean coding_only = false
     Array[VepCustomAnnotation] custom_annotations = []
-    Array[String]? custom_annotation_string =[""]
+    Array[String]? custom_annotation_string
     Array[File]? custom_annotation_files = [""]
     Array[Array[File]?]? custom_annotation_files_tbi = [[""]]
     Boolean everything = true
@@ -41,11 +41,16 @@ task vep {
 
   command <<<
 
-    custom_string="~{sep=" " custom_annotation_string}"
-    for file_path in ~{sep=" " custom_annotation_files}; do
-        custom_string=$(awk -v srch="<CUSTOM_FILE>" -v repl="$file_path" '!x{x=sub(srch,repl)}{print $0}' <<< $custom_string)
-    done
-    echo ${custom_string} >> custom_string_validation.txt
+    if ~{defined(custom_annotation_string)}
+    then
+        custom_string="~{sep=" " custom_annotation_string}"
+        for file_path in ~{sep=" " custom_annotation_files}; do
+            custom_string=$(awk -v srch="<CUSTOM_FILE>" -v repl="$file_path" '!x{x=sub(srch,repl)}{print $0}' <<< $custom_string)
+        done
+        echo ${custom_string} >> custom_string_validation.txt
+    else
+        custom_string=""
+    fi
 
     #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
     unzip -qq ~{cache_dir_zip}
