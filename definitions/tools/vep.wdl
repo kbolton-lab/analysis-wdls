@@ -2,7 +2,7 @@ version 1.0
 
 import "../types.wdl"
 
-task vep {
+task vepTask {
   input {
     File vcf
     File cache_dir_zip
@@ -15,7 +15,7 @@ task vep {
     Array[String] plugins
     Boolean coding_only = false
     Array[VepCustomAnnotation] custom_annotations = []
-    Array[String]? custom_annotation_string =[""]
+    Array[String]? custom_annotation_string = [""]
     Array[File]? custom_annotation_files = [""]
     Array[Array[File]?]? custom_annotation_files_tbi = [[""]]
     Boolean everything = true
@@ -41,12 +41,15 @@ task vep {
   String cache_dir = basename(cache_dir_zip, ".zip")
 
   command <<<
-
     custom_string="~{sep=" " custom_annotation_string}"
-    for file_path in ~{sep=" " custom_annotation_files}; do
-        custom_string=$(awk -v srch="<CUSTOM_FILE>" -v repl="$file_path" '!x{x=sub(srch,repl)}{print $0}' <<< $custom_string)
-    done
-    echo ${custom_string} >> custom_string_validation.txt
+    if [[ -z "$custom_string" ]]; then
+        echo ${custom_string} >> custom_string_validation.txt
+    else
+        for file_path in ~{sep=" " custom_annotation_files}; do
+            custom_string=$(awk -v srch="<CUSTOM_FILE>" -v repl="$file_path" '!x{x=sub(srch,repl)}{print $0}' <<< $custom_string)
+        done
+        echo ${custom_string} >> custom_string_validation.txt
+    fi
 
     #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
     unzip -qq ~{cache_dir_zip}
@@ -97,7 +100,7 @@ task generateCustomString {
     }
 }
 
-workflow wf {
+workflow vep {
   input {
     File vcf
     File cache_dir_zip
@@ -121,7 +124,7 @@ workflow wf {
       }
   }
 
-  call vep {
+  call vepTask {
     input:
     vcf=vcf,
     cache_dir_zip=cache_dir_zip,
@@ -140,5 +143,10 @@ workflow wf {
     coding_only=coding_only,
     everything=everything,
     pick=pick
+  }
+
+  output {
+      File annotated_vcf = vepTask.annotated_vcf
+      File vep_summary = vepTask.vep_summary
   }
 }

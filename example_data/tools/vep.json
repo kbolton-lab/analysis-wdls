@@ -1,7 +1,7 @@
 {
     "wf.coding_only": true,
     "wf.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
-    "wf.pick": "pick --pick_order canonical,rank,mane,ccds,appris,tsl,biotype,length",
+    "wf.pick": "pick",
     "wf.synonyms_file": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build50f99e75d14340ffb5b7d21b03887637/chromAlias.ensembl.txt",
     "wf.plugins": ["Frameshift", "Wildtype"],
     "wf.custom_annotations": [{

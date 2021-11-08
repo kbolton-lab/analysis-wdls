@@ -12,7 +12,7 @@
   "archerdx.af_threshold":  0.0001,
   "archerdx.vep_cache_dir_zip": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/ukbb_calls/pvcf/vep_zip.zip",
   "archerdx.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
-  "archerdx.vep_ensembl_species": "homo_sapiens_merged",
+  "archerdx.vep_ensembl_species": "homo_sapiens",
   "archerdx.variants_to_table_genotype_fields": ["GT","AD"],
   "archerdx.normalized_gnomad_exclude": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz",
   "archerdx.mutect_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz",
@@ -219,7 +219,7 @@
       "chrY",
       "chrM"],
   "archerdx.synonyms_file": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build50f99e75d14340ffb5b7d21b03887637/chromAlias.ensembl.txt",
-  "archerdx.vep_pick": "pick --pick_order canonical,rank,mane,ccds,appris,tsl,biotype,length",
+  "archerdx.vep_pick": "pick",
   "archerdx.pindel_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pindel.merged.2percent.2N.vcf.gz",
   "archerdx.read_structure": ["8M13S+T", "+T"],
   "archerdx.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz.tbi"
