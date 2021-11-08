@@ -2,7 +2,7 @@ version 1.0
 
 import "../types.wdl"
 
-task vep {
+task vepTask {
   input {
     File vcf
     File cache_dir_zip
@@ -100,7 +100,7 @@ task generateCustomString {
     }
 }
 
-workflow wf {
+workflow vep {
   input {
     File vcf
     File cache_dir_zip
