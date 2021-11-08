@@ -19,11 +19,13 @@ task bcftoolsIsecComplement {
     }
 
     command <<<
-        /usr/local/bin/bcftools isec -C -w1 ~{vcf} ~{exclude_vcf} --output-type z --output ~{output_vcf_name}
+        /usr/local/bin/bcftools isec -C -w1 ~{vcf} ~{exclude_vcf} --output-type ~{output_type} --output ~{output_vcf_name} && /usr/local/bin/tabix ~{output_vcf_name}
+
     >>>
 
     output {
         File complement_vcf = "~{output_vcf_name}"
+        File complement_vcf_tbi = "~{output_vcf_name}.tbi"
     }
 }
 

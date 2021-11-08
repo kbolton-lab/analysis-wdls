@@ -14,6 +14,10 @@ workflow mutect {
 
     File tumor_bam
     File tumor_bam_bai
+    File? pon
+    File? pon_tbi
+    File? gnomad_file
+    File? gnomad_file_tbi
 
     # both or neither
     Boolean? tumor_only = false
@@ -38,7 +42,11 @@ workflow mutect {
         normal_bam=normal_bam,
         normal_bam_bai=normal_bam_bai,
         interval_list=interval_list,
-        tumor_only=tumor_only
+        tumor_only=tumor_only,
+        pon = pon,
+        pon_tbi = pon_tbi,
+        gnomad = gnomad_file,
+        gnomad_tbi = gnomad_file_tbi,
       }
   }
 
