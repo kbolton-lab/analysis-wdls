@@ -21,6 +21,7 @@ task vep {
     Boolean everything = true
     # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
     String pick = "flag_pick"
+    String additional_args = "--pick_order canonical,rank,mane,ccds,appris,tsl,biotype,length --merged --buffer_size 1000 --af_gnomad"
     File? synonyms_file
   }
 
@@ -78,6 +79,7 @@ task vep {
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
     --species ~{ensembl_species} \
+    ~{additional_args} \
     ${custom_string}
   >>>
 

@@ -18,7 +18,7 @@ task bcftoolsNorm {
     }
 
     command <<<
-        /usr/local/bin/bcftools norm --multiallelics -any --output-type z --output bcftools_norm.vcf.gz ~{vcf} -f ~{reference}
+        /opt/bcftools/bin/bcftools norm --multiallelics -any --output-type z --output bcftools_norm.vcf.gz ~{vcf} -f ~{reference}
 
         /usr/local/bin/tabix bcftools_norm.vcf.gz
     >>>

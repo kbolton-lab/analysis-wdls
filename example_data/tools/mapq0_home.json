@@ -1,0 +1,9 @@
+{
+  "wf.vcf": "/Users/brian/test/1010590_23153_0_0.vardict.BCBIOfiltered.vcf.gz",
+  "wf.vcf_tbi": "/Users/brian/test/1010590_23153_0_0.vardict.BCBIOfiltered.vcf.gz.tbi",
+  "wf.bam": "/Users/brian/test/1010590_23153_0_0.bam",
+  "wf.bam_bai": "/Users/brian/test/1010590_23153_0_0.bam.bai",
+  "wf.mapq0perc": 0.10,
+  "wf.caller": "mutect"
+}
+

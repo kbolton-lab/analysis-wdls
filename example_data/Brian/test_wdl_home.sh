@@ -9,13 +9,22 @@ ${(z)CROMWELL} run \
     -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/vardict_tool_home.json \
     /Users/brian/test/WDL/analysis-wdls/definitions/tools/vardict.wdl
 
+    ${(z)CROMWELL} run \
+    -t wdl \
+    -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/norm_home.json \
+    /Users/brian/test/WDL/analysis-wdls/definitions/tools/bcftools_norm.wdl
+
 ${(z)CROMWELL} run \
     -o /Users/brian/test/WDL/analysis-wdls/example_data/Brian/options/vep_options_home.json \
     -t wdl \
     -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/vep_brian.json \
     /Users/brian/test/WDL/analysis-wdls/definitions/tools/vep_brian.wdl
 
-docker run -it -v /Users/brian/Bolton/CWL_TESTS:/Users/brian/Bolton/CWL_TESTS kboltonlab/vardictjava:1.0
+${(z)CROMWELL} run \
+    -o /Users/brian/test/WDL/analysis-wdls/example_data/Brian/options/mq0_options_home.json \
+    -t wdl \
+    -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/mapq0_home.json \
+    /Users/brian/test/WDL/analysis-wdls/definitions/tools/mapq0.wdl
 
 /opt/VarDictJava/build/install/VarDict/bin/VarDict \
             -U -G /Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa \
