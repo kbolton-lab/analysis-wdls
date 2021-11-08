@@ -17,7 +17,7 @@ task vep {
     Array[VepCustomAnnotation] custom_annotations = []
     Boolean everything = true
     File? synonyms_file
-    String? additional_args
+    String? additional_args = "--sift p --polyphen p --pick --pick_order canonical,rank,mane,ccds,appris,tsl,biotype,length --everything 1 --merged --check_existing --buffer_size 1000 --af_gnomad"
   }
 
   Float cache_size = 2*size(cache_dir_zip, "GB")  # doubled to unzip

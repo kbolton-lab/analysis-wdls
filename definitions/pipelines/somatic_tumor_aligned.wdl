@@ -71,8 +71,8 @@ workflow somatic_tumor_only {
 
         # Variant Calling
         Boolean? arrayMode = false       # Decide if you would raather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
-        File pon_normal_bams
-        Array[String] bams              # This is just an array of Files (as Strings)... if you have the bam_fof it's easier just to use above and set this to empty array []
+        File? pon_normal_bams
+        Array[String]? bams              # This is just an array of Files (as Strings)... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
         Boolean mutect_artifact_detection_mode = false
         Float? mutect_max_alt_allele_in_normal_fraction
@@ -117,8 +117,8 @@ workflow somatic_tumor_only {
         Float filter_gnomADe_maximum_population_allele_frequency = 0.005
         File? normalized_gnomad_file # option for mutect2
         File? normalized_gnomad_file_tbi # option for mutect2
-        File normalized_gnomad_exclude
-        File normalized_gnomad_exclude_tbi
+        File normalized_gnomad_exclude # gnomad filter
+        File normalized_gnomad_exclude_tbi # gnomad filter
         String filter_flag = "include"
         File? pon # option for mutect2
         File? pon_tbi # option for mutect2
@@ -177,7 +177,8 @@ workflow somatic_tumor_only {
             roi_padding = target_interval_padding
     }
 
-    call m.mutect as mutect {
+    # Mutect PoN
+    call m.mutect as mutect_pon {
         input:
             reference = reference,
             reference_fai = reference_fai,
@@ -187,6 +188,51 @@ workflow somatic_tumor_only {
             interval_list = target_intervals,
             pon = pon,
             pon_tbi = pon_tbi,
+            gnomad_file = normalized_gnomad_file,
+            gnomad_file_tbi = normalized_gnomad_file_tbi,
+            scatter_count = scatter_count,
+            tumor_sample_name = tumor_sample_name,
+            min_var_freq = af_threshold,
+            tumor_only = tumor_only
+    }
+
+    call gamf.gnomadAndMapQ0Filter as mutect_pon_gnomad_mapq0_filters {
+        input:
+            caller_vcf = mutect_pon.unfiltered_vcf,
+            caller_vcf_tbi = mutect_pon.unfiltered_vcf_tbi,
+            bam = tumor_bam,
+            bam_bai = tumor_bai,
+            gnomAD_exclude_vcf = normalized_gnomad_exclude,
+            gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+            caller_prefix = "mutect." + tumor_sample_name
+    }
+
+    call vep.vep as mutect_pon_annotate_variants {
+        input:
+            vcf = mutect_pon_gnomad_mapq0_filters.mapq0_soft_filtered_vcf,
+            cache_dir_zip = vep_cache_dir_zip,
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            plugins = vep_plugins,
+            ensembl_assembly = vep_ensembl_assembly,
+            ensembl_version = vep_ensembl_version,
+            ensembl_species = vep_ensembl_species,
+            synonyms_file = synonyms_file,
+            custom_annotations = vep_custom_annotations,
+            coding_only = annotate_coding_only,
+            additional_args = additional_args
+    }
+
+     # Mutect no PoN
+    call m.mutect as mutect {
+        input:
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            tumor_bam = index_bam.indexed_bam,
+            tumor_bam_bai = index_bam.indexed_bam_bai,
+            interval_list = target_intervals,
             gnomad_file = normalized_gnomad_file,
             gnomad_file_tbi = normalized_gnomad_file_tbi,
             scatter_count = scatter_count,
@@ -419,7 +465,15 @@ workflow somatic_tumor_only {
         File tumor_verify_bam_id_metrics = tumor_qc.verify_bam_id_metrics
         File tumor_verify_bam_id_depth = tumor_qc.verify_bam_id_depth
 
-        # Mutect
+        # Mutect PoN
+        File mutect_pon_full = mutect_pon.unfiltered_vcf
+        File mutect_pon_full_tbi = mutect_pon.unfiltered_vcf_tbi
+        File mutect_pon_gnomad_mapq = mutect_pon_gnomad_mapq0_filters.mapq0_soft_filtered_vcf
+        File mutect_pon_gnomad_mapq_tbi = mutect_pon_gnomad_mapq0_filters.mapq0_soft_filtered_vcf_tbi
+        File mutect_pon_vep = mutect_pon_annotate_variants.annotated_vcf
+        File mutect_pon_vep_tbi = mutect_pon_annotate_variants.annotated_vcf_tbi
+
+        # Mutect no PoN
         File mutect_full = mutect.unfiltered_vcf
         File mutect_full_tbi = mutect.unfiltered_vcf_tbi
         File mutect_gnomad_mapq = mutect_gnomad_mapq0_filters.mapq0_soft_filtered_vcf
