@@ -3,7 +3,9 @@ version 1.0
 task lofreqIntersect {
     input {
         File call_vcf
+        File call_vcf_tbi
         File pass_vcf
+        File pass_vcf_tbi
     }
 
     Int space_needed_gb = 10 + round(size([call_vcf, pass_vcf], "GB"))

@@ -73,7 +73,9 @@ workflow lofreq {
     call li.lofreqIntersect as lofreqFinal {
       input:
         call_vcf = mergeCalls.merged_vcf,
-        pass_vcf = mergePass.merged_vcf
+        call_vcf_tbi = mergeCalls.merged_vcf_tbi,
+        pass_vcf = mergePass.merged_vcf,
+        pass_vcf_tbi = mergePass.merged_vcf_tbi
     }
 
     call lr.lofreqReformat as reformat {
