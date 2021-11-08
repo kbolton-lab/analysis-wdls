@@ -124,7 +124,7 @@ workflow vep {
       }
   }
 
-  call vep {
+  call vepTask {
     input:
     vcf=vcf,
     cache_dir_zip=cache_dir_zip,
