@@ -1,0 +1,8 @@
+{
+  "lofreqCall.interval_bed": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.bed",
+  "lofreqCall.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "lofreqCall.tumor_bam": "/storage1/fs1/bolton/Active/data/TEST_DATA/bqsr.bam",
+  "lofreqCall.tumor_bam_bai": "/storage1/fs1/bolton/Active/data/TEST_DATA/bqsr.bam.bai",
+  "lofreqCall.tumor_only": true,
+  "lofreqCall.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa"
+}

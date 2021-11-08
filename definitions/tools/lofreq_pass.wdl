@@ -8,14 +8,14 @@ task lofreqTumorOnly {
       File tumor_bam
       File tumor_bam_bai
 
-      File interval_list
+      File interval_bed
       String? output_name = "lofreq.vcf"
     }
 
     Int cores = 2
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai], "GB")
-    Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_list, "GB"))
+    Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
     runtime {
       docker: "kboltonlab/lofreq:latest"
       memory: "12GB"
@@ -29,7 +29,7 @@ task lofreqTumorOnly {
         set -o nounset
 
         /opt/lofreq/bin/lofreq indelqual --dindel -f ~{reference} -o output.indel.bam ~{tumor_bam}
-        /opt/lofreq/bin/lofreq call -A -B -f ~{reference} --call-indels --bed ~{interval_list} -o ~{output_name} output.indel.bam --force-overwrite
+        /opt/lofreq/bin/lofreq call -A -B -f ~{reference} --call-indels --bed ~{interval_bed} -o ~{output_name} output.indel.bam --force-overwrite
         bgzip ~{output_name} && tabix ~{output_name}.gz
     >>>
 
@@ -51,14 +51,14 @@ task lofreqNormal {
       File? normal_bam
       File? normal_bam_bai
 
-      File interval_list
+      File interval_bed
       String? output_name = "lofreq.vcf"
     }
 
     Int cpu = 2
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
-    Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_list, "GB"))
+    Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
     runtime {
       docker: "kboltonlab/lofreq:latest"
       memory: "12GB"
@@ -72,7 +72,7 @@ task lofreqNormal {
         set -o nounset
 
         /opt/lofreq/bin/lofreq indelqual --dindel -f ~{reference} -o output.indel.bam ~{tumor_bam}
-        /opt/lofreq/bin/lofreq somatic --call-indels -n ~{normal_bam} -t output.indel.bam -f ~{reference} -l ~{interval_list} -o lofreq_ --threads 8
+        /opt/lofreq/bin/lofreq somatic --call-indels -n ~{normal_bam} -t output.indel.bam -f ~{reference} -l ~{interval_bed} -o lofreq_ --threads 8
         tabix lofreq_somatic_final.snvs.vcf.gz
         tabix lofreq_somatic_final.indels.vcf.gz
         bcftools concat -a lofreq_somatic_final.snvs.vcf.gz lofreq_somatic_final.indels.vcf.gz > ~{output_name}
@@ -85,7 +85,7 @@ task lofreqNormal {
     }
 }
 
-workflow lofreq {
+workflow lofreqPass {
     input {
         File tumor_bam
         File tumor_bam_bai
@@ -93,7 +93,7 @@ workflow lofreq {
         File? normal_bam_bai
         File reference
         File reference_fai
-        File interval_list
+        File interval_bed
         String? output_name = "lofreq.vcf"
         Boolean tumor_only = false
     }
@@ -105,7 +105,7 @@ workflow lofreq {
                 tumor_bam_bai = tumor_bam_bai,
                 reference = reference,
                 reference_fai = reference_fai,
-                interval_list = interval_list,
+                interval_bed = interval_bed,
                 output_name = output_name
         }
     }
@@ -119,7 +119,7 @@ workflow lofreq {
                 normal_bam_bai = normal_bam_bai,
                 reference = reference,
                 reference_fai = reference_fai,
-                interval_list = interval_list,
+                interval_bed = interval_bed,
                 output_name = output_name
         }
     }
