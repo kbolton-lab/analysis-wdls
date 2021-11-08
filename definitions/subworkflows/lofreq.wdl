@@ -41,8 +41,7 @@ workflow lofreq {
             normal_bam = normal_bam,
             normal_bam_bai = normal_bam_bai,
             interval_bed = segment,
-            tumor_only = tumor_only,
-            output_name = sample_name + "pass.vcf"
+            tumor_only = tumor_only
       }
 
       call lc.lofreqCall as lofreqCallTask {
