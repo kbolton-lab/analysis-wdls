@@ -148,9 +148,9 @@
               "force_report_coordinates" : true,
               "method" : "exact",
               "annotation" : {
-                  "file" : "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.vcf.gz",
+                  "file" : "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.archer_panel.vcf.gz",
                   "secondary_files" : [
-                      "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.vcf.gz.tbi"
+                      "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.archer_panel.vcf.gz.tbi"
                   ],
                   "data_format" : "vcf",
                   "name" : "gnomADg",
