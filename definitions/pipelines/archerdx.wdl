@@ -85,7 +85,7 @@ workflow archerdx {
         String? ref_date = "20161216"
         Int? pindel_min_supporting_reads = 3
         Float? af_threshold = 0.0001
-        String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 2.0) || (FMT/DP < 10) || (INFO/QUAL < 45)))"
+        String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))"
         String? pon_pvalue = "4.098606e-08"
 
         # PoN2
