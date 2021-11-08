@@ -144,4 +144,9 @@ workflow vep {
     everything=everything,
     pick=pick
   }
+
+  output {
+      File annotated_vcf = vepTask.annotated_vcf
+      File vep_summary = vepTask.vep_summary
+  }
 }
