@@ -16,8 +16,8 @@ task lofreqIntersect {
     command <<<
         printf "##FILTER=<ID=CALL,Description=\"A variant that was called by Lofreq's Caller without any filters\">" > lofreq.header;
         zcat ~{call_vcf} | sed 's/PASS/CALL/g' > call_to_pass.vcf
-        bgzip call_to_pass.vcf && tabix call_to_pass.vcf
-        bcftools annotate --threads 32 -a ~{pass_vcf} -h lofreq.header -c FILTER call_to_pass.vcf -Oz -o lofreq_intersect.vcf.gz
+        bgzip call_to_pass.vcf && tabix call_to_pass.vcf.gz
+        bcftools annotate --threads 32 -a ~{pass_vcf} -h lofreq.header -c FILTER call_to_pass.vcf.gz -Oz -o lofreq_intersect.vcf.gz
     >>>
 
     output {
