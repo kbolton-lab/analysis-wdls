@@ -30,7 +30,7 @@ task lofreqTumorOnly {
         set -o nounset
 
         /opt/lofreq/bin/lofreq indelqual --dindel -f ~{reference} -o output.indel.bam ~{tumor_bam}
-        /opt/lofreq/bin/lofreq call --no-default-filter -B -a 1 -b 1 -l ${interval_bed} -f ~{reference} --call-indels -o lofreq.vcf output.indel.bam --force-overwrite
+        /opt/lofreq/bin/lofreq call --no-default-filter -B -a 1 -b 1 -l ~{interval_bed} -f ~{reference} --call-indels -o lofreq.vcf output.indel.bam --force-overwrite
         /opt/lofreq/bin/lofreq filter -i lofreq.vcf -o ~{output_name}.filtered.vcf -v 5 -a ~{min_vaf} -A 0.9 --sb-incl-indels --print-all
 
         bgzip ~{output_name}.filtered.vcf && tabix ~{output_name}.filtered.vcf.gz
