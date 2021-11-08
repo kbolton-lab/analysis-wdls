@@ -37,16 +37,7 @@ task mapq0 {
             # sequences/reads
             grep -P "SN\tsequences:" stats | cut -f3 >> mapq0counts
         done
-
-        # zgrep -v "^#" ${vcf} | grep chr22 | grep -v "MQ0" | cut -f 1,2 | while read chr pos; do
-        #     echo samtools stats -d -@8 ${bam} $chr:$pos-$pos
-        #     /usr/local/bin/samtools stats -d -@8 ${bam} $chr:$pos-$pos > stats
-        #     mapq0=$(grep "reads MQ0:" stats | cut -f3); printf "$chr\t$pos\t$mapq0\t" >> mapq0counts
-        #     # sequences/reads
-        #     grep -P "SN\tsequences:" stats | cut -f3 >> mapq0counts
-        # done
-
-        
+      
 
         printf "##INFO=<ID=MQ0,Number=1,Type=Integer,Description=\"Number of MAPQ == 0 reads covering this record\">\n##INFO=<ID=samtools_DP,Number=1,Type=Integer,Description=\"Number of MAPQ == 0 reads covering this record\">\n" > MQ0.header;
         

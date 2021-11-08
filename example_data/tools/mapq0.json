@@ -1,0 +1,9 @@
+{
+  "wf.vcf": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/Brian/test_inputs/1010590_23153_0_0.vardict.BCBIOfiltered.vcf.gz",
+  "wf.vcf_tbi": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/Brian/test_inputs/1010590_23153_0_0.vardict.BCBIOfiltered.vcf.gz.tbi",
+  "wf.bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/Brian/test_inputs/1010590_23153_0_0.bam",
+  "wf.bam_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/Brian/test_inputs/1010590_23153_0_0.bam.bai",
+  "wf.mapq0perc": 0.15,
+  "wf.caller": "vardict"
+}
+

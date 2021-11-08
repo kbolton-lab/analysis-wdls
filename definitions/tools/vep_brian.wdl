@@ -74,7 +74,7 @@ task vep {
 
   output {
     File annotated_vcf = "~{annotated_path}.gz"
-    File annotated_vcf_index = "~{annotated_path}.gz.tbi"
+    File annotated_vcf_tbi = "~{annotated_path}.gz.tbi"
     File vep_summary = annotated_path + "_summary.html"
   }
 }

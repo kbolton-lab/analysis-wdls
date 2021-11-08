@@ -4,6 +4,7 @@ import "../subworkflows/fp_filter.wdl" as ff
 import "../tools/varscan.wdl" as v
 import "../tools/intervals_to_bed.wdl" as itb
 import "../tools/bcftools_filter_bcbio.wdl" as bfb
+import "../tools/mapq0.wdl" as mq
 import "../tools/split_interval_list_to_bed.wdl" as siltb
 import "../tools/merge_vcf.wdl" as ca
 

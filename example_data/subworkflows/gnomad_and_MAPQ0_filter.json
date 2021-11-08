@@ -1,0 +1,10 @@
+{
+    "gnomadAndMapQ0Filter.caller_vcf": "/storage1/fs1/bolton/Active/projects/HIV/input/mutect2_vcfs/on_target_gnomad/CHAJ-588117-28.final.vcf.gz",
+    "gnomadAndMapQ0Filter.caller_vcf_tbi": "/storage1/fs1/bolton/Active/projects/HIV/input/mutect2_vcfs/on_target_gnomad/CHAJ-588117-28.final.vcf.gz.tbi",
+    "gnomadAndMapQ0Filter.gnomAD_exclude_vcf": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz",
+    "gnomadAndMapQ0Filter.gnomAD_exclude_vcf_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz.tbi",
+    
+    "gnomadAndMapQ0Filter.bam": "/storage1/fs1/bolton/Active/projects/HIV/input/CHAJ-588117-28.bam",
+    "gnomadAndMapQ0Filter.bam_bai": "/storage1/fs1/bolton/Active/projects/HIV/input/CHAJ-588117-28.bam.bai",
+    "gnomadAndMapQ0Filter.caller_prefix": "mutect"
+}

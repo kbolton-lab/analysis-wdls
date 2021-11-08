@@ -26,6 +26,16 @@ ${(z)CROMWELL} run \
     -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/mapq0_home.json \
     /Users/brian/test/WDL/analysis-wdls/definitions/tools/mapq0.wdl
 
+
+${(z)CROMWELL} run \
+    -o /Users/brian/test/WDL/analysis-wdls/example_data/Brian/options/mq0_options_home.json \
+    -t wdl \
+    -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/mutect_tool_home.json \
+    /Users/brian/test/WDL/analysis-wdls/definitions/tools/mutect.wdl
+
+
+
+
 /opt/VarDictJava/build/install/VarDict/bin/VarDict \
             -U -G /Users/brian/Bolton/CWL_TESTS/GRCh38_full_analysis_set_plus_decoy_hla.chr22.fa \
             -f 0.005 \

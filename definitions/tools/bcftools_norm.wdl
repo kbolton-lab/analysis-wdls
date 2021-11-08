@@ -16,7 +16,6 @@ task bcftoolsNorm {
       docker: "kboltonlab/bst"
       disks: "local-disk ~{space_needed_gb} SSD"
     }
-
     command <<<
         /usr/local/bin/bcftools norm --multiallelics -any --output-type z --output bcftools_norm.vcf.gz ~{vcf} -f ~{reference}
 
