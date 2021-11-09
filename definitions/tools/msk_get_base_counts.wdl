@@ -66,10 +66,13 @@ task mskGetBaseCountsWithArray {
       cpu: cores
       memory: "128GB"
       disks: "local-disk ~{space_needed_gb} SSD"
+      bootDiskSizeGb: space_needed_gb
     }
 
     command <<<
         set -eou pipefail
+
+        echo "~{space_needed_gb}"
 
         bam_string=""
         for bam in ~{sep=" " normal_bams}; do
