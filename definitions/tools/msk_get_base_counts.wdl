@@ -60,11 +60,11 @@ task mskGetBaseCountsWithArray {
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
     Float bam_size = size(normal_bams, "GB")
     Float vcf_size = size(vcf, "GB")
-    Int space_needed_gb = 10 + round(reference_size + 5*bam_size*vcf_size)
+    Int space_needed_gb = 10 + round(reference_size + 6*bam_size*vcf_size)
     runtime {
       docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
-      memory: "64GB"
+      memory: "128GB"
       disks: "local-disk ~{space_needed_gb} SSD"
     }
 
