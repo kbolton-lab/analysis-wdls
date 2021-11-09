@@ -7,7 +7,7 @@ task bcftoolsIsecComplement {
         File exclude_vcf
         File exclude_vcf_tbi
         String output_type = "z"
-        String? output_vcf_name = "bcftools_isec.vcf.gz"
+        String? output_vcf_name = "bcftools_isec.vcf"
     }
 
     Int space_needed_gb = 10 + round(size([vcf, vcf_tbi, exclude_vcf, exclude_vcf_tbi], "GB"))
@@ -19,13 +19,13 @@ task bcftoolsIsecComplement {
     }
 
     command <<<
-        /usr/local/bin/bcftools isec -C -w1 ~{vcf} ~{exclude_vcf} --output-type ~{output_type} --output ~{output_vcf_name} && /usr/local/bin/tabix ~{output_vcf_name}
+        /usr/local/bin/bcftools isec -C -w1 ~{vcf} ~{exclude_vcf} --output-type ~{output_type} --output ~{output_vcf_name}.gz && /usr/local/bin/tabix ~{output_vcf_name}.gz
 
     >>>
 
     output {
-        File complement_vcf = "~{output_vcf_name}"
-        File complement_vcf_tbi = "~{output_vcf_name}.tbi"
+        File complement_vcf = "~{output_vcf_name}.gz"
+        File complement_vcf_tbi = "~{output_vcf_name}.gz.tbi"
     }
 }
 
