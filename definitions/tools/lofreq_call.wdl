@@ -30,15 +30,21 @@ task lofreqTumorOnly {
         set -o nounset
 
         /opt/lofreq/bin/lofreq indelqual --dindel -f ~{reference} -o output.indel.bam ~{tumor_bam}
-        /opt/lofreq/bin/lofreq call --no-default-filter -B -a 1 -b 1 -l ~{interval_bed} -f ~{reference} --call-indels -o lofreq.vcf output.indel.bam --force-overwrite
-        /opt/lofreq/bin/lofreq filter -i lofreq.vcf -o ~{output_name}.filtered.vcf -v 5 -a ~{min_vaf} -A 0.9 --sb-incl-indels --print-all
+        /opt/lofreq/bin/lofreq call -A -B -f ~{reference} --call-indels --bed ~{interval_bed} -o lofreq_pass.vcf output.indel.bam --force-overwrite
+        /opt/lofreq/bin/lofreq call --no-default-filter -B -a 1 -b 1 -l ~{interval_bed} -f ~{reference} --call-indels -o lofreq_call.vcf output.indel.bam --force-overwrite
+        /opt/lofreq/bin/lofreq filter -i lofreq_call.vcf -o lofreq_call.filtered.vcf -v 5 -a ~{min_vaf} -A 0.9 --sb-incl-indels --print-all
 
-        bgzip ~{output_name}.filtered.vcf && tabix ~{output_name}.filtered.vcf.gz
+        printf "##FILTER=<ID=CALL,Description=\"A variant that was called by Lofreq's Caller without any filters\">" > lofreq.header;
+        cat lofreq_call.vcf | sed 's/PASS/CALL/g' > call_to_pass.vcf
+        bgzip call_to_pass.vcf && tabix call_to_pass.vcf.gz
+        bcftools annotate --threads 32 -a lofreq_pass.vcf -h lofreq.header -c FILTER call_to_pass.vcf.gz -Oz -o ~{output_name}.vcf.gz
+
+        tabix ~{output_name}.vcf.gz
     >>>
 
     output {
-        File vcf = "~{output_name}.filtered.vcf.gz"
-        File vcf_tbi = "~{output_name}.filtered.vcf.gz.tbi"
+        File vcf = "~{output_name}.vcf.gz"
+        File vcf_tbi = "~{output_name}.vcf.gz.tbi"
     }
 }
 
