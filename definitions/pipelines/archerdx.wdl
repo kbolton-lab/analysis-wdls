@@ -390,64 +390,64 @@ workflow archerdx {
         sample_name = tumor_sample_name
     }
 
-    call p.pindel as pindel {
-        input:
-            reference = reference,
-            reference_fai = reference_fai,
-            reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
-            interval_list = target_intervals,
-            scatter_count = scatter_count,
-            insert_size = pindel_insert_size,
-            tumor_sample_name = tumor_sample_name,
-            ref_name = ref_name,
-            ref_date = ref_date,
-            pindel_min_supporting_reads = pindel_min_supporting_reads,
-            min_var_freq = af_threshold,
-            tumor_only = tumor_only
-    }
-    call gapf.gnomadAndPoNFilter as pindel_gnomad_pon_filters {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        caller_vcf = pindel.unfiltered_vcf,
-        caller_vcf_tbi = pindel.unfiltered_vcf_tbi,
-        gnomAD_exclude_vcf = normalized_gnomad_exclude,
-        gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        caller_prefix = "pindel." + tumor_sample_name,
-        arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
-        pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
-        pon_pvalue = pon_pvalue
-    }
-    call vep.vep as pindel_annotate_variants {
-        input:
-        vcf = pindel_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = vep_cache_dir_zip,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        plugins = vep_plugins,
-        ensembl_assembly = vep_ensembl_assembly,
-        ensembl_version = vep_ensembl_version,
-        ensembl_species = vep_ensembl_species,
-        synonyms_file = synonyms_file,
-        custom_annotations = vep_custom_annotations,
-        coding_only = annotate_coding_only,
-        pick = vep_pick
-    }
-    call pp.pon2Percent as pindel_pon2 {
-        input:
-        vcf = pindel_annotate_variants.annotated_vcf,
-        vcf2PON = pindel_pon2_file,
-        vcf2PON_tbi = pindel_pon2_file_tbi,
-        caller = "pindel",
-        sample_name = tumor_sample_name
-    }
+    # call p.pindel as pindel {
+        # input:
+            # reference = reference,
+            # reference_fai = reference_fai,
+            # reference_dict = reference_dict,
+            # tumor_bam = index_bam.indexed_bam,
+            # tumor_bam_bai = index_bam.indexed_bam_bai,
+            # interval_list = target_intervals,
+            # scatter_count = scatter_count,
+            # insert_size = pindel_insert_size,
+            # tumor_sample_name = tumor_sample_name,
+            # ref_name = ref_name,
+            # ref_date = ref_date,
+            # pindel_min_supporting_reads = pindel_min_supporting_reads,
+            # min_var_freq = af_threshold,
+            # tumor_only = tumor_only
+    # }
+    # call gapf.gnomadAndPoNFilter as pindel_gnomad_pon_filters {
+        # input:
+        # reference = reference,
+        # reference_fai = reference_fai,
+        # reference_dict = reference_dict,
+        # caller_vcf = pindel.unfiltered_vcf,
+        # caller_vcf_tbi = pindel.unfiltered_vcf_tbi,
+        # gnomAD_exclude_vcf = normalized_gnomad_exclude,
+        # gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        # caller_prefix = "pindel." + tumor_sample_name,
+        # arrayMode = arrayMode,
+        # normal_bams = pon_normal_bams,
+        # bams = bams,
+        # bams_bai = bams_bai,
+        # pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
+        # pon_pvalue = pon_pvalue
+    #}
+    #call vep.vep as pindel_annotate_variants {
+        # input:
+        # vcf = pindel_gnomad_pon_filters.processed_filtered_vcf,
+        # cache_dir_zip = vep_cache_dir_zip,
+        # reference = reference,
+        # reference_fai = reference_fai,
+        # reference_dict = reference_dict,
+        # plugins = vep_plugins,
+        # ensembl_assembly = vep_ensembl_assembly,
+        # ensembl_version = vep_ensembl_version,
+        # ensembl_species = vep_ensembl_species,
+        # synonyms_file = synonyms_file,
+        # custom_annotations = vep_custom_annotations,
+        # coding_only = annotate_coding_only,
+        # pick = vep_pick
+    # }
+    # call pp.pon2Percent as pindel_pon2 {
+        # input:
+        # vcf = pindel_annotate_variants.annotated_vcf,
+        # vcf2PON = pindel_pon2_file,
+        # vcf2PON_tbi = pindel_pon2_file_tbi,
+        # caller = "pindel",
+        # sample_name = tumor_sample_name
+    # }
 
     output {
         # Alignments
@@ -486,10 +486,10 @@ workflow archerdx {
         File vardict_pon_total_counts = vardict_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
 
         # Pindel
-        File pindel_full = pindel.unfiltered_vcf                                                                # Raw Pindel Ouput
-        File pindel_pon_annotated_unfiltered_vcf = pindel_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        File pindel_pon_annotated_filtered_vcf = pindel_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        File pindel_pon_total_counts = pindel_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        # File pindel_full = pindel.unfiltered_vcf                                                                # Raw Pindel Ouput
+        # File pindel_pon_annotated_unfiltered_vcf = pindel_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
+        # File pindel_pon_annotated_filtered_vcf = pindel_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
+        # File pindel_pon_total_counts = pindel_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
 
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 

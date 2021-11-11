@@ -3,8 +3,8 @@ version 1.0
 import "../subworkflows/fp_filter.wdl" as ff
 import "../tools/index_vcf.wdl" as iv
 import "../tools/merge_vcf.wdl" as mv
-#import "../tools/lofreq_pass.wdl" as lp
-import "../tools/lofreq_call.wdl" as lc
+import "../tools/lofreq_pass.wdl" as lp
+#import "../tools/lofreq_call.wdl" as lc
 import "../tools/lofreq_reformat.wdl" as lr
 import "../tools/split_interval_list_to_bed.wdl" as siltb
 
@@ -31,7 +31,7 @@ workflow lofreq {
     }
 
     scatter(segment in splitIntervalListToBed.split_beds) {
-      call lc.lofreqCall as lofreqCallTask {
+      call lp.lofreqPass as lofreqTask {
         input:
             reference = reference,
             reference_fai = reference_fai,
@@ -40,20 +40,19 @@ workflow lofreq {
             normal_bam = normal_bam,
             normal_bam_bai = normal_bam_bai,
             interval_bed = segment,
-            min_vaf = min_var_freq,
             tumor_only = tumor_only
       }
     }
 
-    call mv.mergeVcf as mergeCalls {
+    call mv.mergeVcf as merge {
       input:
-          vcfs = lofreqCallTask.vcf,
-          vcf_tbis = lofreqCallTask.vcf_tbi
+          vcfs = lofreqTask.vcf,
+          vcf_tbis = lofreqTask.vcf_tbi
     }
 
     call lr.lofreqReformat as reformat {
         input:
-            vcf = mergeCalls.merged_vcf,
+            vcf = merge.merged_vcf,
             tumor_sample_name = tumor_sample_name
     }
 
