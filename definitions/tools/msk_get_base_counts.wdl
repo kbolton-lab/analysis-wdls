@@ -71,6 +71,8 @@ task mskGetBaseCounts {
       bootDiskSizeGb: space_needed_gb
     }
 
+    File bam = normal_bam.bam
+
     command <<<
         set -eou pipefail
 
@@ -79,14 +81,14 @@ task mskGetBaseCounts {
         echo "VCF: ~{vcf_size}"
         echo "SPACE_NEEDED: ~{space_needed_gb}"
 
-        sample_name=$(samtools view -H ~{normal_bam} | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq)
+        sample_name=$(samtools view -H ~{bam} | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq)
 
         if [[ ~{vcf} == *.vcf.gz ]]; then
             bgzip -d ~{vcf}
             vcf_file=~{vcf}
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam} --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{bam} --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         else
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam} --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{bam} --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         fi
         bgzip ~{pon_final_name}.vcf && tabix ~{pon_final_name}.vcf.gz
     >>>
