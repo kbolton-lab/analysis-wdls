@@ -1,9 +1,12 @@
 version 1.0
 
+import "../types.wdl"
+
 import "../tools/bcftools_isec_complement.wdl" as bic
 import "../tools/msk_get_base_counts.wdl" as mgbc
 import "../tools/normal_fisher.wdl" as nf
 import "../tools/index_vcf.wdl" as iv
+import "../tools/merge_vcf.wdl" as mv
 
 workflow gnomadAndPoNFilter {
     input {
@@ -15,14 +18,13 @@ workflow gnomadAndPoNFilter {
         String? caller_prefix = "caller"
         File gnomAD_exclude_vcf
         File gnomAD_exclude_vcf_tbi
-        File normal_bams
-        Array[File] bams
-        Array[File] bams_bai
+        File normal_bams_file
+        Array[bam_and_bai] pon_bams
         Int? mapq = 5
         Int? baseq = 5
         String? pon_final_name = "pon.pileup"
         String? pon_pvalue = "0.05"
-        Boolean? arrayMode = false
+        Boolean arrayMode = true
     }
 
     call bic.bcftoolsIsecComplement as isec_complement_gnomAD {
@@ -35,26 +37,46 @@ workflow gnomadAndPoNFilter {
         output_type = "z"
     }
 
-    call mgbc.mskGetBaseCounts as get_pileup_counts {
-        input:
-            normal_bams = normal_bams,
-            bams = bams,
-            bams_bai = bams_bai,
+    if (arrayMode) {
+        scatter (pon_bam in pon_bams) {
+            call mgbc.mskGetBaseCounts as mskGetBaseCounts {
+                input:
+                reference = reference,
+                reference_fai = reference_fai,
+                reference_dict = reference_dict,
+                normal_bam = pon_bam,
+                pon_final_name = pon_final_name,
+                vcf = caller_vcf,
+                mapq = mapq,
+                baseq = baseq
+            }
+        }
+
+        call mv.mergeVcf as merge {
+            input:
+                vcfs = mskGetBaseCounts.pileup,
+                vcf_tbis = mskGetBaseCounts.pileup_tbi
+        }
+    }
+    if (!arrayMode) {
+        call mgbc.mskGetBaseCountsWithFile as get_pileup_counts {
+            input:
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
+            normal_bams = normal_bams_file,
             pon_final_name = pon_final_name,
             vcf = caller_vcf,
-            baseq = baseq,
             mapq = mapq,
-            arrayMode = arrayMode
+            baseq = baseq
+        }
     }
 
     call nf.normalFisher as call_R_fisher {
         input:
         vcf = isec_complement_gnomAD.complement_vcf,
-        pon = get_pileup_counts.pileup,
-        pon_tbi = get_pileup_counts.pileup_tbi,
+        pon = select_first([merge.merged_vcf, get_pileup_counts.pileup]),
+        pon_tbi = select_first([merge.merged_vcf_tbi, get_pileup_counts.pileup_tbi]),
         p_value = pon_pvalue,
         caller = caller_prefix
     }
@@ -72,7 +94,7 @@ workflow gnomadAndPoNFilter {
         File processed_gnomAD_filtered_vcf_tbi = index_pon_vcf.indexed_vcf_tbi
         File processed_filtered_vcf = index_pon_filtered_vcf.indexed_vcf
         File processed_filtered_vcf_tbi = index_pon_filtered_vcf.indexed_vcf_tbi
-        File pon_total_counts = get_pileup_counts.pileup
-        File pon_total_counts_tbi = get_pileup_counts.pileup_tbi
+        File pon_total_counts = select_first([merge.merged_vcf, get_pileup_counts.pileup])
+        File pon_total_counts_tbi = select_first([merge.merged_vcf_tbi, get_pileup_counts.pileup_tbi])
     }
 }

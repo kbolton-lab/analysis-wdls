@@ -73,9 +73,8 @@ workflow archerdx {
 
         # Variant Calling
         Boolean? arrayMode = true       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
-        File pon_normal_bams            # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
-        Array[File] bams                # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
-        Array[File] bams_bai
+        File pon_normal_bams_file       # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
+        Array[bam_and_bai] pon_bams     # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
         Boolean mutect_artifact_detection_mode = false
         Float? mutect_max_alt_allele_in_normal_fraction
@@ -248,9 +247,8 @@ workflow archerdx {
         gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
         caller_prefix = "mutect." + tumor_sample_name,
         arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
+        normal_bams_file = pon_normal_bams_file,
+        pon_bams = pon_bams,
         pon_final_name = "mutect." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -304,9 +302,8 @@ workflow archerdx {
         gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
         caller_prefix = "vardict." + tumor_sample_name,
         arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
+        normal_bams_file = pon_normal_bams_file,
+        pon_bams = pon_bams,
         pon_final_name = "vardict." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -359,9 +356,8 @@ workflow archerdx {
         gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
         caller_prefix = "lofreq." + tumor_sample_name,
         arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
+        normal_bams_file = pon_normal_bams_file,
+        pon_bams = pon_bams,
         pon_final_name = "lofreq." + tumor_sample_name + ".pon.pileup",
         pon_pvalue = pon_pvalue
     }
@@ -418,9 +414,8 @@ workflow archerdx {
         # gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
         # caller_prefix = "pindel." + tumor_sample_name,
         # arrayMode = arrayMode,
-        # normal_bams = pon_normal_bams,
-        # bams = bams,
-        # bams_bai = bams_bai,
+        # normal_bams_file = pon_normal_bams_file,
+        # pon_bams = pon_bams,
         # pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
         # pon_pvalue = pon_pvalue
     #}

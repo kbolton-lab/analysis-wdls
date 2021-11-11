@@ -1,5 +1,8 @@
 version 1.0
 
+import "../types.wdl"
+import "../tools/merge_vcf.wdl" as mv
+
 task mskGetBaseCountsWithFile {
     input {
         File reference
@@ -16,7 +19,7 @@ task mskGetBaseCountsWithFile {
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
     Float bam_size = size(normal_bams, "GB")
     Float vcf_size = size(vcf, "GB")
-    Int space_needed_gb = 10 + round(reference_size + 2*bam_size + vcf_size)
+    Int space_needed_gb = 100 + round(reference_size + 2*bam_size + vcf_size)
     runtime {
       docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
@@ -43,13 +46,12 @@ task mskGetBaseCountsWithFile {
     }
 }
 
-task mskGetBaseCountsWithArray {
+task mskGetBaseCounts {
     input {
         File reference
         File reference_fai
         File reference_dict
-        Array[File] normal_bams
-        Array[File] normal_bams_bai
+        bam_and_bai normal_bam
         String? pon_final_name = "pon.pileup"
         File vcf
         Int? mapq = 5
@@ -58,9 +60,9 @@ task mskGetBaseCountsWithArray {
 
     Int cores = 4
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
-    Float bam_size = size(normal_bams, "GB")
+    Float bam_size = size([normal_bam.bam, normal_bam.bai], "GB")
     Float vcf_size = size(vcf, "GB")
-    Int space_needed_gb = 10 + round(reference_size + 5*bam_size + vcf_size)
+    Int space_needed_gb = 5 + round(reference_size + 2*bam_size + vcf_size)
     runtime {
       docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
@@ -77,18 +79,14 @@ task mskGetBaseCountsWithArray {
         echo "VCF: ~{vcf_size}"
         echo "SPACE_NEEDED: ~{space_needed_gb}"
 
-        bam_string=""
-        for bam in ~{sep=" " normal_bams}; do
-            sample_name=$(samtools view -H $bam | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq)
-            bam_string="$bam_string --bam ${sample_name}:$bam"
-        done
+        sample_name=$(samtools view -H ~{normal_bam} | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq)
 
         if [[ ~{vcf} == *.vcf.gz ]]; then
             bgzip -d ~{vcf}
             vcf_file=~{vcf}
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam} --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         else
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} $bam_string --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam} --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
         fi
         bgzip ~{pon_final_name}.vcf && tabix ~{pon_final_name}.vcf.gz
     >>>
@@ -99,32 +97,38 @@ task mskGetBaseCountsWithArray {
     }
 }
 
-workflow mskGetBaseCounts {
+workflow wf {
     input {
         File reference
         File reference_fai
         File reference_dict
         Boolean arrayMode = false
-        File normal_bams
-        Array[File] bams
-        Array[File] bams_bai
+        File normal_bams_file
+        Array[bam_and_bai] pon_bams
         String? pon_final_name = "pon.pileup"
         File vcf
         Int? mapq = 5
         Int? baseq = 5
     }
     if (arrayMode) {
-        call mskGetBaseCountsWithArray {
+        scatter (pon_bam in pon_bams){
+            call mskGetBaseCounts {
+                input:
+                reference = reference,
+                reference_fai = reference_fai,
+                reference_dict = reference_dict,
+                normal_bam = pon_bam,
+                pon_final_name = pon_final_name,
+                vcf = vcf,
+                mapq = mapq,
+                baseq = baseq
+            }
+        }
+
+        call mv.mergeVcf as merge {
             input:
-            reference = reference,
-            reference_fai = reference_fai,
-            reference_dict = reference_dict,
-            normal_bams = bams,
-            normal_bams_bai = bams_bai,
-            pon_final_name = pon_final_name,
-            vcf = vcf,
-            mapq = mapq,
-            baseq = baseq
+                vcfs = mskGetBaseCounts.pileup,
+                vcf_tbis = mskGetBaseCounts.pileup_tbi
         }
     }
     if (!arrayMode) {
@@ -133,7 +137,7 @@ workflow mskGetBaseCounts {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            normal_bams = normal_bams,
+            normal_bams = normal_bams_file,
             pon_final_name = pon_final_name,
             vcf = vcf,
             mapq = mapq,
@@ -142,7 +146,7 @@ workflow mskGetBaseCounts {
     }
 
     output {
-        File pileup = select_first([mskGetBaseCountsWithArray.pileup, mskGetBaseCountsWithFile.pileup])
-        File pileup_tbi = select_first([mskGetBaseCountsWithArray.pileup_tbi, mskGetBaseCountsWithFile.pileup_tbi])
+        File pileup = select_first([merge.merged_vcf, mskGetBaseCountsWithFile.pileup])
+        File pileup_tbi = select_first([merge.merged_vcf_tbi, mskGetBaseCountsWithFile.pileup_tbi])
     }
 }
