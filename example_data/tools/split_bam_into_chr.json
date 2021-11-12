@@ -1,0 +1,4 @@
+{
+  "wf.interval_bed": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.bed",
+  "wf.bam": "/storage1/fs1/bolton/Active/data/TEST_DATA/bqsr.bam"
+}
