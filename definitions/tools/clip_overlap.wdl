@@ -8,9 +8,11 @@ task clipOverlap {
         File reference_dict
     }
 
-    Int cores = 2
+    Int cores = 1
     Float data_size = size(bam, "GB")
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
+    Int preemptible = 1
+    Int maxRetries = 0
 
     runtime {
         docker: "quay.io/biocontainers/fgbio:1.3.0--0"
@@ -18,6 +20,8 @@ task clipOverlap {
         cpu: cores
         bootDiskSizeGb: 10 + round(5*data_size + reference_size)
         disks: "local-disk ~{10 + round(5*data_size + reference_size)} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     command <<<

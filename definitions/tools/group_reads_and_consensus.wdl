@@ -1,13 +1,13 @@
 version 1.0
 
-task groupReads {
+task groupReadsAndConsensus {
     input {
         File bam
         Boolean umi_paired = true
     }
 
     Int cores = 1
-    Int space_needed_gb = 5 + round(2*size(bam, "GB"))
+    Int space_needed_gb = 5 + round(3*size(bam, "GB"))
     Int preemptible = 1
     Int maxRetries = 0
 
@@ -31,10 +31,11 @@ task groupReads {
         else
             /usr/local/bin/fgbio GroupReadsByUmi --strategy adjacency --assign-tag MI --raw-tag RX --min-map-q 1 --edits 1 --input $BAM --output umi_grouped.bam
         fi
+        /usr/local/bin/fgbio CallMolecularConsensusReads --input umi_grouped.bam --error-rate-pre-umi 45 --error-rate-post-umi 30 --min-input-base-quality 30 --min-reads 1 --output consensus_unaligned.bam
     >>>
 
     output {
-        File grouped_bam = "umi_grouped.bam"
+        File consensus_bam = "consensus_unaligned.bam"
     }
 }
 
@@ -44,7 +45,7 @@ workflow wf {
         File bam
         Boolean umi_paired = true
     }
-    call groupReads {
+    call groupReadsAndConsensus {
         input:
         bam = bam,
         umi_paired = umi_paired

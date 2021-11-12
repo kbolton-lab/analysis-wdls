@@ -7,15 +7,18 @@ task extractUmis {
         Boolean? umi_paired = true
     }
 
-    Int cores = 2
-    Int space_needed_gb = 10 + round(10*size(bam, "GB"))
+    Int cores = 1
+    Int space_needed_gb = 5 + round(2*size(bam, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
 
     runtime {
         docker: "quay.io/biocontainers/fgbio:1.3.0--0"
         memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 25
         disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     command <<<

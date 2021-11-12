@@ -26,6 +26,11 @@ struct bam_and_bai {
     File bai
 }
 
+struct bam_and_bai_array {
+    Array[File] bams
+    Array[File] bais
+}
+
 # ---- vep_custom_annotation ----
 struct Info {
   File file

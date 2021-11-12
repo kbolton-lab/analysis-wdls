@@ -10,12 +10,18 @@ task bcftoolsIsecComplement {
         String? output_vcf_name = "bcftools_isec.vcf"
     }
 
-    Int space_needed_gb = 10 + round(size([vcf, vcf_tbi, exclude_vcf, exclude_vcf_tbi], "GB"))
+    Int space_needed_gb = 5 + 2*round(size([vcf, vcf_tbi, exclude_vcf, exclude_vcf_tbi], "GB"))
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
     runtime {
+      cpu: cores
       docker: "kboltonlab/bst:latest"
-      memory: "4GB"
+      memory: "6GB"
       bootDiskSizeGb: space_needed_gb
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<

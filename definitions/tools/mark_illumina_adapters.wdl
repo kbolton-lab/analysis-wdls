@@ -5,15 +5,18 @@ task markIlluminaAdapters {
         File bam
     }
 
-    Int cores = 2
-    Int space_needed_gb = 10 + round(10*size(bam, "GB"))
+    Int cores = 1
+    Int space_needed_gb = 5 + round(2*size(bam, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
 
     runtime {
         docker: "mgibio/dna-alignment:1.0.0"
         memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 25
         disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     command <<<

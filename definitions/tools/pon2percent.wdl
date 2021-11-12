@@ -10,10 +10,17 @@ task pon2Percent {
     }
 
     Int space_needed_gb = 10 + round(size([vcf, vcf2PON, vcf2PON_tbi],"GB"))
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
+      cpu: cores
       docker: "kboltonlab/bst:latest"
-      memory: "32GB"
+      memory: "6GB"
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<

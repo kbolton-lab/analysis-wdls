@@ -22,11 +22,18 @@ task mutectNormal {
   Float reference_size = size([reference, reference_fai, reference_dict], "GB")
   Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
   Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_list, "GB"))
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+
   runtime {
+    cpu: cores
     docker: "broadinstitute/gatk:4.2.0.0"
     memory: "32GB"
     bootDiskSizeGb: space_needed_gb
     disks: "local-disk ~{space_needed_gb} SSD"
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   String output_vcf = "mutect.filtered.vcf.gz"
@@ -73,11 +80,18 @@ task mutectTumorOnly {
   Float reference_size = size([reference, reference_fai, reference_dict], "GB")
   Float bam_size = size([tumor_bam, tumor_bam_bai], "GB")
   Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_list, "GB"))
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+
   runtime {
+    cpu: cores
     docker: "broadinstitute/gatk:4.2.0.0"
     memory: "32GB"
     bootDiskSizeGb: space_needed_gb
     disks: "local-disk ~{space_needed_gb} SSD"
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   String output_vcf = "mutect.filtered.vcf.gz"
