@@ -12,14 +12,11 @@ import "../subworkflows/lofreq_noFp.wdl" as l
 import "../subworkflows/vardict_noFp.wdl" as v
 
 import "../tools/fastq_to_bam.wdl" as ftb
-import "../tools/bam_to_cram.wdl" as btc
-import "../tools/index_cram.wdl" as ic
 import "../tools/bqsr_apply.wdl" as ba
 import "../tools/index_bam.wdl" as ib
 import "../tools/bcftools_isec_complement.wdl" as bic
 import "../tools/vep.wdl" as vep
 import "../tools/pon2percent.wdl" as pp
-import "../tools/intervals_to_bed.wdl" as itb
 import "../tools/split_bam_into_chr.wdl" as sbic
 import "../tools/merge_vcf.wdl" as mv
 
@@ -76,16 +73,16 @@ workflow archerdx {
         File pon_normal_bams_file       # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
         Array[bam_and_bai] pon_bams     # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
-        Boolean mutect_artifact_detection_mode = false
-        Float? mutect_max_alt_allele_in_normal_fraction
-        Int? mutect_max_alt_alleles_in_normal_count
+        Float? af_threshold = 0.0001
+        String? pon_pvalue = "2.114164905e-6"
+
+        # Pindel
         Int pindel_insert_size = 400
         String? ref_name = "GRCh38DH"
         String? ref_date = "20161216"
         Int? pindel_min_supporting_reads = 3
-        Float? af_threshold = 0.0001
+
         String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))"
-        String? pon_pvalue = "2.114164905e-6"
 
         # PoN2
         File mutect_pon2_file
@@ -258,6 +255,7 @@ workflow archerdx {
             tumor_bam_bai = index_bam.indexed_bam_bai,
             interval_bed = target_bed,
             bcbio_filter_string = bcbio_filter_string,
+            tumor_sample_name = tumor_sample_name,
             min_var_freq = af_threshold,
             tumor_only = tumor_only
         }
