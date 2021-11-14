@@ -22,7 +22,7 @@ task bbmapRepair {
     }
 
     command <<<
-        repair.sh repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
+        repair.sh -Xmx6g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
     >>>
 
     output {

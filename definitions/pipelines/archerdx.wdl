@@ -306,6 +306,12 @@ workflow archerdx {
             caller = "lofreq",
             sample_name = tumor_sample_name
         }
+
+        # 1. Merge Callers Together and create a fake VCF
+        # 2. Run fpfilter on fake VCF
+        # 3. Run PoN on fake VCF
+        # 4. Run VEP on fake VCF
+        # 5. Annotate the Original Callers with the annotations
     }
 
     call mv.mergeVcf as merge_mutect_full {
