@@ -2,6 +2,9 @@ version 1.0
 
 import "../tools/vardict.wdl" as v
 import "../tools/bcftools_filter_bcbio.wdl" as bfb
+import "../tools/bcftools_norm.wdl" as bn
+import "../tools/vcf_sanitize.wdl" as vs
+import "../tools/vt_decompose.wdl" as vd
 
 workflow vardictNoFp {
   input {
@@ -56,10 +59,28 @@ workflow vardictNoFp {
       output_vcf_prefix = "vardict.bcbiofilter"
   }
 
+  call vs.vcfSanitize as sanitizeVcf {
+    input: vcf=bcbio_filter.filtered_vcf
+  }
+
+  call bn.bcftoolsNorm as normalize {
+      input:
+      reference=reference,
+      reference_fai=reference_fai,
+      vcf=sanitizeVcf.sanitized_vcf,
+      vcf_tbi=sanitizeVcf.sanitized_vcf_tbi
+  }
+
+  call vd.vtDecompose as decomposeVariants {
+    input:
+    vcf=normalize.normalized_vcf,
+    vcf_tbi=normalize.normalized_vcf_tbi
+  }
+
   output {
     File unfiltered_vcf = vardictTask.vcf
     File unfiltered_vcf_tbi = vardictTask.vcf_tbi
-    File bcbio_filtered_vcf = bcbio_filter.filtered_vcf
-    File bcbio_filtered_vcf_tbi = bcbio_filter.filtered_vcf_tbi
+    File bcbio_filtered_vcf = decomposeVariants.decomposed_vcf
+    File bcbio_filtered_vcf_tbi = decomposeVariants.decomposed_vcf_tbi
   }
 }

@@ -14,12 +14,12 @@ task annotateVcf {
     }
 
     Int space_needed_gb = 10 + 2*round(size([vcf, vcf_tbi, fp_filter, fp_filter_tbi, pon_filter, pon_filter_tbi, vep], "GB"))
-    Int cores = 16
+    Int cores = 1
     Int preemptible = 1
     Int maxRetries = 0
 
     runtime {
-      memory: "96GB"
+      memory: "6GB"
       docker: "kboltonlab/bst"
       disks: "local-disk ~{space_needed_gb} SSD"
       bootDiskSizeGb: space_needed_gb
@@ -34,9 +34,9 @@ task annotateVcf {
         zcat ~{pon_filter} | tail -n +3 > pon_filter.header;
         zcat ~{vep} | tail -n +3 > vep.header;
 
-        bcftools annotate --threads 32 -a ~{fp_filter} -h fp_filter.header -c +FILTER ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
-        bcftools annotate --threads 32 -a ~{pon_filter} -h pon_filter.header -c PON_RefDepth,PON_AltDepth,PON_FISHER ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.pon.annotated.vcf.gz
-        bcftools annotate --threads 32 -a ~{vep} -h vep.header -c CSQ ~{caller_prefix}.~{sample_name}.fp_filter.pon.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
+        bcftools annotate -a ~{fp_filter} -h fp_filter.header -c +FILTER ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
+        bcftools annotate -a ~{pon_filter} -h pon_filter.header -c PON_RefDepth,PON_AltDepth,PON_FISHER ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.pon.annotated.vcf.gz
+        bcftools annotate -a ~{vep} -h vep.header -c CSQ ~{caller_prefix}.~{sample_name}.fp_filter.pon.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
 
         tabix ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.pon.annotated.vcf.gz
         tabix ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz

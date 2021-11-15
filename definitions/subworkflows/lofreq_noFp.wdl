@@ -3,6 +3,9 @@ version 1.0
 import "../tools/lofreq_pass.wdl" as lp
 #import "../tools/lofreq_call.wdl" as lc
 import "../tools/lofreq_reformat.wdl" as lr
+import "../tools/bcftools_norm.wdl" as bn
+import "../tools/vcf_sanitize.wdl" as vs
+import "../tools/vt_decompose.wdl" as vd
 
 workflow lofreqNoFp {
     input {
@@ -36,8 +39,26 @@ workflow lofreqNoFp {
             tumor_sample_name = tumor_sample_name
     }
 
+    call vs.vcfSanitize as sanitizeVcf {
+      input: vcf=reformat.reformat_vcf
+    }
+
+    call bn.bcftoolsNorm as normalize {
+        input:
+        reference=reference,
+        reference_fai=reference_fai,
+        vcf=sanitizeVcf.sanitized_vcf,
+        vcf_tbi=sanitizeVcf.sanitized_vcf_tbi
+    }
+
+    call vd.vtDecompose as decomposeVariants {
+      input:
+      vcf=normalize.normalized_vcf,
+      vcf_tbi=normalize.normalized_vcf_tbi
+    }
+
     output {
-      File unfiltered_vcf = reformat.reformat_vcf
-      File unfiltered_vcf_tbi = reformat.reformat_vcf_tbi
+      File unfiltered_vcf = decomposeVariants.decomposed_vcf
+      File unfiltered_vcf_tbi = decomposeVariants.decomposed_vcf_tbi
     }
 }

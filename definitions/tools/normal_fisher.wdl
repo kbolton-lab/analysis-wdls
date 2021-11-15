@@ -11,10 +11,17 @@ task normalFisher {
 
 
     Int space_needed_gb = 100 + round(size([vcf, pon, pon_tbi], "GB"))
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
+      cpu: cores
       docker: "kboltonlab/sam_bcftools_tabix_bgzip:1.0"
-      memory: "32GB"
+      memory: "6GB"
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<
@@ -76,7 +83,7 @@ task normalFisher {
             })
             write.table(df, file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%RD]\t[%AD]\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
         elif [[ ~{caller} =~ $patt ]]
         then
@@ -120,7 +127,7 @@ task normalFisher {
             })
             write.table(df[, -c(9:10)], file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t%INFO/DP4\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
         else
             echo '
@@ -159,7 +166,7 @@ task normalFisher {
             })
             write.table(df, file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%AD]\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
 
         fi

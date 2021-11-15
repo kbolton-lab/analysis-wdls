@@ -52,7 +52,7 @@ workflow gnomadAndPoNFilter {
             }
         }
 
-        call mv.mergeVcf as merge {
+        call bm.bcftoolsMerge as mergeMulti {
             input:
                 vcfs = mskGetBaseCounts.pileup,
                 vcf_tbis = mskGetBaseCounts.pileup_tbi

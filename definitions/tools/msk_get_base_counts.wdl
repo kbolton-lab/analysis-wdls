@@ -20,11 +20,16 @@ task mskGetBaseCountsWithFile {
     Float bam_size = size(normal_bams, "GB")
     Float vcf_size = size(vcf, "GB")
     Int space_needed_gb = 100 + round(reference_size + 2*bam_size + vcf_size)
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
       docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
       memory: "24GB"
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<
@@ -63,12 +68,16 @@ task mskGetBaseCountsWithArray {
     Float bam_size = size(normal_bams.bams, "GB")
     Float vcf_size = size(vcf, "GB")
     Int space_needed_gb = 10 + round(reference_size + 6*bam_size*vcf_size)
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
       docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
-      memory: "128GB"
+      memory: "24GB"
       disks: "local-disk ~{space_needed_gb} SSD"
-      bootDiskSizeGb: space_needed_gb
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<
@@ -118,12 +127,16 @@ task mskGetBaseCounts {
     Float bam_size = size([normal_bam.bam, normal_bam.bai], "GB")
     Float vcf_size = size(vcf, "GB")
     Int space_needed_gb = 5 + round(reference_size + 2*bam_size + vcf_size)
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
       docker: "kboltonlab/msk_getbasecounts:3.0"
       cpu: cores
-      memory: "128GB"
+      memory: "24GB"
       disks: "local-disk ~{space_needed_gb} SSD"
-      bootDiskSizeGb: space_needed_gb
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<

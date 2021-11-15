@@ -5,7 +5,7 @@ import "../types.wdl"
 import "../tools/msk_get_base_counts.wdl" as mgbc
 import "../tools/normal_fisher.wdl" as nf
 import "../tools/index_vcf.wdl" as iv
-import "../tools/merge_vcf.wdl" as mv
+import "../tools/bcftools_merge.wdl" as bm
 
 workflow PoNFilter {
     input {
@@ -39,7 +39,7 @@ workflow PoNFilter {
             }
         }
 
-        call mv.mergeVcf as merge {
+        call bm.bcftoolsMerge as merge {
             input:
                 vcfs = mskGetBaseCounts.pileup,
                 vcf_tbis = mskGetBaseCounts.pileup_tbi

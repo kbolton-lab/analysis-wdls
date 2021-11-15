@@ -6,7 +6,7 @@ import "../subworkflows/archer_fastq_format.wdl" as fqf
 import "../subworkflows/molecular_alignment.wdl" as ma
 import "../subworkflows/qc_exome.wdl" as qe
 import "../subworkflows/PoN_filter.wdl" as pf
-import "../subworkflows/fp_filter.wdl" as ff
+import "../subworkflows/fp_filter_no_norm.wdl" as ffnn
 import "../subworkflows/mutect_noFp.wdl" as m
 import "../subworkflows/lofreq_noFp.wdl" as l
 import "../subworkflows/vardict_noFp.wdl" as v
@@ -277,7 +277,7 @@ workflow archerdx {
             merged_vcf_basename = "all_callers." + tumor_sample_name
         }
 
-        call ff.fpFilter as fpFilter {
+        call ffnn.fpFilterNoNorm as fpFilter {
             input:
             bam=index_chr_bam.indexed_bam,
             bam_bai=index_chr_bam.indexed_bam_bai,
