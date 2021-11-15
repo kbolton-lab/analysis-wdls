@@ -429,7 +429,7 @@ workflow archerdx {
 
     output {
         # Alignments
-        File aligned_bam = alignment_workflow.aligned_bam
+        # File aligned_bam = alignment_workflow.aligned_bam
         File bqsr_bam = index_bam.indexed_bam
 
         # Tumor QC
