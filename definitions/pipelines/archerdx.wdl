@@ -344,6 +344,7 @@ workflow archerdx {
             reference_fai = reference_fai,
             reference_dict = reference_dict,
             caller_vcf = mergeCallers.merged_vcf,
+            caller_vcf_tbi = mergeCallers.merged_vcf_tbi,
             caller_prefix = "all_callers",
             normal_bams_file = pon_normal_bams_file,
             pon_bams = pon_bams,
