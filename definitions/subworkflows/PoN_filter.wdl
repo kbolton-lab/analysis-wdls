@@ -7,7 +7,7 @@ import "../tools/normal_fisher.wdl" as nf
 import "../tools/index_vcf.wdl" as iv
 import "../tools/merge_vcf.wdl" as mv
 
-workflow gnomadAndPoNFilter {
+workflow PoNFilter {
     input {
         File reference
         File reference_fai

@@ -5,7 +5,7 @@ import "../types.wdl"
 import "../subworkflows/archer_fastq_format.wdl" as fqf
 import "../subworkflows/molecular_alignment.wdl" as ma
 import "../subworkflows/qc_exome.wdl" as qe
-import "../subworkflows/PoN_filter.wdl" as gapf
+import "../subworkflows/PoN_filter.wdl" as pf
 import "../subworkflows/fp_filter.wdl" as ff
 import "../subworkflows/mutect_noFp.wdl" as m
 import "../subworkflows/lofreq_noFp.wdl" as l
@@ -19,6 +19,8 @@ import "../tools/vep.wdl" as vep
 import "../tools/pon2percent.wdl" as pp
 import "../tools/split_bam_into_chr.wdl" as sbic
 import "../tools/merge_vcf.wdl" as mv
+import "../tools/create_fake_vcf.wdl" as cfv
+import "../tools/annotate_vcf.wdl" as av
 
 workflow archerdx {
     input {
@@ -251,8 +253,8 @@ workflow archerdx {
             input:
             reference = reference,
             reference_fai = reference_fai,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = index_chr_bam.indexed_bam,
+            tumor_bam_bai = index_chr_bam.indexed_bam_bai,
             interval_bed = target_bed,
             bcbio_filter_string = bcbio_filter_string,
             tumor_sample_name = tumor_sample_name,
@@ -283,8 +285,8 @@ workflow archerdx {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = index_chr_bam.indexed_bam,
+            tumor_bam_bai = index_chr_bam.indexed_bam_bai,
             interval_bed = target_bed,
             tumor_sample_name = tumor_sample_name,
             tumor_only = tumor_only
@@ -307,11 +309,104 @@ workflow archerdx {
             sample_name = tumor_sample_name
         }
 
-        # 1. Merge Callers Together and create a fake VCF
-        # 2. Run fpfilter on fake VCF
-        # 3. Run PoN on fake VCF
-        # 4. Run VEP on fake VCF
-        # 5. Annotate the Original Callers with the annotations
+        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf]){
+            call cfv.createFakeVcf as fake_vcf {
+                input:
+                vcf = caller_vcf,
+                tumor_sample_name = tumor_sample_name
+            }
+        }
+
+        call mv.mergeVcf as mergeCallers {
+            input:
+            vcfs = fake_vcf.fake_vcf,
+            vcf_tbis = fake_vcf.fake_vcf_tbi,
+            merged_vcf_basename = "all_callers." + tumor_sample_name
+        }
+
+        call ff.fpFilter as fpFilter {
+            input:
+            bam=index_chr_bam.indexed_bam,
+            bam_bai=index_chr_bam.indexed_bam_bai,
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            vcf = mergeCallers.merged_vcf,
+            vcf_tbi = mergeCallers.merged_vcf_tbi,
+            variant_caller="all_callers",
+            sample_name=tumor_sample_name,
+            min_var_freq=af_threshold
+        }
+
+        call pf.PoNFilter as PoN_filter {
+            input:
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            caller_vcf = mergeCallers.merged_vcf,
+            caller_prefix = "all_callers",
+            normal_bams_file = pon_normal_bams_file,
+            pon_bams = pon_bams,
+            pon_final_name = "all_callers." + tumor_sample_name + ".pon.pileup",
+            pon_pvalue = pon_pvalue,
+            arrayMode = arrayMode
+        }
+
+        call vep.vep as vep {
+            input:
+            vcf = mergeCallers.merged_vcf,
+            cache_dir_zip = vep_cache_dir_zip,
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            plugins = vep_plugins,
+            ensembl_assembly = vep_ensembl_assembly,
+            ensembl_version = vep_ensembl_version,
+            ensembl_species = vep_ensembl_species,
+            synonyms_file = synonyms_file,
+            custom_annotations = vep_custom_annotations,
+            coding_only = annotate_coding_only,
+            pick = vep_pick
+        }
+
+        call av.annotateVcf as mutect_annotate_vcf {
+            input:
+            vcf = mutect_pon2.annotated_vcf,
+            vcf_tbi = mutect_pon2.annotated_vcf_tbi,
+            fp_filter = fpFilter.unfiltered_vcf,
+            fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
+            pon_filter = PoN_filter.processed_filtered_vcf,
+            pon_filter_tbi = PoN_filter.processed_filtered_vcf_tbi,
+            vep = vep.annotated_vcf,
+            caller_prefix = "mutect",
+            sample_name = tumor_sample_name
+        }
+
+        call av.annotateVcf as vardict_annotate_vcf {
+            input:
+            vcf = vardict_pon2.annotated_vcf,
+            vcf_tbi = vardict_pon2.annotated_vcf_tbi,
+            fp_filter = fpFilter.unfiltered_vcf,
+            fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
+            pon_filter = PoN_filter.processed_filtered_vcf,
+            pon_filter_tbi = PoN_filter.processed_filtered_vcf_tbi,
+            vep = vep.annotated_vcf,
+            caller_prefix = "vardict",
+            sample_name = tumor_sample_name
+        }
+
+        call av.annotateVcf as lofreq_annotate_vcf {
+            input:
+            vcf = lofreq_pon2.annotated_vcf,
+            vcf_tbi = lofreq_pon2.annotated_vcf_tbi,
+            fp_filter = fpFilter.unfiltered_vcf,
+            fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
+            pon_filter = PoN_filter.processed_filtered_vcf,
+            pon_filter_tbi = PoN_filter.processed_filtered_vcf_tbi,
+            vep = vep.annotated_vcf,
+            caller_prefix = "lofreq",
+            sample_name = tumor_sample_name
+        }
     }
 
     call mv.mergeVcf as merge_mutect_full {
@@ -320,6 +415,18 @@ workflow archerdx {
             vcf_tbis = mutect.unfiltered_vcf_tbi,
             merged_vcf_basename = "mutect_full." + tumor_sample_name
     }
+    call mv.mergeVcf as merge_mutect_pon {
+        input:
+            vcfs = mutect_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = mutect_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "mutect." + tumor_sample_name + ".pileup.fisherPON"
+    }
+    call mv.mergeVcf as merge_mutect_final {
+        input:
+            vcfs = mutect_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = mutect_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "mutect." + tumor_sample_name + ".final.annotated"
+    }
 
     call mv.mergeVcf as merge_vardict_full {
         input:
@@ -327,12 +434,43 @@ workflow archerdx {
             vcf_tbis = vardict.unfiltered_vcf_tbi,
             merged_vcf_basename = "vardict_full." + tumor_sample_name
     }
+    call mv.mergeVcf as merge_vardict_pon {
+        input:
+            vcfs = vardict_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = vardict_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "vardict." + tumor_sample_name + ".pileup.fisherPON"
+    }
+    call mv.mergeVcf as merge_vardict_final {
+        input:
+            vcfs = vardict_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = vardict_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "vardict." + tumor_sample_name + ".final.annotated"
+    }
 
     call mv.mergeVcf as merge_lofreq_full {
         input:
             vcfs = lofreq.unfiltered_vcf,
             vcf_tbis = lofreq.unfiltered_vcf_tbi,
             merged_vcf_basename = "lofreq_full." + tumor_sample_name
+    }
+    call mv.mergeVcf as merge_lofreq_pon {
+        input:
+            vcfs = lofreq_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = lofreq_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "lofreq." + tumor_sample_name + ".pileup.fisherPON"
+    }
+    call mv.mergeVcf as merge_lofreq_final {
+        input:
+            vcfs = lofreq_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = lofreq_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "lofreq." + tumor_sample_name + ".final.annotated"
+    }
+
+    call mv.mergeVcf as merge_pon {
+        input:
+            vcfs = PoN_filter.pon_total_counts,
+            vcf_tbis = PoN_filter.pon_total_counts_tbi,
+            merged_vcf_basename = tumor_sample_name + ".pon.total.counts"
     }
 
     output {
@@ -354,22 +492,21 @@ workflow archerdx {
         File tumor_verify_bam_id_depth = tumor_qc.verify_bam_id_depth
 
         # Mutect
-        File mutect_full =  merge_mutect_full.merged_vcf                                                          # Raw Mutect Ouput
-        # File mutect_pon_annotated_unfiltered_vcf = mutect_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        # File mutect_pon_annotated_filtered_vcf = mutect_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        # File mutect_pon_total_counts = mutect_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File mutect_full =  merge_mutect_full.merged_vcf                                # Raw Mutect Ouput
+        File mutect_pon_annotated_vcf = merge_mutect_pon.merged_vcf                     # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File mutect_vep_annotated_vcf = merge_mutect_final.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
         # Lofreq
-        File lofreq_full = merge_lofreq_full.merged_vcf                                                           # Raw Lofreq Ouput
-        # File lofreq_pon_annotated_unfiltered_vcf = lofreq_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        # File lofreq_pon_annotated_filtered_vcf = lofreq_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        # File lofreq_pon_total_counts = lofreq_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File lofreq_full = merge_lofreq_full.merged_vcf                                 # Raw Lofreq Ouput
+        File lofreq_pon_annotated_vcf = merge_lofreq_pon.merged_vcf                     # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File lofreq_vep_annotated_vcf = merge_lofreq_final.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
         # Vardict
-        File vardict_full = merge_vardict_full.merged_vcf                                                            # Raw Vardict Ouput
-        # File vardict_pon_annotated_unfiltered_vcf = vardict_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        # File vardict_pon_annotated_filtered_vcf = vardict_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        # File vardict_pon_total_counts = vardict_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File vardict_full = merge_vardict_full.merged_vcf                               # Raw Vardict Ouput
+        File vardict_pon_annotated_vcf = merge_vardict_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File vardict_vep_annotated_vcf = merge_vardict_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
+
+        File pon_total_counts = merge_pon.merged_vcf                                    # PoN Pileup Results
 
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 

@@ -37,8 +37,8 @@ task pon2Percent {
     >>>
 
     output {
-        File annotated_vcf = "~{caller}.~{sample_name}.final.annotated.vcf.gz"
-        File annotated_vcf_tbi = "~{caller}.~{sample_name}.final.annotated.vcf.gz.tbi"
+        File annotated_vcf = "~{caller}.~{sample_name}.pon2.annotated.vcf.gz"
+        File annotated_vcf_tbi = "~{caller}.~{sample_name}.pon2.annotated.vcf.gz.tbi"
     }
 }
 
