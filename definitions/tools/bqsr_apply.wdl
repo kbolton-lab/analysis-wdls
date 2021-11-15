@@ -14,7 +14,7 @@ task bqsrApply {
   }
 
   Int cores = 1
-  Int space_needed_gb = 10 + round(size([known_sites,known_sites_tbi], "GB") + size([reference, reference_fai, reference_dict], "GB") + 2*size([bam, bam_bai], "GB"))
+  Int space_needed_gb = 10 + round(size([known_sites, known_sites_tbi], "GB") + size([reference, reference_fai, reference_dict], "GB") + size([bam, bam_bai], "GB") * 2)
   Int preemptible = 1
   Int maxRetries = 0
   runtime {
@@ -45,6 +45,10 @@ workflow wf {
     File bam
     File bam_bai
     String output_name = "final"
+
+    Array[File] known_sites
+    Array[File] known_sites_tbi
+    Array[String]? intervals
   }
   call bqsrApply {
     input:
@@ -53,6 +57,9 @@ workflow wf {
     reference_dict=reference_dict,
     bam=bam,
     bam_bai=bam_bai,
-    output_name=output_name
+    output_name=output_name,
+    known_sites=known_sites,
+    known_sites_tbi=known_sites_tbi,
+    intervals=intervals
   }
 }
