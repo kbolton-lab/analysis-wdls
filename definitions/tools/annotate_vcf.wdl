@@ -28,13 +28,13 @@ task annotateVcf {
 
     command <<<
         bgzip ~{vep} && tabix ~{vep}.gz
-        zcat ~{fp_filter} | tail -n +4  > fp_filter.header;
-        zcat ~{vep} | tail -n +3 > vep.header;
+        zcat ~{fp_filter} | grep '##' | tail -n +4  > fp_filter.header;
+        zcat ~{vep} | grep '##' | tail -n +3 > vep.header;
 
         bcftools annotate -a ~{fp_filter} -h fp_filter.header -c +FILTER ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
         bcftools annotate -a ~{vep} -h vep.header -c CSQ ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
 
-        tabix ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.pon.annotated.vcf.gz
+        tabix ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
         tabix ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
     >>>
 
