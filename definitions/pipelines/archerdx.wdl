@@ -139,25 +139,6 @@ workflow archerdx {
         #bam = bqsr.bqsr_bam
     }
 
-    call qe.qcExome as tumor_qc {
-        input:
-        bam = index_bam.indexed_bam,
-        bam_bai = index_bam.indexed_bam_bai,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        bait_intervals = bait_intervals,
-        target_intervals = target_intervals,
-        per_base_intervals = per_base_intervals,
-        per_target_intervals = per_target_intervals,
-        summary_intervals = summary_intervals,
-        omni_vcf = omni_vcf,
-        omni_vcf_tbi = omni_vcf_tbi,
-        picard_metric_accumulation_level = picard_metric_accumulation_level,
-        minimum_mapping_quality = qc_minimum_mapping_quality,
-        minimum_base_quality = qc_minimum_base_quality
-    }
-
     call sbic.splitBamIntoChr as split_bam_into_chr {
         input:
         bam = index_bam.indexed_bam,
