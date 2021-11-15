@@ -34,6 +34,7 @@ task lofreqTumorOnly {
         set -o nounset
 
         /opt/lofreq/bin/lofreq indelqual --dindel -f ~{reference} -o output.indel.bam ~{tumor_bam}
+        samtools index output.indel.bam
         /opt/lofreq/bin/lofreq call-parallel --pp-threads ~{cores} -A -B -f ~{reference} --call-indels --bed ~{interval_bed} -o ~{output_name} output.indel.bam --force-overwrite
         bgzip ~{output_name} && tabix ~{output_name}.gz
     >>>
