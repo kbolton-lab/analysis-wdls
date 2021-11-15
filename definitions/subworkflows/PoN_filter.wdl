@@ -13,14 +13,11 @@ workflow PoNFilter {
         File reference_fai
         File reference_dict
         File caller_vcf
-        File caller_vcf_tbi
-        String? caller_prefix = "caller"
         File normal_bams_file
         Array[bam_and_bai] pon_bams
         Int? mapq = 5
         Int? baseq = 5
         String? pon_final_name = "pon.pileup"
-        String? pon_pvalue = "0.05"
         Boolean arrayMode = true
     }
 
@@ -59,26 +56,7 @@ workflow PoNFilter {
         }
     }
 
-    call nf.normalFisher as call_R_fisher {
-        input:
-        vcf = caller_vcf,
-        pon = select_first([merge.merged_vcf, get_pileup_counts.pileup]),
-        pon_tbi = select_first([merge.merged_vcf_tbi, get_pileup_counts.pileup_tbi]),
-        p_value = pon_pvalue,
-        caller = caller_prefix
-    }
-
-    call iv.indexVcf as index_pon_vcf {
-        input: vcf = call_R_fisher.pon_vcf
-    }
-
-    call iv.indexVcf as index_pon_filtered_vcf {
-        input: vcf = call_R_fisher.pon_filtered_vcf
-    }
-
     output {
-        File processed_filtered_vcf = index_pon_filtered_vcf.indexed_vcf
-        File processed_filtered_vcf_tbi = index_pon_filtered_vcf.indexed_vcf_tbi
         File pon_total_counts = select_first([merge.merged_vcf, get_pileup_counts.pileup])
         File pon_total_counts_tbi = select_first([merge.merged_vcf_tbi, get_pileup_counts.pileup_tbi])
     }

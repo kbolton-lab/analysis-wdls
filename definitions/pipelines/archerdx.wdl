@@ -10,6 +10,7 @@ import "../subworkflows/fp_filter_no_norm.wdl" as ffnn
 import "../subworkflows/mutect_noFp.wdl" as m
 import "../subworkflows/lofreq_noFp.wdl" as l
 import "../subworkflows/vardict_noFp.wdl" as v
+import "../subworkflows/annotate_caller.wdl" as ac
 
 import "../tools/fastq_to_bam.wdl" as ftb
 import "../tools/bqsr_apply.wdl" as ba
@@ -20,7 +21,6 @@ import "../tools/pon2percent.wdl" as pp
 import "../tools/split_bam_into_chr.wdl" as sbic
 import "../tools/merge_vcf.wdl" as mv
 import "../tools/create_fake_vcf.wdl" as cfv
-import "../tools/annotate_vcf.wdl" as av
 
 workflow archerdx {
     input {
@@ -297,12 +297,9 @@ workflow archerdx {
             reference_fai = reference_fai,
             reference_dict = reference_dict,
             caller_vcf = mergeCallers.merged_vcf,
-            caller_vcf_tbi = mergeCallers.merged_vcf_tbi,
-            caller_prefix = "all_callers",
             normal_bams_file = pon_normal_bams_file,
             pon_bams = pon_bams,
             pon_final_name = "all_callers." + tumor_sample_name + ".pon.pileup",
-            pon_pvalue = pon_pvalue,
             arrayMode = arrayMode
         }
 
@@ -323,43 +320,46 @@ workflow archerdx {
             pick = vep_pick
         }
 
-        call av.annotateVcf as mutect_annotate_vcf {
+        call ac.annotateCaller as mutect_annotate_vcf {
             input:
             vcf = mutect_pon2.annotated_vcf,
             vcf_tbi = mutect_pon2.annotated_vcf_tbi,
             fp_filter = fpFilter.unfiltered_vcf,
             fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
-            pon_filter = PoN_filter.processed_filtered_vcf,
-            pon_filter_tbi = PoN_filter.processed_filtered_vcf_tbi,
+            pileup_file = PoN_filter.pon_total_counts,
+            pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
             vep = vep.annotated_vcf,
             caller_prefix = "mutect",
-            sample_name = tumor_sample_name
+            sample_name = tumor_sample_name,
+            pon_pvalue = pon_pvalue
         }
 
-        call av.annotateVcf as vardict_annotate_vcf {
+        call ac.annotateCaller as vardict_annotate_vcf {
             input:
             vcf = vardict_pon2.annotated_vcf,
             vcf_tbi = vardict_pon2.annotated_vcf_tbi,
             fp_filter = fpFilter.unfiltered_vcf,
             fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
-            pon_filter = PoN_filter.processed_filtered_vcf,
-            pon_filter_tbi = PoN_filter.processed_filtered_vcf_tbi,
+            pileup_file = PoN_filter.pon_total_counts,
+            pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
             vep = vep.annotated_vcf,
             caller_prefix = "vardict",
-            sample_name = tumor_sample_name
+            sample_name = tumor_sample_name,
+            pon_pvalue = pon_pvalue
         }
 
-        call av.annotateVcf as lofreq_annotate_vcf {
+        call ac.annotateCaller as lofreq_annotate_vcf {
             input:
             vcf = lofreq_pon2.annotated_vcf,
             vcf_tbi = lofreq_pon2.annotated_vcf_tbi,
             fp_filter = fpFilter.unfiltered_vcf,
             fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
-            pon_filter = PoN_filter.processed_filtered_vcf,
-            pon_filter_tbi = PoN_filter.processed_filtered_vcf_tbi,
+            pileup_file = PoN_filter.pon_total_counts,
+            pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
             vep = vep.annotated_vcf,
             caller_prefix = "lofreq",
-            sample_name = tumor_sample_name
+            sample_name = tumor_sample_name,
+            pon_pvalue = pon_pvalue
         }
     }
 
