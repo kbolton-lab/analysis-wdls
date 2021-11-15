@@ -14,12 +14,19 @@ task fpFilter {
     Float? min_var_freq = 0.05
   }
 
-  Int space_needed_gb = 10 + round(size(vcf, "GB")*2 + size([reference, reference_fai, reference_dict, bam], "GB"))
+  Int space_needed_gb = 5 + round(size(vcf, "GB")*2 + size([reference, reference_fai, reference_dict, bam], "GB"))
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+
   runtime {
     memory: "6GB"
     bootDiskSizeGb: 25
     docker: "kboltonlab/fp_filter-wdl"
     disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   String output_vcf = output_vcf_basename + ".vcf"

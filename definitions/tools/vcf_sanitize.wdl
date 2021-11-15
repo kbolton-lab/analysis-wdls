@@ -5,10 +5,16 @@ task vcfSanitize {
     File vcf
   }
 
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+
   runtime {
-    memory: "4GB"
-    cpu: 1
+    memory: "6GB"
+    cpu: cores
     docker: "mgibio/samtools-cwl:1.0.0"
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   # outbase should match in script but I don't want to risk changing it yet

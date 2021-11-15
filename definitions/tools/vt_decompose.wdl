@@ -6,11 +6,18 @@ task vtDecompose {
     File vcf_tbi
   }
 
-  Int space_needed_gb = 10 + round(size([vcf, vcf_tbi], "GB")*2)
+  Int space_needed_gb = 5 + round(size([vcf, vcf_tbi], "GB")*2)
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+
   runtime {
-    memory: "4GB"
+    memory: "6GB"
     docker: "kboltonlab/vt"
     disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   command <<<

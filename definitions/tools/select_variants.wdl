@@ -18,7 +18,7 @@ task selectVariants {
     String? select_type
   }
 
-  Int space_needed_gb = 10 + round(size([vcf, vcf_tbi], "GB")*3 + size([reference, reference_fai, reference_dict, interval_list], "GB"))
+  Int space_needed_gb = 5 + round(size([vcf, vcf_tbi], "GB")*3 + size([reference, reference_fai, reference_dict, interval_list], "GB"))
   Int preemptible = 1
   Int maxRetries = 0
   Int cores = 1
