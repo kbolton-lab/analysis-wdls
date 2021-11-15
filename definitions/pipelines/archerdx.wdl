@@ -128,63 +128,15 @@ workflow archerdx {
         File normalized_gnomad_exclude
         File normalized_gnomad_exclude_tbi
         String filter_flag = "include"
-    }
 
-    scatter(seq_data in sequence) {
-        call fqf.archerFastqFormat as format_fastq {
-            input:
-            sequence = seq_data,
-            umi_length = umi_length
-        }
-
-        call ftb.fastqToBam as fastq_to_bam {
-            input:
-            fastq1 = format_fastq.fastq1,
-            fastq2 = format_fastq.fastq2,
-            sample_name = tumor_sample_name,
-            library_name = "Library",
-            platform_unit = "Illumina",
-            platform = "ArcherDX"
-        }
-    }
-
-    call ma.molecularAlignment as alignment_workflow {
-        input:
-        bam = fastq_to_bam.bam,
-        sample_name = tumor_sample_name,
-        read_structure = read_structure,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        reference_amb = reference_amb,
-        reference_ann = reference_ann,
-        reference_bwt = reference_bwt,
-        reference_pac = reference_pac,
-        reference_sa = reference_sa,
-        target_intervals = target_intervals,
-        umi_paired = umi_paired,
-        min_reads = min_reads,
-        max_read_error_rate = max_read_error_rate,
-        max_base_error_rate = max_base_error_rate,
-        min_base_quality = min_base_quality,
-        max_no_call_fraction = max_no_call_fraction
-    }
-
-    call ba.bqsrApply as bqsr {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        bam = alignment_workflow.aligned_bam,
-        bam_bai = alignment_workflow.aligned_bam_bai,
-        intervals = bqsr_intervals,
-        known_sites = bqsr_known_sites,
-        known_sites_tbi = bqsr_known_sites_tbi
+        # DELETE AFTER TESTING
+        File final_bam
     }
 
     call ib.indexBam as index_bam {
         input:
-        bam = bqsr.bqsr_bam
+        bam = final_bam
+        #bam = bqsr.bqsr_bam
     }
 
     call qe.qcExome as tumor_qc {
@@ -209,6 +161,7 @@ workflow archerdx {
     call sbic.splitBamIntoChr as split_bam_into_chr {
         input:
         bam = index_bam.indexed_bam,
+        bam_bai = index_bam.indexed_bam_bai,
         interval_bed = target_bed
     }
 

@@ -31,8 +31,8 @@ task annotateVcf {
     command <<<
         bgzip ~{vep} && tabix ~{vep}.gz
         zcat ~{fp_filter} | tail -n +4  > fp_filter.header;
-        zcat ~{vep} | tail -n +3 > vep.header;
         zcat ~{pon_filter} | tail -n +3 > pon_filter.header;
+        zcat ~{vep} | tail -n +3 > vep.header;
 
         bcftools annotate --threads 32 -a ~{fp_filter} -h fp_filter.header -c +FILTER ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
         bcftools annotate --threads 32 -a ~{pon_filter} -h pon_filter.header -c PON_RefDepth,PON_AltDepth,PON_FISHER ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.pon.annotated.vcf.gz

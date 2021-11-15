@@ -193,5 +193,6 @@
   "archerdx.vep_pick": "pick",
   "archerdx.pindel_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pindel.merged.2percent.2N.vcf.gz",
   "archerdx.read_structure": ["8M13S+T", "+T"],
-  "archerdx.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz.tbi"
+  "archerdx.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz.tbi",
+  "archerdx.final_bam" : "/storage1/fs1/bolton/Active/data/TEST_DATA/final.bam"
 }
