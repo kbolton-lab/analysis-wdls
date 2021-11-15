@@ -1,0 +1,4 @@
+{
+  "wf.vcf": "/storage1/fs1/bolton/Active/data/TEST_DATA/mutect_full.vcf.gz",
+  "wf.tumor_sample_name": "Sample"
+}
