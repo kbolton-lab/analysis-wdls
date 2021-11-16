@@ -27,7 +27,11 @@ task normalFisher {
     command <<<
         set -eou pipefail
 
-        name=$(basename ~{vcf} .vcf)
+        if [ "~{vcf}" == "*.gz" ]; then
+            name=$(basename ~{vcf} .vcf.gz)
+        else
+            name=$(basename ~{vcf} .vcf)
+        fi
 
         bcftools +fill-tags -Oz -o RD.vcf.gz ~{pon} -- -t "PON_RefDepth=sum(RD)"
         bcftools +fill-tags -Oz -o RD_AD.vcf.gz RD.vcf.gz -- -t "PON_AltDepth=sum(AD)" && tabix RD_AD.vcf.gz
@@ -172,12 +176,17 @@ task normalFisher {
         fi
         chmod u+x fisherTestInput.R
 
-
-        LC_ALL=C.UTF-8 Rscript --vanilla ./fisherTestInput.R $name.fisher.input $name.fisher.output
-        bgzip -f $name.fisher.output
-        tabix -f -s1 -b2 -e2 $name.fisher.output.gz
-        bcftools annotate -a $name.fisher.output.gz -h fisher.header -c CHROM,POS,REF,ALT,-,-,-,-,PON_FISHER $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
-        bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+        # Depending on how we split, we might have caller_vcf that doesn't have any variants called
+        if [ -s $name.fisher.input ]; then
+            LC_ALL=C.UTF-8 Rscript --vanilla ./fisherTestInput.R $name.fisher.input $name.fisher.output
+            bgzip -f $name.fisher.output
+            tabix -f -s1 -b2 -e2 $name.fisher.output.gz
+            bcftools annotate -a $name.fisher.output.gz -h fisher.header -c CHROM,POS,REF,ALT,-,-,-,-,PON_FISHER $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
+            bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+        else
+            bcftools annotate -h fisher.header $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
+            bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+        fi
     >>>
 
     output {
