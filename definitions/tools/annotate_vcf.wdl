@@ -27,8 +27,11 @@ task annotateVcf {
     }
 
     command <<<
-        #bgzip ~{vep}
-        tabix ~{vep}.gz
+        if [ "~{vep}" == "*.gz"]; then
+            tabix ~{vep}.gz
+        else
+            bgzip ~{vep} && tabix ~{vep}.gz
+        fi
         zcat ~{fp_filter} | grep '##' | tail -n +4  > fp_filter.header;
         zcat ~{vep} | grep '##' | tail -n +3 > vep.header;
 
