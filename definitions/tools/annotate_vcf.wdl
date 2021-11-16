@@ -32,9 +32,8 @@ task annotateVcf {
         zcat ~{vep} | grep '##' | tail -n +3 > vep.header;
 
         bcftools annotate -a ~{fp_filter} -h fp_filter.header -c +FILTER ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
-        bcftools annotate -a ~{vep} -h vep.header -c CSQ ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
-
         tabix ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
+        bcftools annotate -a ~{vep} -h vep.header -c CSQ ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
         tabix ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
     >>>
 
