@@ -79,10 +79,13 @@ task vepTask {
     --species ~{ensembl_species} \
     ~{additional_args} \
     ${custom_string}
+
+    bgzip ~{annotated_path} && tabix ~{annotated_path}.gz
   >>>
 
   output {
-    File annotated_vcf = annotated_path
+    File annotated_vcf = "~{annotated_path}.gz"
+    File annotated_vcf_tbi = "~{annotated_path}.gz.tbi"
     File vep_summary = annotated_path + "_summary.html"
   }
 }
@@ -147,6 +150,7 @@ workflow vep {
 
   output {
       File annotated_vcf = vepTask.annotated_vcf
+      File annotated_vcf_tbi = vepTask.annotated_vcf_tbi
       File vep_summary = vepTask.vep_summary
   }
 }

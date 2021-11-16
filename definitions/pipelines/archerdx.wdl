@@ -329,6 +329,7 @@ workflow archerdx {
             pileup_file = PoN_filter.pon_total_counts,
             pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
             vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
             caller_prefix = "mutect",
             sample_name = tumor_sample_name,
             pon_pvalue = pon_pvalue
@@ -343,6 +344,7 @@ workflow archerdx {
             pileup_file = PoN_filter.pon_total_counts,
             pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
             vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
             caller_prefix = "vardict",
             sample_name = tumor_sample_name,
             pon_pvalue = pon_pvalue
@@ -357,6 +359,7 @@ workflow archerdx {
             pileup_file = PoN_filter.pon_total_counts,
             pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
             vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
             caller_prefix = "lofreq",
             sample_name = tumor_sample_name,
             pon_pvalue = pon_pvalue

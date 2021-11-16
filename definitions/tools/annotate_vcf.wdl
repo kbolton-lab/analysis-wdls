@@ -7,6 +7,7 @@ task annotateVcf {
         File fp_filter
         File fp_filter_tbi
         File vep
+        File vep_tbi
         String caller_prefix
         String sample_name
     }

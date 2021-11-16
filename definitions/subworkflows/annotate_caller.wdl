@@ -12,6 +12,7 @@ workflow annotateCaller {
         File pileup_file
         File pileup_file_tbi
         File vep
+        File vep_tbi
         String caller_prefix
         String sample_name
         String? pon_pvalue = "0.05"
@@ -33,6 +34,7 @@ workflow annotateCaller {
         fp_filter = fp_filter,
         fp_filter_tbi = fp_filter_tbi,
         vep = vep,
+        vep_tbi = vep_tbi,
         caller_prefix = caller_prefix,
         sample_name = sample_name
     }
