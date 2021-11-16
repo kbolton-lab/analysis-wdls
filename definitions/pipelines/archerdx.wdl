@@ -16,7 +16,7 @@ import "../tools/fastq_to_bam.wdl" as ftb
 import "../tools/bqsr_apply.wdl" as ba
 import "../tools/index_bam.wdl" as ib
 import "../tools/bcftools_isec_complement.wdl" as bic
-import "../tools/vep_brian.wdl" as vep
+import "../tools/vep.wdl" as vep
 import "../tools/pon2percent.wdl" as pp
 import "../tools/split_bam_into_chr.wdl" as sbic
 import "../tools/merge_vcf.wdl" as mv
@@ -303,7 +303,7 @@ workflow archerdx {
             arrayMode = arrayMode
         }
 
-        call vep.vep as vepTask {
+        call vep.vep as vep {
             input:
             vcf = mergeCallers.merged_vcf,
             cache_dir_zip = vep_cache_dir_zip,
@@ -316,7 +316,8 @@ workflow archerdx {
             ensembl_species = vep_ensembl_species,
             synonyms_file = synonyms_file,
             custom_annotations = vep_custom_annotations,
-            coding_only = annotate_coding_only
+            coding_only = annotate_coding_only,
+            pick = vep_pick
         }
 
         call ac.annotateCaller as mutect_annotate_vcf {
@@ -327,8 +328,7 @@ workflow archerdx {
             fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
             pileup_file = PoN_filter.pon_total_counts,
             pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
-            vep = vepTask.annotated_vcf,
-            vep_tbi = vepTask.annotated_vcf_tbi,
+            vep = vep.annotated_vcf,
             caller_prefix = "mutect",
             sample_name = tumor_sample_name,
             pon_pvalue = pon_pvalue
@@ -342,8 +342,7 @@ workflow archerdx {
             fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
             pileup_file = PoN_filter.pon_total_counts,
             pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
-            vep = vepTask.annotated_vcf,
-            vep_tbi = vepTask.annotated_vcf_tbi,
+            vep = vep.annotated_vcf,
             caller_prefix = "vardict",
             sample_name = tumor_sample_name,
             pon_pvalue = pon_pvalue
@@ -357,8 +356,7 @@ workflow archerdx {
             fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
             pileup_file = PoN_filter.pon_total_counts,
             pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
-            vep = vepTask.annotated_vcf,
-            vep_tbi = vepTask.annotated_vcf_tbi,
+            vep = vep.annotated_vcf,
             caller_prefix = "lofreq",
             sample_name = tumor_sample_name,
             pon_pvalue = pon_pvalue

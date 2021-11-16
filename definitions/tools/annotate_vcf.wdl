@@ -7,12 +7,11 @@ task annotateVcf {
         File fp_filter
         File fp_filter_tbi
         File vep
-        File vep_tbi
         String caller_prefix
         String sample_name
     }
 
-    Int space_needed_gb = 10 + 2*round(size([vcf, vcf_tbi, fp_filter, fp_filter_tbi, vep, vep_tbi], "GB"))
+    Int space_needed_gb = 10 + 2*round(size([vcf, vcf_tbi, fp_filter, fp_filter_tbi, vep], "GB"))
     Int cores = 1
     Int preemptible = 1
     Int maxRetries = 0
@@ -28,6 +27,8 @@ task annotateVcf {
     }
 
     command <<<
+        #bgzip ~{vep}
+        tabix ~{vep}.gz
         zcat ~{fp_filter} | grep '##' | tail -n +4  > fp_filter.header;
         zcat ~{vep} | grep '##' | tail -n +3 > vep.header;
 
