@@ -15,8 +15,8 @@ task bbmapRepair {
         docker: "quay.io/biocontainers/bbmap:38.92--he522d1c_0"
         memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 5 + round(2*data_size)
-        disks: "local-disk ~{2 + round(2*data_size)} SSD"
+        bootDiskSizeGb: 10 + round(2*data_size)
+        disks: "local-disk ~{10 + round(2*data_size)} SSD"
         preemptible: preemptible
         maxRetries: maxRetries
     }

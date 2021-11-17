@@ -26,8 +26,8 @@ task filterClipAndCollectMetrics {
         docker: "quay.io/biocontainers/fgbio:1.3.0--0"
         memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 5 + round(3*data_size + reference_size)
-        disks: "local-disk ~{5 + round(3*data_size + reference_size)} SSD"
+        bootDiskSizeGb: 10 + round(3*data_size + reference_size)
+        disks: "local-disk ~{10 + round(3*data_size + reference_size)} SSD"
         preemptible: preemptible
         maxRetries: maxRetries
     }

@@ -11,7 +11,7 @@ task filterUmiLength {
     Int preemptible = 1
     Int maxRetries = 0
     Float data_size = size([fastq1, fastq2], "GB")
-    Int space_needed_gb = 5 + round(2*data_size)
+    Int space_needed_gb = 10 + round(2*data_size)
 
     runtime {
         docker: "ubuntu:xenial"

@@ -10,7 +10,7 @@ task collectInsertSizeMetrics {
     String metric_accumulation_level
   }
 
-  Int space_needed_gb = 5 + round(size([bam, bam_bai, reference, reference_fai, reference_dict], "GB"))
+  Int space_needed_gb = 10 + round(size([bam, bam_bai, reference, reference_fai, reference_dict], "GB"))
   Int preemptible = 1
   Int maxRetries = 0
   Int cores = 1

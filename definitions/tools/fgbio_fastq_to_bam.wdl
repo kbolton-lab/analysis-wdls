@@ -10,7 +10,7 @@ task fgbioFastqToBam {
     }
 
     Int cores = 1
-    Int space_needed_gb = 5 + 2*round(size([trimmed_fastqs], "GB"))
+    Int space_needed_gb = 10 + 2*round(size([trimmed_fastqs], "GB"))
     Int preemptible = 1
     Int maxRetries = 0
     runtime {

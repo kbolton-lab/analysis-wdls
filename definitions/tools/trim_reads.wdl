@@ -10,7 +10,7 @@ task trimReads {
     }
 
     Int cores = 1
-    Int space_needed_gb = 5 + round(size([fastq1, fastq2], "GB"))
+    Int space_needed_gb = 10 + round(size([fastq1, fastq2], "GB"))
     Int preemptible = 1
     Int maxRetries = 0
     runtime {

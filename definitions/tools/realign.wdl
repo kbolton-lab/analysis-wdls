@@ -23,8 +23,8 @@ task realign {
         docker: "mgibio/dna-alignment:1.0.0"
         memory: "48GB"
         cpu: cores
-        bootDiskSizeGb: 10 + round(5*data_size + reference_size)
-        disks: "local-disk ~{10 + round(5*data_size + reference_size)} SSD"
+        bootDiskSizeGb: 10 + round(10*data_size + reference_size)
+        disks: "local-disk ~{10 + round(10*data_size + reference_size)} SSD"
         preemptible: preemptible
         maxRetries: maxRetries
     }

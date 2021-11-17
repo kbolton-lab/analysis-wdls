@@ -7,7 +7,7 @@ task groupReadsAndConsensus {
     }
 
     Int cores = 1
-    Int space_needed_gb = 5 + round(3*size(bam, "GB"))
+    Int space_needed_gb = 10 + round(3*size(bam, "GB"))
     Int preemptible = 1
     Int maxRetries = 0
 
@@ -16,6 +16,7 @@ task groupReadsAndConsensus {
         memory: "6GB"
         cpu: cores
         disks: "local-disk ~{space_needed_gb} SSD"
+        bootDiskSizeGb: space_needed_gb
         preemptible: preemptible
         maxRetries: maxRetries
     }

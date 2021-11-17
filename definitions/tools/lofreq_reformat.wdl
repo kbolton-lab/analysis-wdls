@@ -6,7 +6,7 @@ task lofreqReformat {
         String tumor_sample_name
     }
 
-    Int space_needed_gb = 5 + 2*round(size(vcf, "GB"))
+    Int space_needed_gb = 10 + 2*round(size(vcf, "GB"))
     Int cores = 1
     Int preemptible = 1
     Int maxRetries = 0
@@ -14,7 +14,7 @@ task lofreqReformat {
     runtime {
       cpu: cores
       docker: "quay.io/biocontainers/samtools:1.11--h6270b1f_0"
-      memory: "2GB"
+      memory: "6GB"
       bootDiskSizeGb: space_needed_gb
       disks: "local-disk ~{space_needed_gb} SSD"
       preemptible: preemptible

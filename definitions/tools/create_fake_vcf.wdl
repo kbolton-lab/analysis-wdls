@@ -7,7 +7,7 @@ task createFakeVcf {
     }
 
     Int cores = 1
-    Int space_needed_gb = 5 + round(2*size(vcf, "GB"))
+    Int space_needed_gb = 10 + round(2*size(vcf, "GB"))
     Int preemptible = 1
     Int maxRetries = 0
 

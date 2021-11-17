@@ -126,7 +126,7 @@ task mskGetBaseCounts {
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
     Float bam_size = size([normal_bam.bam, normal_bam.bai], "GB")
     Float vcf_size = size(vcf, "GB")
-    Int space_needed_gb = 5 + round(reference_size + 2*bam_size + vcf_size)
+    Int space_needed_gb = 10 + round(reference_size + 2*bam_size + vcf_size)
     Int preemptible = 1
     Int maxRetries = 0
 

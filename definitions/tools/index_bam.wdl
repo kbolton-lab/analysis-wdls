@@ -3,7 +3,7 @@ version 1.0
 task indexBam {
   input { File bam }
 
-  Int space_needed_gb = 5 + round(size(bam, "GB")*2)
+  Int space_needed_gb = 10 + round(size(bam, "GB")*2)
   Int cores = 1
   Int preemptible = 1
   Int maxRetries = 0

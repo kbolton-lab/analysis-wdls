@@ -10,7 +10,7 @@ task normalFisher {
     }
 
 
-    Int space_needed_gb = 100 + round(size([vcf, pon, pon_tbi], "GB"))
+    Int space_needed_gb = 10 + round(size([vcf, pon, pon_tbi], "GB"))
     Int cores = 1
     Int preemptible = 1
     Int maxRetries = 0

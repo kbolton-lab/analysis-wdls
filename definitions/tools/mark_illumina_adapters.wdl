@@ -6,7 +6,7 @@ task markIlluminaAdapters {
     }
 
     Int cores = 1
-    Int space_needed_gb = 5 + round(2*size(bam, "GB"))
+    Int space_needed_gb = 10 + round(2*size(bam, "GB"))
     Int preemptible = 1
     Int maxRetries = 0
 
@@ -15,6 +15,7 @@ task markIlluminaAdapters {
         memory: "6GB"
         cpu: cores
         disks: "local-disk ~{space_needed_gb} SSD"
+        bootDiskSizeGb: space_needed_gb
         preemptible: preemptible
         maxRetries: maxRetries
     }
