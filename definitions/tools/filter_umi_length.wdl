@@ -11,13 +11,14 @@ task filterUmiLength {
     Int preemptible = 1
     Int maxRetries = 0
     Float data_size = size([fastq1, fastq2], "GB")
+    Int space_needed_gb = 5 + round(2*data_size)
 
     runtime {
         docker: "ubuntu:xenial"
         memory: "6GB"
         cpu: cores
-        disks: "local-disk ~{2 + round(2*data_size)} SSD"
-        bootDiskSizeGb: data_size
+        disks: "local-disk ~{space_needed_gb} SSD"
+        bootDiskSizeGb: space_needed_gb
         preemptible: preemptible
         maxRetries: maxRetries
     }
