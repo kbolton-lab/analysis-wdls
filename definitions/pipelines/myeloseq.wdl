@@ -1,27 +1,27 @@
 version 1.0
 
-import "../types.wdl"
+import "types.wdl"
 
-import "../subworkflows/archer_fastq_format.wdl" as fqf
-import "../subworkflows/molecular_alignment_no_extract.wdl" as mane
-import "../subworkflows/qc_exome.wdl" as qe
-import "../subworkflows/PoN_filter.wdl" as pf
-import "../subworkflows/fp_filter_no_norm.wdl" as ffnn
-import "../subworkflows/mutect_noFp.wdl" as m
-import "../subworkflows/lofreq_noFp.wdl" as l
-import "../subworkflows/vardict_noFp.wdl" as v
-import "../subworkflows/annotate_caller.wdl" as ac
-import "../subworkflows/myeloseq_prep.wdl" as mp
+import "subworkflows/archer_fastq_format.wdl" as fqf
+import "subworkflows/molecular_alignment_no_extract.wdl" as mane
+import "subworkflows/qc_exome.wdl" as qe
+import "subworkflows/PoN_filter.wdl" as pf
+import "subworkflows/fp_filter_no_norm.wdl" as ffnn
+import "subworkflows/mutect_noFp.wdl" as m
+import "subworkflows/lofreq_noFp.wdl" as l
+import "subworkflows/vardict_noFp.wdl" as v
+import "subworkflows/annotate_caller.wdl" as ac
+import "subworkflows/myeloseq_prep.wdl" as mp
 
-import "../tools/fastq_to_bam.wdl" as ftb
-import "../tools/bqsr_apply.wdl" as ba
-import "../tools/index_bam.wdl" as ib
-import "../tools/bcftools_isec_complement.wdl" as bic
-import "../tools/vep.wdl" as vep
-import "../tools/pon2percent.wdl" as pp
-import "../tools/split_bam_into_chr.wdl" as sbic
-import "../tools/merge_vcf.wdl" as mv
-import "../tools/create_fake_vcf.wdl" as cfv
+import "tools/fastq_to_bam.wdl" as ftb
+import "tools/bqsr_apply.wdl" as ba
+import "tools/index_bam.wdl" as ib
+import "tools/bcftools_isec_complement.wdl" as bic
+import "tools/vep.wdl" as vep
+import "tools/pon2percent.wdl" as pp
+import "tools/split_bam_into_chr.wdl" as sbic
+import "tools/merge_vcf.wdl" as mv
+import "tools/create_fake_vcf.wdl" as cfv
 
 workflow myeloseq {
     input {
@@ -29,7 +29,7 @@ workflow myeloseq {
         Int scatter_count = 20
 
         # Sequence and BAM Information
-        #Array[File] input_bam
+        Array[File] input_bam
         Array[SequenceData] sequence
         File fastq_with_umis
         String adapter_one = "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
@@ -133,20 +133,20 @@ workflow myeloseq {
         String filter_flag = "include"
     }
 
-    scatter(seq_data in sequence) {
-        call mp.myeloseqPrep as myeloseq_processing {
-            input:
-                sequence = seq_data,
-                adapter_one = adapter_one,
-                adapter_two = adapter_two,
-                sample_name = tumor_sample_name,
-                fastq_with_umis = fastq_with_umis
-        }
-    }
+    #scatter(seq_data in sequence) {
+    #    call mp.myeloseqPrep as myeloseq_processing {
+    #        input:
+    #            sequence = seq_data,
+    #            adapter_one = adapter_one,
+    #            adapter_two = adapter_two,
+    #            sample_name = tumor_sample_name,
+    #            fastq_with_umis = fastq_with_umis
+    #    }
+    #}
 
     call mane.molecularAlignmentNoExtract as alignment_workflow {
         input:
-        bam = myeloseq_processing.bam,
+        bam = input_bam,
         sample_name = tumor_sample_name,
         reference = reference,
         reference_fai = reference_fai,
