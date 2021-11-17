@@ -1,26 +1,26 @@
 version 1.0
 
-import "../types.wdl"
+import "types.wdl"
 
-import "../subworkflows/archer_fastq_format.wdl" as fqf
-import "../subworkflows/molecular_alignment.wdl" as ma
-import "../subworkflows/qc_exome.wdl" as qe
-import "../subworkflows/PoN_filter.wdl" as pf
-import "../subworkflows/fp_filter_no_norm.wdl" as ffnn
-import "../subworkflows/mutect_noFp.wdl" as m
-import "../subworkflows/lofreq_noFp.wdl" as l
-import "../subworkflows/vardict_noFp.wdl" as v
-import "../subworkflows/annotate_caller.wdl" as ac
+import "subworkflows/archer_fastq_format.wdl" as fqf
+import "subworkflows/molecular_alignment.wdl" as ma
+import "subworkflows/qc_exome.wdl" as qe
+import "subworkflows/PoN_filter.wdl" as pf
+import "subworkflows/fp_filter_no_norm.wdl" as ffnn
+import "subworkflows/mutect_noFp.wdl" as m
+import "subworkflows/lofreq_noFp.wdl" as l
+import "subworkflows/vardict_noFp.wdl" as v
+import "subworkflows/annotate_caller.wdl" as ac
 
-import "../tools/fastq_to_bam.wdl" as ftb
-import "../tools/bqsr_apply.wdl" as ba
-import "../tools/index_bam.wdl" as ib
-import "../tools/bcftools_isec_complement.wdl" as bic
-import "../tools/vep.wdl" as vep
-import "../tools/pon2percent.wdl" as pp
-import "../tools/split_bam_into_chr.wdl" as sbic
-import "../tools/merge_vcf.wdl" as mv
-import "../tools/create_fake_vcf.wdl" as cfv
+import "tools/fastq_to_bam.wdl" as ftb
+import "tools/bqsr_apply.wdl" as ba
+import "tools/index_bam.wdl" as ib
+import "tools/bcftools_isec_complement.wdl" as bic
+import "tools/vep.wdl" as vep
+import "tools/pon2percent.wdl" as pp
+import "tools/split_bam_into_chr.wdl" as sbic
+import "tools/merge_vcf.wdl" as mv
+import "tools/create_fake_vcf.wdl" as cfv
 
 workflow archerdx {
     input {

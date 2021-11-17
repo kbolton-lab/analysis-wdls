@@ -16,7 +16,7 @@ task filterUmiLength {
         docker: "ubuntu:xenial"
         memory: "6GB"
         cpu: cores
-        disks: "local-disk ~{2 + 2*round(data_size)} SSD"
+        disks: "local-disk ~{2 + round(2*data_size)} SSD"
         bootDiskSizeGb: data_size
         preemptible: preemptible
         maxRetries: maxRetries
