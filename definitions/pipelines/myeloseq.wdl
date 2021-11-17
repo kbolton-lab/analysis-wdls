@@ -11,6 +11,7 @@ import "../subworkflows/mutect_noFp.wdl" as m
 import "../subworkflows/lofreq_noFp.wdl" as l
 import "../subworkflows/vardict_noFp.wdl" as v
 import "../subworkflows/annotate_caller.wdl" as ac
+import "../subworkflows/myeloseq_prep.wdl" as mp
 
 import "../tools/fastq_to_bam.wdl" as ftb
 import "../tools/bqsr_apply.wdl" as ba
@@ -28,7 +29,11 @@ workflow myeloseq {
         Int scatter_count = 20
 
         # Sequence and BAM Information
-        Array[File] input_bam
+        #Array[File] input_bam
+        Array[SequenceData] sequence
+        File fastq_with_umis
+        String adapter_one = "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
+        String adapter_two = "AGATCGGAAGAGCGTCGTGTAGGGAAA"
         String? tumor_name = "tumor"
         String tumor_sample_name
         File target_intervals
@@ -128,9 +133,20 @@ workflow myeloseq {
         String filter_flag = "include"
     }
 
+    scatter(seq_data in sequence) {
+        call mp.myeloseqPrep as myeloseq_processing {
+            input:
+                sequence = seq_data,
+                adapter_one = adapter_one,
+                adapter_two = adapter_two,
+                sample_name = tumor_sample_name,
+                fastq_with_umis = fastq_with_umis
+        }
+    }
+
     call mane.molecularAlignmentNoExtract as alignment_workflow {
         input:
-        bam = input_bam,
+        bam = myeloseq_processing.bam,
         sample_name = tumor_sample_name,
         reference = reference,
         reference_fai = reference_fai,
