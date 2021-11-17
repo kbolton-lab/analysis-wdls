@@ -31,7 +31,6 @@ workflow myeloseq {
         # Sequence and BAM Information
         Array[File] input_bam
         Array[SequenceData] sequence
-        File fastq_with_umis
         String adapter_one = "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
         String adapter_two = "AGATCGGAAGAGCGTCGTGTAGGGAAA"
         String? tumor_name = "tumor"

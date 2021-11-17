@@ -103,7 +103,6 @@
       },
       "readgroup": "RG\tRD:Sample\tSM:10979_1_1\tPL:Illumina\tCN:Myeloseq"
   }],
-  "myeloseq.fastq_with_umis": "/storage1/fs1/bolton/Active/projects/MGI_Data/lane2_S1_L002_I2_001.fastq.gz",
   "myeloseq.vep_custom_annotations": [{
       "force_report_coordinates" : true,
       "method" : "exact",
