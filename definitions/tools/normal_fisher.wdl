@@ -27,7 +27,7 @@ task normalFisher {
     command <<<
         set -eou pipefail
 
-        if [ "~{vcf}" == "*.gz" ]; then
+        if [[ "~{vcf}" == *.gz ]]; then
             name=$(basename ~{vcf} .vcf.gz)
         else
             name=$(basename ~{vcf} .vcf)
