@@ -191,5 +191,5 @@
   "myeloseq.tumor_sample_name": "10979_1_1",
   "myeloseq.reference_bwt": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.bwt",
   "myeloseq.annotate_coding_only": true,
-  "myeloseq.input_bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/10979_1_1.bam"
+  "myeloseq.input_bam": ["/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/10979_1_1.bam]"
 }
