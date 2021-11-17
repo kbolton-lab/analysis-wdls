@@ -34,7 +34,6 @@ task mskGetBaseCountsWithFile {
 
     command <<<
         set -eou pipefail
-
         if [[ ~{vcf} == *.vcf.gz ]]; then
             bgzip -d ~{vcf}
             vcf_file=~{vcf}
@@ -148,13 +147,31 @@ task mskGetBaseCounts {
         echo "SPACE_NEEDED: ~{space_needed_gb}"
 
         sample_name=$(samtools view -H ~{normal_bam.bam} | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq)
-
-        if [[ ~{vcf} == *.vcf.gz ]]; then
-            bgzip -d ~{vcf}
-            vcf_file=~{vcf}
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam.bam} --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+        number_of_variants=$(zgrep -v '#' ~{vcf} | wc -l)
+        if [ ${number_of_variants} == 0 ]; then
+            printf "##fileformat=VCFv4.2" > ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Total depth\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=RD,Number=1,Type=Integer,Description=\"Depth matching reference (REF) allele\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=AD,Number=1,Type=Integer,Description=\"Depth matching alternate (ALT) allele\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=VF,Number=1,Type=Float,Description=\"Variant frequence (AD/DP)\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=DPP,Number=1,Type=Integer,Description=\"Depth on postitive strand\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=DPN,Number=1,Type=Integer,Description=\"Depth on negative strand\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=RDP,Number=1,Type=Integer,Description=\"Reference depth on postitive strand\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=RDN,Number=1,Type=Integer,Description=\"Reference depth on negative strand\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=ADP,Number=1,Type=Integer,Description=\"Alternate depth on postitive strand\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=ADN,Number=1,Type=Integer,Description=\"Alternate depth on negative strand\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=DPF,Number=1,Type=Integer,Description=\"Total fragment depth\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=RDF,Number=1,Type=Float,Description=\"Fragment depth matching reference (REF) allele\">" >> ~{pon_final_name}.vcf
+            printf "##FORMAT=<ID=ADF,Number=1,Type=Float,Description=\"Fragment depth matching alternate (ALT) allele\">" >> ~{pon_final_name}.vcf
+            printf "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t${sample_name}"
         else
-            /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam.bam} --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            if [[ ~{vcf} == *.vcf.gz ]]; then
+                bgzip -d ~{vcf}
+                vcf_file=~{vcf}
+                /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam.bam} --vcf "${vcf_file%.*}" --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            else
+                /opt/GetBaseCountsMultiSample/GetBaseCountsMultiSample --fasta ~{reference} --bam ${sample_name}:~{normal_bam.bam} --vcf ~{vcf} --output ~{pon_final_name}.vcf --maq ~{mapq} --baq ~{baseq} --thread 16
+            fi
         fi
         bgzip ~{pon_final_name}.vcf && tabix ~{pon_final_name}.vcf.gz
     >>>

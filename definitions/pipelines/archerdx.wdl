@@ -18,7 +18,7 @@ import "tools/index_bam.wdl" as ib
 import "tools/bcftools_isec_complement.wdl" as bic
 import "tools/vep.wdl" as vep
 import "tools/pon2percent.wdl" as pp
-import "tools/split_bam_into_chr.wdl" as sbic
+import "tools/split_bed_to_chr.wdl" as sbtc
 import "tools/merge_vcf.wdl" as mv
 import "tools/create_fake_vcf.wdl" as cfv
 
@@ -207,28 +207,21 @@ workflow archerdx {
         minimum_base_quality = qc_minimum_base_quality
     }
 
-    call sbic.splitBamIntoChr as split_bam_into_chr {
+    call sbtc.splitBedToChr as split_bed_to_chr {
         input:
-        bam = index_bam.indexed_bam,
-        bam_bai = index_bam.indexed_bam_bai,
         interval_bed = target_bed
     }
 
-    scatter (bam_chr in split_bam_into_chr.split_chr) {
-        call ib.indexBam as index_chr_bam {
-            input:
-            bam = bam_chr
-        }
-
+    scatter (chr_bed in split_bed_to_chr.split_chr) {
         # Mutect
         call m.mutectNoFp as mutect {
             input:
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_chr_bam.indexed_bam,
-            tumor_bam_bai = index_chr_bam.indexed_bam_bai,
-            interval_list = target_intervals,
+            tumor_bam = index_bam.indexed_bam,
+            tumor_bam_bai = index_bam.indexed_bam_bai,
+            interval_list = chr_bed,
             scatter_count = scatter_count,
             tumor_only = tumor_only
         }
@@ -255,9 +248,9 @@ workflow archerdx {
             input:
             reference = reference,
             reference_fai = reference_fai,
-            tumor_bam = index_chr_bam.indexed_bam,
-            tumor_bam_bai = index_chr_bam.indexed_bam_bai,
-            interval_bed = target_bed,
+            tumor_bam = index_bam.indexed_bam,
+            tumor_bam_bai = index_bam.indexed_bam_bai,
+            interval_bed = chr_bed,
             bcbio_filter_string = bcbio_filter_string,
             tumor_sample_name = tumor_sample_name,
             min_var_freq = af_threshold,
@@ -287,9 +280,9 @@ workflow archerdx {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_chr_bam.indexed_bam,
-            tumor_bam_bai = index_chr_bam.indexed_bam_bai,
-            interval_bed = target_bed,
+            tumor_bam = index_bam.indexed_bam,
+            tumor_bam_bai = index_bam.indexed_bam_bai,
+            interval_bed = chr_bed,
             tumor_sample_name = tumor_sample_name,
             tumor_only = tumor_only
         }
@@ -328,8 +321,8 @@ workflow archerdx {
 
         call ffnn.fpFilterNoNorm as fpFilter {
             input:
-            bam=index_chr_bam.indexed_bam,
-            bam_bai=index_chr_bam.indexed_bam_bai,
+            bam=index_bam.indexed_bam,
+            bam_bai=index_bam.indexed_bam_bai,
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
