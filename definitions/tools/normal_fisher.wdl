@@ -190,10 +190,10 @@ task normalFisher {
     >>>
 
     output {
-        File pon_vcf = basename(vcf, ".vcf") + ".pileup.fisherPON.vcf.gz"
-        File pon_vcf_tbi = basename(vcf, ".vcf") + ".pileup.fisherPON.vcf.gz.tbi"
-        File pon_filtered_vcf = basename(vcf, ".vcf") + ".filtered.pileup.fisherPON.vcf.gz"
-        File pon_filtered_vcf_tbi = basename(vcf, ".vcf") + ".filtered.pileup.fisherPON.vcf.gz.tbi"
+        File pon_vcf = basename(vcf, ".vcf.gz") + ".pileup.fisherPON.vcf.gz"
+        File pon_vcf_tbi = basename(vcf, ".vcf.gz") + ".pileup.fisherPON.vcf.gz.tbi"
+        File pon_filtered_vcf = basename(vcf, ".vcf.gz") + ".filtered.pileup.fisherPON.vcf.gz"
+        File pon_filtered_vcf_tbi = basename(vcf, ".vcf.gz") + ".filtered.pileup.fisherPON.vcf.gz.tbi"
     }
 }
 
