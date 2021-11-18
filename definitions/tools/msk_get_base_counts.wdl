@@ -96,7 +96,7 @@ task mskGetBaseCountsWithArray {
         done
 
         if [[ $(zgrep -v '#' ~{vcf} | wc -l) -lt 1 ]]; then
-            echo "PRINT: ~{vcf}"
+            echo "PRINT"
             printf "##fileformat=VCFv4.2\n" > ~{pon_final_name}.vcf
             printf "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Total depth\">\n" >> ~{pon_final_name}.vcf
             printf "##FORMAT=<ID=RD,Number=1,Type=Integer,Description=\"Depth matching reference (REF) allele\">\n" >> ~{pon_final_name}.vcf
@@ -113,7 +113,7 @@ task mskGetBaseCountsWithArray {
             printf "##FORMAT=<ID=ADF,Number=1,Type=Float,Description=\"Fragment depth matching alternate (ALT) allele\">\n" >> ~{pon_final_name}.vcf
             printf "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t${only_names}\n" >> ~{pon_final_name}.vcf
         else
-            echo "SCRIPT: ~{normal_bam.bam}"
+            echo "SCRIPT"
             if [[ ~{vcf} == *.vcf.gz ]]; then
                 bgzip -d ~{vcf}
                 vcf_file=~{vcf}
