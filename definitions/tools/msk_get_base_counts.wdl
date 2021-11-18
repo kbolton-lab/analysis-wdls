@@ -148,6 +148,7 @@ task mskGetBaseCounts {
 
         sample_name=$(samtools view -H ~{normal_bam.bam} | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq)
         number_of_variants=$(zgrep -v '#' ~{vcf} | wc -l)
+        echo "Variants: ${number_of_variants}"
         if [ ${number_of_variants} == 0 ]; then
             printf "##fileformat=VCFv4.2" > ~{pon_final_name}.vcf
             printf "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Total depth\">" >> ~{pon_final_name}.vcf
@@ -163,7 +164,7 @@ task mskGetBaseCounts {
             printf "##FORMAT=<ID=DPF,Number=1,Type=Integer,Description=\"Total fragment depth\">" >> ~{pon_final_name}.vcf
             printf "##FORMAT=<ID=RDF,Number=1,Type=Float,Description=\"Fragment depth matching reference (REF) allele\">" >> ~{pon_final_name}.vcf
             printf "##FORMAT=<ID=ADF,Number=1,Type=Float,Description=\"Fragment depth matching alternate (ALT) allele\">" >> ~{pon_final_name}.vcf
-            printf "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t${sample_name}"
+            printf "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t${sample_name}" >> ~{pon_final_name}.vcf
         else
             if [[ ~{vcf} == *.vcf.gz ]]; then
                 bgzip -d ~{vcf}
