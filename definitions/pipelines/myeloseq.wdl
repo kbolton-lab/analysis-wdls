@@ -29,9 +29,6 @@ workflow myeloseq {
 
         # Sequence and BAM Information
         Array[File] input_bam
-        Array[SequenceData] sequence
-        String adapter_one = "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
-        String adapter_two = "AGATCGGAAGAGCGTCGTGTAGGGAAA"
         String? tumor_name = "tumor"
         String tumor_sample_name
         File target_intervals
@@ -130,17 +127,6 @@ workflow myeloseq {
         File normalized_gnomad_exclude_tbi
         String filter_flag = "include"
     }
-
-    #scatter(seq_data in sequence) {
-    #    call mp.myeloseqPrep as myeloseq_processing {
-    #        input:
-    #            sequence = seq_data,
-    #            adapter_one = adapter_one,
-    #            adapter_two = adapter_two,
-    #            sample_name = tumor_sample_name,
-    #            fastq_with_umis = fastq_with_umis
-    #    }
-    #}
 
     call mane.molecularAlignmentNoExtract as alignment_workflow {
         input:
@@ -466,7 +452,7 @@ workflow myeloseq {
 
     output {
         # Alignments
-        # File aligned_bam = alignment_workflow.aligned_bam
+        File aligned_bam = alignment_workflow.aligned_bam
         File bqsr_bam = index_bam.indexed_bam
 
         # Tumor QC
