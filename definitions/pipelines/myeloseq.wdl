@@ -203,18 +203,18 @@ workflow myeloseq {
             scatter_count = scatter_count,
             tumor_only = tumor_only
         }
-        call bic.bcftoolsIsecComplement as mutect_isec_complement_gnomAD {
-            input:
-            vcf = mutect.unfiltered_vcf,
-            vcf_tbi = mutect.unfiltered_vcf_tbi,
-            exclude_vcf = normalized_gnomad_exclude,
-            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-            output_vcf_name = "mutect." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-            output_type = "z"
-        }
+        #call bic.bcftoolsIsecComplement as mutect_isec_complement_gnomAD {
+        #    input:
+        #    vcf = mutect.unfiltered_vcf,
+        #    vcf_tbi = mutect.unfiltered_vcf_tbi,
+        #    exclude_vcf = normalized_gnomad_exclude,
+        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        #    output_vcf_name = "mutect." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+        #    output_type = "z"
+        #}
         call pp.pon2Percent as mutect_pon2 {
             input:
-            vcf = mutect_isec_complement_gnomAD.complement_vcf,
+            vcf = mutect.unfiltered_vcf,
             vcf2PON = mutect_pon2_file,
             vcf2PON_tbi = mutect_pon2_file_tbi,
             caller = "mutect",
@@ -234,18 +234,18 @@ workflow myeloseq {
             min_var_freq = af_threshold,
             tumor_only = tumor_only
         }
-        call bic.bcftoolsIsecComplement as vardict_isec_complement_gnomAD {
-            input:
-            vcf = vardict.bcbio_filtered_vcf,
-            vcf_tbi = vardict.bcbio_filtered_vcf_tbi,
-            exclude_vcf = normalized_gnomad_exclude,
-            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-            output_vcf_name = "vardict." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-            output_type = "z"
-        }
+        #call bic.bcftoolsIsecComplement as vardict_isec_complement_gnomAD {
+        #    input:
+        #    vcf = vardict.bcbio_filtered_vcf,
+        #    vcf_tbi = vardict.bcbio_filtered_vcf_tbi,
+        #    exclude_vcf = normalized_gnomad_exclude,
+        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        #    output_vcf_name = "vardict." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+        #    output_type = "z"
+        #}
         call pp.pon2Percent as vardict_pon2 {
             input:
-            vcf = vardict_isec_complement_gnomAD.complement_vcf,
+            vcf = vardict.bcbio_filtered_vcf,
             vcf2PON = vardict_pon2_file,
             vcf2PON_tbi = vardict_pon2_file_tbi,
             caller = "vardict",
@@ -264,18 +264,18 @@ workflow myeloseq {
             tumor_sample_name = tumor_sample_name,
             tumor_only = tumor_only
         }
-        call bic.bcftoolsIsecComplement as lofreq_isec_complement_gnomAD {
-            input:
-            vcf = lofreq.unfiltered_vcf,
-            vcf_tbi = lofreq.unfiltered_vcf_tbi,
-            exclude_vcf = normalized_gnomad_exclude,
-            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-            output_vcf_name = "lofreq." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-            output_type = "z"
-        }
+        #call bic.bcftoolsIsecComplement as lofreq_isec_complement_gnomAD {
+        #    input:
+        #    vcf = lofreq.unfiltered_vcf,
+        #    vcf_tbi = lofreq.unfiltered_vcf_tbi,
+        #    exclude_vcf = normalized_gnomad_exclude,
+        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        #    output_vcf_name = "lofreq." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+        #    output_type = "z"
+        #}
         call pp.pon2Percent as lofreq_pon2 {
             input:
-            vcf = lofreq_isec_complement_gnomAD.complement_vcf,
+            vcf = lofreq.unfiltered_vcf,
             vcf2PON = lofreq_pon2_file,
             vcf2PON_tbi = lofreq_pon2_file_tbi,
             caller = "lofreq",
