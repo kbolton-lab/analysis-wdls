@@ -25,10 +25,10 @@ task vepTask {
     File? synonyms_file
   }
 
-  Float cache_size = 2*size(cache_dir_zip, "GB")  # doubled to unzip
+  Float cache_size = 3*size(cache_dir_zip, "GB")  # doubled to unzip
   Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
   Float reference_size = size([reference, reference_fai, reference_dict], "GB")
-  Int space_needed_gb = 10 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
+  Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
   runtime {
     memory: "64GB"
     bootDiskSizeGb: 30
