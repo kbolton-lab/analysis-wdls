@@ -24,6 +24,7 @@ workflow manual {
         File input_bam
         File input_bam_bai
 
+        Int scatter_count = 30
         String? tumor_name = "tumor"
         String tumor_sample_name
         File target_intervals
@@ -88,7 +89,8 @@ workflow manual {
             tumor_bam = input_bam,
             tumor_bam_bai = input_bam_bai,
             interval_list = chr_bed,
-            tumor_only = tumor_only
+            tumor_only = tumor_only,
+            scatter_count = scatter_count
         }
         call bic.bcftoolsIsecComplement as mutect_isec_complement_gnomAD {
             input:
