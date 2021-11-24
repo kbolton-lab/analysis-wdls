@@ -1,0 +1,109 @@
+{
+  "manual.input_bam_bai": "<input_bam_file>.bai",
+  "manual.vardict_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/vardict.merged.BQSR.2N.vcf.gz",
+  "manual.vep_ensembl_assembly": "GRCh38",
+  "manual.pon_bams": [
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_47_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_47_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_48_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_48_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_7__1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_7__1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_8__1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_8__1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_9__1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_9__1.bam.bai"}
+  ],
+  "manual.vep_cache_dir_zip": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/ukbb_calls/pvcf/vep_zip.zip",
+  "manual.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
+  "manual.vep_ensembl_species": "homo_sapiens",
+  "manual.normalized_gnomad_exclude": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz",
+  "manual.mutect_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz",
+  "manual.bcbio_filter_string": "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))",
+  "manual.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "manual.lofreq_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.vcf.gz",
+  "manual.pon_pvalue": "1",
+  "manual.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.dict",
+  "manual.target_intervals": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.interval_list",
+  "manual.vep_custom_annotations": [{
+      "force_report_coordinates" : true,
+      "method" : "exact",
+      "annotation" : {
+          "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz",
+          "secondary_files" : [
+              "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz.tbi"
+          ],
+          "data_format" : "vcf",
+          "name" : "gnomADe",
+          "vcf_fields" : [
+              "AF",
+              "AF_AFR",
+              "AF_AMR",
+              "AF_ASJ",
+              "AF_EAS",
+              "AF_FIN",
+              "AF_NFE",
+              "AF_OTH",
+              "AF_SAS"
+          ],
+          "gnomad_filter" : true,
+          "check_existing" : true
+      }
+      },
+      {
+          "force_report_coordinates" : true,
+          "method" : "exact",
+          "annotation" : {
+              "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz",
+              "secondary_files" : [
+                  "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz.tbi"
+              ],
+              "data_format" : "vcf",
+              "name" : "clinvar",
+              "vcf_fields" : [
+                  "CLINSIGN",
+                  "PHENOTYPE",
+                  "SCORE",
+                  "RCVACC",
+                  "TESTEDINGTR",
+                  "PHENOTYPELIST",
+                  "NUMSUBMIT",
+                  "GUIDELINES"
+              ],
+              "gnomad_filter" : true,
+              "check_existing" : true
+          }
+          },
+          {
+              "force_report_coordinates" : true,
+              "method" : "exact",
+              "annotation" : {
+                  "file" : "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.archer_panel.vcf.gz",
+                  "secondary_files" : [
+                      "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.archer_panel.vcf.gz.tbi"
+                  ],
+                  "data_format" : "vcf",
+                  "name" : "gnomADg",
+                  "vcf_fields" : [
+                      "AF",
+                      "AF_ami",
+                      "AF_oth",
+                      "AF_afr",
+                      "AF_sas",
+                      "AF_asj",
+                      "AF_fin",
+                      "AF_amr",
+                      "AF_nfe",
+                      "AF_eas"
+                  ],
+                  "gnomad_filter" : true,
+                  "check_existing" : true
+              }
+              }],
+  "manual.normalized_gnomad_exclude_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz.tbi",
+  "manual.vep_ensembl_version": "104",
+  "manual.tumor_sample_name": "<sample_name_input>",
+  "manual.target_bed": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.bed",
+  "manual.vardict_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/vardict.merged.BQSR.2N.vcf.gz.tbi",
+  "manual.lofreq_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.vcf.gz.tbi",
+  "manual.input_bam": "<input_bam_file>",
+  "manual.pon_normal_bams_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pon.sample.bam.cloud.txt",
+  "manual.synonyms_file": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build50f99e75d14340ffb5b7d21b03887637/chromAlias.ensembl.txt",
+  "manual.vep_pick": "pick",
+  "manual.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.vcf.gz.tbi"
+}
