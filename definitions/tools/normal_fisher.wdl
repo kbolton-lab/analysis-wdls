@@ -65,7 +65,7 @@ task normalFisher {
             stop("Must supply (output file).n", call.=FALSE)
             }
 
-            df = read.table(args[1], header=F)
+            df = read.table(args[1], header=F, colClasses = c("character", "numeric", "character", "character", "numeric", "numeric", "numeric", "numeric"))
 
             if (length(colnames(df)) != 8) {
             stop("Must supply file with 8 columns: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%RD]\t[%AD]", call.=FALSE)
@@ -103,7 +103,7 @@ task normalFisher {
             stop("Must supply (output file).n", call.=FALSE)
             }
 
-            df = read.table(args[1], header=F)
+            df = read.table(args[1], header=F, colClasses = c("character", "numeric", "character", "character", "numeric", "numeric", "character"))
 
             #https://statisticsglobe.com/split-data-frame-variable-into-multiple-columns-in-r
             df <- cbind(df, data.frame(do.call("rbind", strsplit(as.character(df$V7), ",", fixed = TRUE))))[,-7]
@@ -146,7 +146,7 @@ task normalFisher {
             stop("Must supply (output file).n", call.=FALSE)
             }
 
-            df = read.table(args[1], header=F)
+            df = read.table(args[1], header=F, colClasses = c("character", "numeric", "character", "character", "numeric", "numeric", "character"))
 
             #https://statisticsglobe.com/split-data-frame-variable-into-multiple-columns-in-r
             df <- cbind(df, data.frame(do.call("rbind", strsplit(as.character(df$V7), ",", fixed = TRUE))))[,-7]
