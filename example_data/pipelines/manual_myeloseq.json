@@ -18,7 +18,7 @@
   "manual.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
   "manual.lofreq_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.vcf.gz",
   "manual.pon_pvalue": "1",
-  "manual.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.dict",
+  "manual.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
   "manual.target_intervals": "/storage1/fs1/bolton/Active/data/hg38/bed/archer_panel.hg38.interval_list",
   "manual.vep_custom_annotations": [{
       "force_report_coordinates" : true,
