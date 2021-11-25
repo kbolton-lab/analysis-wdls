@@ -3,11 +3,11 @@
   "manual.vardict_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/vardict.merged.BQSR.2N.vcf.gz",
   "manual.vep_ensembl_assembly": "GRCh38",
   "manual.pon_bams": [
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_47_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_47_1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_48_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_48_1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_7__1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_7__1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_8__1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_8__1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_9__1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/11108_9__1.bam.bai"}
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_47_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_47_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_48_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_48_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_7_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_7_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_8_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_8_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_9_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_9_1.bam.bai"}
   ],
   "manual.vep_cache_dir_zip": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/ukbb_calls/pvcf/vep_zip.zip",
   "manual.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
