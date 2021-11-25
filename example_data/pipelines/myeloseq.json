@@ -60,11 +60,11 @@
       "chrM"],
   "myeloseq.normalized_gnomad_exclude_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz.tbi",
   "myeloseq.pon_bams": [
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_47_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_47_1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_48_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_48_1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_7_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_7_1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_8_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_8_1.bam.bai"},
-    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_9_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/BAM/Normals/11108_9_1.bam.bai"}
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_47_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_47_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_48_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_48_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_7_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_7_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_8_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_8_1.bam.bai"},
+    {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_9_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_9_1.bam.bai"}
   ],
   "myeloseq.normalized_gnomad_exclude": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz",
   "myeloseq.lofreq_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.vcf.gz.tbi",
