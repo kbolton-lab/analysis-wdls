@@ -214,6 +214,7 @@ workflow myeloseq {
         #}
         call pp.pon2Percent as mutect_pon2 {
             input:
+            #vcf = mutect_isec_complement_gnomAD.complement_vcf,
             vcf = mutect.unfiltered_vcf,
             vcf2PON = mutect_pon2_file,
             vcf2PON_tbi = mutect_pon2_file_tbi,
@@ -245,6 +246,7 @@ workflow myeloseq {
         #}
         call pp.pon2Percent as vardict_pon2 {
             input:
+            #vcf = vardict_isec_complement_gnomAD.complement_vcf,
             vcf = vardict.bcbio_filtered_vcf,
             vcf2PON = vardict_pon2_file,
             vcf2PON_tbi = vardict_pon2_file_tbi,
@@ -275,6 +277,7 @@ workflow myeloseq {
         #}
         call pp.pon2Percent as lofreq_pon2 {
             input:
+            #vcf = lofreq_isec_complement_gnomAD.complement_vcf,
             vcf = lofreq.unfiltered_vcf,
             vcf2PON = lofreq_pon2_file,
             vcf2PON_tbi = lofreq_pon2_file_tbi,
