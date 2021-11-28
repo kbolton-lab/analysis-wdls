@@ -54,7 +54,7 @@ workflow vardictNoFp {
       vcf = vardictTask.vcf,
       vcf_tbi = vardictTask.vcf_tbi,
       filter_string = bcbio_filter_string,
-      filter_flag = "include",
+      filter_flag = "exclude",
       output_type = "z",
       output_vcf_prefix = "vardict.bcbiofilter"
   }

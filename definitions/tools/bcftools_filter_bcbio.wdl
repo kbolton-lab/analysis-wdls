@@ -4,7 +4,7 @@ task bcftoolsFilterBcbio {
     input {
         File vcf
         File vcf_tbi
-        String filter_flag = "include"
+        String filter_flag = "exclude"
         String filter_string
         String? output_vcf_prefix = "bcftools_filter"
         String output_type = "z"
