@@ -453,6 +453,20 @@ workflow myeloseq {
             merged_vcf_basename = tumor_sample_name + ".pon.total.counts"
     }
 
+    call mv.mergeVcf as merge_fp_filter {
+        input:
+            vcfs = fpFilter.unfiltered_vcf,
+            vcf_tbis = fpFilter.unfiltered_vcf_tbi,
+            merged_vcf_basename = tumor_sample_name + ".fpfilter"
+    }
+
+    call mv.mergeVcf as merge_vep {
+        input:
+            vcfs = vep.annotated_vcf,
+            vcf_tbis = vep.annotated_vcf_tbi,
+            merged_vcf_basename = tumor_sample_name + ".vep"
+    }
+
     output {
         # Alignments
         File aligned_bam = alignment_workflow.aligned_bam
@@ -487,6 +501,8 @@ workflow myeloseq {
         File vardict_vep_annotated_vcf = merge_vardict_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
         File pon_total_counts = merge_pon.merged_vcf                                    # PoN Pileup Results
+        File fpfilter_results = merge_fp_filter.merged_vcf
+        File vep_results = merge_vep.merged_vcf
 
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 
