@@ -1,26 +1,26 @@
 version 1.0
 
-import "types.wdl"
+import "../types.wdl"
 
-import "subworkflows/molecular_alignment_no_extract.wdl" as mane
-import "subworkflows/qc_exome.wdl" as qe
-import "subworkflows/PoN_filter.wdl" as pf
-import "subworkflows/fp_filter_no_norm.wdl" as ffnn
-import "subworkflows/mutect_noFp.wdl" as m
-import "subworkflows/lofreq_noFp.wdl" as l
-import "subworkflows/vardict_noFp.wdl" as v
-import "subworkflows/annotate_caller.wdl" as ac
-import "subworkflows/myeloseq_prep.wdl" as mp
+import "../subworkflows/molecular_alignment_no_extract.wdl" as mane
+import "../subworkflows/qc_exome.wdl" as qe
+import "../subworkflows/PoN_filter.wdl" as pf
+import "../subworkflows/fp_filter_no_norm.wdl" as ffnn
+import "../subworkflows/mutect_noFp.wdl" as m
+import "../subworkflows/lofreq_noFp.wdl" as l
+import "../subworkflows/vardict_noFp.wdl" as v
+import "../subworkflows/annotate_caller.wdl" as ac
+import "../subworkflows/myeloseq_prep.wdl" as mp
 
-import "tools/fastq_to_bam.wdl" as ftb
-import "tools/bqsr_apply.wdl" as ba
-import "tools/index_bam.wdl" as ib
-import "tools/bcftools_isec_complement.wdl" as bic
-import "tools/vep.wdl" as vep
-import "tools/pon2percent.wdl" as pp
-import "tools/split_bed_to_chr.wdl" as sbtc
-import "tools/merge_vcf.wdl" as mv
-import "tools/create_fake_vcf.wdl" as cfv
+import "../tools/fastq_to_bam.wdl" as ftb
+import "../tools/bqsr_apply.wdl" as ba
+import "../tools/index_bam.wdl" as ib
+import "../tools/bcftools_isec_complement.wdl" as bic
+import "../tools/vep.wdl" as vep
+import "../tools/pon2percent.wdl" as pp
+import "../tools/split_bed_to_chr.wdl" as sbtc
+import "../tools/merge_vcf.wdl" as mv
+import "../tools/create_fake_vcf.wdl" as cfv
 
 workflow myeloseq {
     input {
@@ -77,10 +77,10 @@ workflow myeloseq {
         String? pon_pvalue = "2.114164905e-6"
 
         # Pindel
-        Int pindel_insert_size = 400
-        String? ref_name = "GRCh38DH"
-        String? ref_date = "20161216"
-        Int? pindel_min_supporting_reads = 3
+        #Int pindel_insert_size = 400
+        #String? ref_name = "GRCh38DH"
+        #String? ref_date = "20161216"
+        #Int? pindel_min_supporting_reads = 3
 
         String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))"
 
@@ -91,8 +91,8 @@ workflow myeloseq {
         File lofreq_pon2_file_tbi
         File vardict_pon2_file
         File vardict_pon2_file_tbi
-        File pindel_pon2_file
-        File pindel_pon2_file_tbi
+        #File pindel_pon2_file
+        #File pindel_pon2_file_tbi
 
         # TODO: R Stuff
         # File impact_annotation

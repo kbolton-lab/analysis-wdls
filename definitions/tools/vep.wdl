@@ -68,7 +68,7 @@ task vepTask {
     ~{if defined(synonyms_file) then "--synonyms ~{synonyms_file}" else ""} \
     --sift p \
     --polyphen p \
-    --coding_only ~{coding_only} \
+    ~{if coding_only then "--coding_only" else ""} \
     --~{pick} \
     --dir ~{cache_dir} \
     --fasta ~{reference} \
