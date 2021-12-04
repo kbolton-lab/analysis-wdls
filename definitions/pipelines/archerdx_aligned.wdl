@@ -2,20 +2,25 @@ version 1.0
 
 import "../types.wdl"
 
+import "../subworkflows/archer_fastq_format.wdl" as fqf
+import "../subworkflows/molecular_alignment.wdl" as ma
 import "../subworkflows/qc_exome.wdl" as qe
-import "../subworkflows/gnomad_and_PoN_filter.wdl" as gapf
-import "../subworkflows/mutect.wdl" as m
-import "../subworkflows/lofreq.wdl" as l
-import "../subworkflows/vardict.wdl" as v
-import "../subworkflows/pindel.wdl" as p
+import "../subworkflows/PoN_filter.wdl" as pf
+import "../subworkflows/fp_filter_no_norm.wdl" as ffnn
+import "../subworkflows/mutect_noFp.wdl" as m
+import "../subworkflows/lofreq_noFp.wdl" as l
+import "../subworkflows/vardict_noFp.wdl" as v
+import "../subworkflows/annotate_caller.wdl" as ac
 
-import "../tools/bqsr.wdl" as b
-import "../tools/apply_bqsr.wdl" as ab
+import "../tools/fastq_to_bam.wdl" as ftb
+import "../tools/bqsr_apply.wdl" as ba
 import "../tools/index_bam.wdl" as ib
-import "../tools/interval_list_expand.wdl" as ile
+import "../tools/bcftools_isec_complement.wdl" as bic
 import "../tools/vep.wdl" as vep
 import "../tools/pon2percent.wdl" as pp
-import "../tools/intervals_to_bed.wdl" as itb
+import "../tools/split_bed_to_chr.wdl" as sbtc
+import "../tools/merge_vcf.wdl" as mv
+import "../tools/create_fake_vcf.wdl" as cfv
 
 workflow archerdx {
     input {
@@ -47,7 +52,6 @@ workflow archerdx {
 
         # QC
         File bait_intervals
-        Int target_interval_padding = 100
         Array[LabelledFile] per_base_intervals
         Array[LabelledFile] per_target_intervals
         Array[LabelledFile] summary_intervals
@@ -59,21 +63,19 @@ workflow archerdx {
 
         # Variant Calling
         Boolean? arrayMode = true       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
-        File pon_normal_bams            # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
-        Array[File] bams                # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
-        Array[File] bams_bai
+        File pon_normal_bams_file       # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
+        Array[bam_and_bai] pon_bams     # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
-        Boolean no_scatter = true
-        Boolean mutect_artifact_detection_mode = false
-        Float? mutect_max_alt_allele_in_normal_fraction
-        Int? mutect_max_alt_alleles_in_normal_count
-        Int pindel_insert_size = 400
-        String? ref_name = "GRCh38DH"
-        String? ref_date = "20161216"
-        Int? pindel_min_supporting_reads = 3
         Float? af_threshold = 0.0001
+        String? pon_pvalue = "2.114164905e-6"
+
+        # Pindel
+        #Int pindel_insert_size = 400
+        #String? ref_name = "GRCh38DH"
+        #String? ref_date = "20161216"
+        #Int? pindel_min_supporting_reads = 3
+
         String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))"
-        String? pon_pvalue = "1" #"4.098606e-08"
 
         # PoN2
         File mutect_pon2_file
@@ -82,8 +84,8 @@ workflow archerdx {
         File lofreq_pon2_file_tbi
         File vardict_pon2_file
         File vardict_pon2_file_tbi
-        File pindel_pon2_file
-        File pindel_pon2_file_tbi
+        #File pindel_pon2_file
+        #File pindel_pon2_file_tbi
 
         # TODO: R Stuff
         # File impact_annotation
@@ -110,7 +112,7 @@ workflow archerdx {
         Array[String] variants_to_table_fields = ["CHROM","POS","ID","REF","ALT","set","AC","AF"]
         Array[String]? variants_to_table_genotype_fields = ["GT","AD"]
         Array[String]? vep_to_table_fields = ["HGVSc","HGVSp"]
-        String vep_pick = "flag_pick"
+        String vep_pick = "pick"
 
         # gnomAD
         Float filter_gnomADe_maximum_population_allele_frequency = 0.005
@@ -120,7 +122,7 @@ workflow archerdx {
     }
 
 
-    call b.bqsr as bqsr {
+    call ba.bqsrApply as bqsr {
         input:
         reference = reference,
         reference_fai = reference_fai,
@@ -132,19 +134,9 @@ workflow archerdx {
         known_sites_tbi = bqsr_known_sites_tbi
     }
 
-    call ab.applyBqsr as apply_bqsr {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        bam = bam,
-        bam_bai = bam_bai,
-        bqsr_table = bqsr.bqsr_table
-    }
-
     call ib.indexBam as index_bam {
         input:
-        bam = apply_bqsr.bqsr_bam
+        bam = bqsr.bqsr_bam
     }
 
     call qe.qcExome as tumor_qc {
@@ -166,239 +158,291 @@ workflow archerdx {
         minimum_base_quality = qc_minimum_base_quality
     }
 
-    call ile.intervalListExpand as pad_target_intervals {
+    call sbtc.splitBedToChr as split_bed_to_chr {
         input:
-        interval_list = target_intervals,
-        roi_padding = target_interval_padding
+        interval_bed = target_bed
     }
 
-    call m.mutect as mutect {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        tumor_bam = index_bam.indexed_bam,
-        tumor_bam_bai = index_bam.indexed_bam_bai,
-        interval_list = target_intervals,
-        scatter_count = scatter_count,
-        tumor_sample_name = tumor_sample_name,
-        min_var_freq = af_threshold,
-        tumor_only = tumor_only
-    }
-    call gapf.gnomadAndPoNFilter as mutect_gnomad_pon_filters {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        caller_vcf = mutect.unfiltered_vcf,
-        caller_vcf_tbi = mutect.unfiltered_vcf_tbi,
-        gnomAD_exclude_vcf = normalized_gnomad_exclude,
-        gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        caller_prefix = "mutect." + tumor_sample_name,
-        arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
-        pon_final_name = "mutect." + tumor_sample_name + ".pon.pileup",
-        pon_pvalue = pon_pvalue
-    }
-    call vep.vep as mutect_annotate_variants {
-        input:
-        vcf = mutect_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = vep_cache_dir_zip,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        plugins = vep_plugins,
-        ensembl_assembly = vep_ensembl_assembly,
-        ensembl_version = vep_ensembl_version,
-        ensembl_species = vep_ensembl_species,
-        synonyms_file = synonyms_file,
-        custom_annotations = vep_custom_annotations,
-        coding_only = annotate_coding_only,
-        pick = vep_pick
-    }
-    call pp.pon2Percent as mutect_pon2 {
-        input:
-        vcf = mutect_annotate_variants.annotated_vcf,
-        vcf2PON = mutect_pon2_file,
-        vcf2PON_tbi = mutect_pon2_file_tbi,
-        caller = "mutect",
-        sample_name = tumor_sample_name
-    }
-
-    # Vardict
-    call v.vardict as vardict {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        tumor_bam = index_bam.indexed_bam,
-        tumor_bam_bai = index_bam.indexed_bam_bai,
-        interval_bed = target_bed,
-        tumor_sample_name = tumor_sample_name,
-        min_var_freq = af_threshold,
-        bcbio_filter_string = bcbio_filter_string,
-        tumor_only = tumor_only
-    }
-    call gapf.gnomadAndPoNFilter as vardict_gnomad_pon_filters {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        caller_vcf = vardict.unfiltered_vcf,
-        caller_vcf_tbi = vardict.unfiltered_vcf_tbi,
-        gnomAD_exclude_vcf = normalized_gnomad_exclude,
-        gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        caller_prefix = "vardict." + tumor_sample_name,
-        arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
-        pon_final_name = "vardict." + tumor_sample_name + ".pon.pileup",
-        pon_pvalue = pon_pvalue
-    }
-    call vep.vep as vardict_annotate_variants {
-        input:
-        vcf = vardict_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = vep_cache_dir_zip,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        plugins = vep_plugins,
-        ensembl_assembly = vep_ensembl_assembly,
-        ensembl_version = vep_ensembl_version,
-        ensembl_species = vep_ensembl_species,
-        synonyms_file = synonyms_file,
-        custom_annotations = vep_custom_annotations,
-        coding_only = annotate_coding_only,
-        pick = vep_pick
-    }
-    call pp.pon2Percent as vardict_pon2 {
-        input:
-        vcf = vardict_annotate_variants.annotated_vcf,
-        vcf2PON = vardict_pon2_file,
-        vcf2PON_tbi = vardict_pon2_file_tbi,
-        caller = "vardict",
-        sample_name = tumor_sample_name
-    }
-
-    call l.lofreq as lofreq {
-        input:
+    scatter (chr_bed in split_bed_to_chr.split_chr) {
+        # Mutect
+        call m.mutectNoFp as mutect {
+            input:
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
             tumor_bam = index_bam.indexed_bam,
             tumor_bam_bai = index_bam.indexed_bam_bai,
-            interval_list = target_intervals,
+            interval_list = chr_bed,
             scatter_count = scatter_count,
+            tumor_only = tumor_only
+        }
+        #call bic.bcftoolsIsecComplement as mutect_isec_complement_gnomAD {
+        #    input:
+        #    vcf = mutect.unfiltered_vcf,
+        #    vcf_tbi = mutect.unfiltered_vcf_tbi,
+        #    exclude_vcf = normalized_gnomad_exclude,
+        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        #    output_vcf_name = "mutect." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+        #    output_type = "z"
+        #}
+        call pp.pon2Percent as mutect_pon2 {
+            input:
+            #vcf = mutect_isec_complement_gnomAD.complement_vcf,
+            vcf = mutect.unfiltered_vcf,
+            vcf2PON = mutect_pon2_file,
+            vcf2PON_tbi = mutect_pon2_file_tbi,
+            caller = "mutect",
+            sample_name = tumor_sample_name
+        }
+
+        # Vardict
+        call v.vardictNoFp as vardict {
+            input:
+            reference = reference,
+            reference_fai = reference_fai,
+            tumor_bam = index_bam.indexed_bam,
+            tumor_bam_bai = index_bam.indexed_bam_bai,
+            interval_bed = chr_bed,
+            bcbio_filter_string = bcbio_filter_string,
             tumor_sample_name = tumor_sample_name,
             min_var_freq = af_threshold,
             tumor_only = tumor_only
-    }
-    call gapf.gnomadAndPoNFilter as lofreq_gnomad_pon_filters {
-        input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        caller_vcf = lofreq.unfiltered_vcf,
-        caller_vcf_tbi = lofreq.unfiltered_vcf_tbi,
-        gnomAD_exclude_vcf = normalized_gnomad_exclude,
-        gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        caller_prefix = "lofreq." + tumor_sample_name,
-        arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
-        pon_final_name = "lofreq." + tumor_sample_name + ".pon.pileup",
-        pon_pvalue = pon_pvalue
-    }
-    call vep.vep as lofreq_annotate_variants {
-        input:
-        vcf = lofreq_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = vep_cache_dir_zip,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        plugins = vep_plugins,
-        ensembl_assembly = vep_ensembl_assembly,
-        ensembl_version = vep_ensembl_version,
-        ensembl_species = vep_ensembl_species,
-        synonyms_file = synonyms_file,
-        custom_annotations = vep_custom_annotations,
-        coding_only = annotate_coding_only,
-        pick = vep_pick
-    }
-    call pp.pon2Percent as lofreq_pon2 {
-        input:
-        vcf = lofreq_annotate_variants.annotated_vcf,
-        vcf2PON = lofreq_pon2_file,
-        vcf2PON_tbi = lofreq_pon2_file_tbi,
-        caller = "lofreq",
-        sample_name = tumor_sample_name
-    }
+        }
+        #call bic.bcftoolsIsecComplement as vardict_isec_complement_gnomAD {
+        #    input:
+        #    vcf = vardict.bcbio_filtered_vcf,
+        #    vcf_tbi = vardict.bcbio_filtered_vcf_tbi,
+        #    exclude_vcf = normalized_gnomad_exclude,
+        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        #    output_vcf_name = "vardict." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+        #    output_type = "z"
+        #}
+        call pp.pon2Percent as vardict_pon2 {
+            input:
+            #vcf = vardict_isec_complement_gnomAD.complement_vcf,
+            vcf = vardict.bcbio_filtered_vcf,
+            vcf2PON = vardict_pon2_file,
+            vcf2PON_tbi = vardict_pon2_file_tbi,
+            caller = "vardict",
+            sample_name = tumor_sample_name
+        }
 
-    call p.pindel as pindel {
-        input:
+        # Lofreq
+        call l.lofreqNoFp as lofreq {
+            input:
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
             tumor_bam = index_bam.indexed_bam,
             tumor_bam_bai = index_bam.indexed_bam_bai,
-            interval_list = target_intervals,
-            scatter_count = scatter_count,
-            insert_size = pindel_insert_size,
+            interval_bed = chr_bed,
             tumor_sample_name = tumor_sample_name,
-            ref_name = ref_name,
-            ref_date = ref_date,
-            pindel_min_supporting_reads = pindel_min_supporting_reads,
-            min_var_freq = af_threshold,
             tumor_only = tumor_only
+        }
+        #call bic.bcftoolsIsecComplement as lofreq_isec_complement_gnomAD {
+        #    input:
+        #    vcf = lofreq.unfiltered_vcf,
+        #    vcf_tbi = lofreq.unfiltered_vcf_tbi,
+        #    exclude_vcf = normalized_gnomad_exclude,
+        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+        #    output_vcf_name = "lofreq." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+        #    output_type = "z"
+        #}
+        call pp.pon2Percent as lofreq_pon2 {
+            input:
+            #vcf = lofreq_isec_complement_gnomAD.complement_vcf,
+            vcf = lofreq.unfiltered_vcf,
+            vcf2PON = lofreq_pon2_file,
+            vcf2PON_tbi = lofreq_pon2_file_tbi,
+            caller = "lofreq",
+            sample_name = tumor_sample_name
+        }
+
+        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf]){
+            call cfv.createFakeVcf as fake_vcf {
+                input:
+                vcf = caller_vcf,
+                tumor_sample_name = tumor_sample_name
+            }
+        }
+
+        call mv.mergeVcf as mergeCallers {
+            input:
+            vcfs = fake_vcf.fake_vcf,
+            vcf_tbis = fake_vcf.fake_vcf_tbi,
+            merged_vcf_basename = "all_callers." + tumor_sample_name
+        }
+
+        call ffnn.fpFilterNoNorm as fpFilter {
+            input:
+            bam=index_bam.indexed_bam,
+            bam_bai=index_bam.indexed_bam_bai,
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            vcf = mergeCallers.merged_vcf,
+            vcf_tbi = mergeCallers.merged_vcf_tbi,
+            variant_caller="all_callers",
+            sample_name=tumor_sample_name,
+            min_var_freq=af_threshold
+        }
+
+        call pf.PoNFilter as PoN_filter {
+            input:
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            caller_vcf = mergeCallers.merged_vcf,
+            normal_bams_file = pon_normal_bams_file,
+            pon_bams = pon_bams,
+            pon_final_name = "all_callers." + tumor_sample_name + ".pon.pileup",
+            arrayMode = arrayMode
+        }
+
+        call vep.vep as vep {
+            input:
+            vcf = mergeCallers.merged_vcf,
+            cache_dir_zip = vep_cache_dir_zip,
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            plugins = vep_plugins,
+            ensembl_assembly = vep_ensembl_assembly,
+            ensembl_version = vep_ensembl_version,
+            ensembl_species = vep_ensembl_species,
+            synonyms_file = synonyms_file,
+            custom_annotations = vep_custom_annotations,
+            coding_only = annotate_coding_only,
+            pick = vep_pick
+        }
+
+        call ac.annotateCaller as mutect_annotate_vcf {
+            input:
+            vcf = mutect_pon2.annotated_vcf,
+            vcf_tbi = mutect_pon2.annotated_vcf_tbi,
+            fp_filter = fpFilter.unfiltered_vcf,
+            fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
+            pileup_file = PoN_filter.pon_total_counts,
+            pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
+            vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
+            caller_prefix = "mutect",
+            sample_name = tumor_sample_name,
+            pon_pvalue = pon_pvalue
+        }
+
+        call ac.annotateCaller as vardict_annotate_vcf {
+            input:
+            vcf = vardict_pon2.annotated_vcf,
+            vcf_tbi = vardict_pon2.annotated_vcf_tbi,
+            fp_filter = fpFilter.unfiltered_vcf,
+            fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
+            pileup_file = PoN_filter.pon_total_counts,
+            pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
+            vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
+            caller_prefix = "vardict",
+            sample_name = tumor_sample_name,
+            pon_pvalue = pon_pvalue
+        }
+
+        call ac.annotateCaller as lofreq_annotate_vcf {
+            input:
+            vcf = lofreq_pon2.annotated_vcf,
+            vcf_tbi = lofreq_pon2.annotated_vcf_tbi,
+            fp_filter = fpFilter.unfiltered_vcf,
+            fp_filter_tbi = fpFilter.unfiltered_vcf_tbi,
+            pileup_file = PoN_filter.pon_total_counts,
+            pileup_file_tbi = PoN_filter.pon_total_counts_tbi,
+            vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
+            caller_prefix = "lofreq",
+            sample_name = tumor_sample_name,
+            pon_pvalue = pon_pvalue
+        }
     }
-    call gapf.gnomadAndPoNFilter as pindel_gnomad_pon_filters {
+
+    call mv.mergeVcf as merge_mutect_full {
         input:
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        caller_vcf = pindel.unfiltered_vcf,
-        caller_vcf_tbi = pindel.unfiltered_vcf_tbi,
-        gnomAD_exclude_vcf = normalized_gnomad_exclude,
-        gnomAD_exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        caller_prefix = "pindel." + tumor_sample_name,
-        arrayMode = arrayMode,
-        normal_bams = pon_normal_bams,
-        bams = bams,
-        bams_bai = bams_bai,
-        pon_final_name = "pindel." + tumor_sample_name + ".pon.pileup",
-        pon_pvalue = pon_pvalue
+            vcfs = mutect.unfiltered_vcf,
+            vcf_tbis = mutect.unfiltered_vcf_tbi,
+            merged_vcf_basename = "mutect_full." + tumor_sample_name
     }
-    call vep.vep as pindel_annotate_variants {
+    call mv.mergeVcf as merge_mutect_pon {
         input:
-        vcf = pindel_gnomad_pon_filters.processed_filtered_vcf,
-        cache_dir_zip = vep_cache_dir_zip,
-        reference = reference,
-        reference_fai = reference_fai,
-        reference_dict = reference_dict,
-        plugins = vep_plugins,
-        ensembl_assembly = vep_ensembl_assembly,
-        ensembl_version = vep_ensembl_version,
-        ensembl_species = vep_ensembl_species,
-        synonyms_file = synonyms_file,
-        custom_annotations = vep_custom_annotations,
-        coding_only = annotate_coding_only,
-        pick = vep_pick
+            vcfs = mutect_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = mutect_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "mutect." + tumor_sample_name + ".pileup.fisherPON"
     }
-    call pp.pon2Percent as pindel_pon2 {
+    call mv.mergeVcf as merge_mutect_final {
         input:
-        vcf = pindel_annotate_variants.annotated_vcf,
-        vcf2PON = pindel_pon2_file,
-        vcf2PON_tbi = pindel_pon2_file_tbi,
-        caller = "pindel",
-        sample_name = tumor_sample_name
+            vcfs = mutect_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = mutect_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "mutect." + tumor_sample_name + ".final.annotated"
+    }
+
+    call mv.mergeVcf as merge_vardict_full {
+        input:
+            vcfs = vardict.unfiltered_vcf,
+            vcf_tbis = vardict.unfiltered_vcf_tbi,
+            merged_vcf_basename = "vardict_full." + tumor_sample_name
+    }
+    call mv.mergeVcf as merge_vardict_pon {
+        input:
+            vcfs = vardict_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = vardict_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "vardict." + tumor_sample_name + ".pileup.fisherPON"
+    }
+    call mv.mergeVcf as merge_vardict_final {
+        input:
+            vcfs = vardict_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = vardict_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "vardict." + tumor_sample_name + ".final.annotated"
+    }
+
+    call mv.mergeVcf as merge_lofreq_full {
+        input:
+            vcfs = lofreq.unfiltered_vcf,
+            vcf_tbis = lofreq.unfiltered_vcf_tbi,
+            merged_vcf_basename = "lofreq_full." + tumor_sample_name
+    }
+    call mv.mergeVcf as merge_lofreq_pon {
+        input:
+            vcfs = lofreq_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = lofreq_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "lofreq." + tumor_sample_name + ".pileup.fisherPON"
+    }
+    call mv.mergeVcf as merge_lofreq_final {
+        input:
+            vcfs = lofreq_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = lofreq_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "lofreq." + tumor_sample_name + ".final.annotated"
+    }
+
+    call mv.mergeVcf as merge_pon {
+        input:
+            vcfs = PoN_filter.pon_total_counts,
+            vcf_tbis = PoN_filter.pon_total_counts_tbi,
+            merged_vcf_basename = tumor_sample_name + ".pon.total.counts"
+    }
+
+    call mv.mergeVcf as merge_fp_filter {
+        input:
+            vcfs = fpFilter.unfiltered_vcf,
+            vcf_tbis = fpFilter.unfiltered_vcf_tbi,
+            merged_vcf_basename = tumor_sample_name + ".fpfilter"
+    }
+
+    call mv.mergeVcf as merge_vep {
+        input:
+            vcfs = vep.annotated_vcf,
+            vcf_tbis = vep.annotated_vcf_tbi,
+            merged_vcf_basename = tumor_sample_name + ".vep"
     }
 
     output {
         # Alignments
+        #File aligned_bam = alignment_workflow.aligned_bam
         File bqsr_bam = index_bam.indexed_bam
 
         # Tumor QC
@@ -415,28 +459,23 @@ workflow archerdx {
         File tumor_verify_bam_id_depth = tumor_qc.verify_bam_id_depth
 
         # Mutect
-        File mutect_full = mutect.unfiltered_vcf                                                                # Raw Mutect Ouput
-        File mutect_pon_annotated_unfiltered_vcf = mutect_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        File mutect_pon_annotated_filtered_vcf = mutect_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        File mutect_pon_total_counts = mutect_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File mutect_full =  merge_mutect_full.merged_vcf                                # Raw Mutect Ouput
+        File mutect_pon_annotated_vcf = merge_mutect_pon.merged_vcf                     # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File mutect_vep_annotated_vcf = merge_mutect_final.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
         # Lofreq
-        File lofreq_full = lofreq.unfiltered_vcf                                                                # Raw Lofreq Ouput
-        File lofreq_pon_annotated_unfiltered_vcf = lofreq_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        File lofreq_pon_annotated_filtered_vcf = lofreq_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        File lofreq_pon_total_counts = lofreq_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File lofreq_full = merge_lofreq_full.merged_vcf                                 # Raw Lofreq Ouput
+        File lofreq_pon_annotated_vcf = merge_lofreq_pon.merged_vcf                     # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File lofreq_vep_annotated_vcf = merge_lofreq_final.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
         # Vardict
-        File vardict_full = vardict.unfiltered_vcf                                                                # Raw Vardict Ouput
-        File vardict_pon_annotated_unfiltered_vcf = vardict_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        File vardict_pon_annotated_filtered_vcf = vardict_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        File vardict_pon_total_counts = vardict_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File vardict_full = merge_vardict_full.merged_vcf                               # Raw Vardict Ouput
+        File vardict_pon_annotated_vcf = merge_vardict_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File vardict_vep_annotated_vcf = merge_vardict_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
-        # Pindel
-        File pindel_full = pindel.unfiltered_vcf                                                                # Raw Pindel Ouput
-        File pindel_pon_annotated_unfiltered_vcf = pindel_gnomad_pon_filters.processed_gnomAD_filtered_vcf      # gnomAD Filtered w/ PoN Annotated
-        File pindel_pon_annotated_filtered_vcf = pindel_pon2.annotated_vcf                                      # gnomAD Filtered + PoN Filtered + PoN2 Filtered w/ VEP Annotation
-        File pindel_pon_total_counts = pindel_gnomad_pon_filters.pon_total_counts                               # PoN Pileup Results
+        File pon_total_counts = merge_pon.merged_vcf                                    # PoN Pileup Results
+        File fpfilter_results = merge_fp_filter.merged_vcf
+        File vep_results = merge_vep.merged_vcf
 
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 
@@ -445,25 +484,3 @@ workflow archerdx {
         # File column_check = final_annotation.column_check
     }
 }
-
-    # final_annotation:
-    #     run: ../tools/annotate_CH_pd.cwl
-    #     in:
-    #         mutect_vcf: mutect_pon2/annotated_vcf
-    #         varscan_vcf: varscan_pon2/annotated_vcf
-    #         vardict_vcf: vardict_pon2/annotated_vcf
-    #         pindel_vcf: pindel_pon2/annotated_vcf
-    #         sample_name: tumor_sample_name
-    #         impact_annotation: impact_annotation
-    #         topmed_annotation: topmed_annotation
-    #         cosmic_annotation: cosmic_annotation
-    #         tsg_annotation: tsg_annotation
-    #         oncoKB_annotation: oncoKB_annotation
-    #         pd_table_annotation: pd_table_annotation
-    #         panmyeloid_annotation: panmyeloid_annotation
-    #         blacklist_annotation: blacklist_annotation
-    #         segemental_duplications_annotation: segemental_duplications_annotation
-    #         simple_repeats_annotation: simple_repeats_annotation
-    #         repeat_masker_annotation: repeat_masker_annotation
-    #     out:
-    #         [final_tsv, column_check]
