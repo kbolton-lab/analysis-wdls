@@ -1,5 +1,5 @@
 {
-  "myeloseq.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.maxVAF.vcf.gz.tbi",
+  "myeloseq.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Mutect_N/mutect2.merged.SB.2N.maxVAF.vcf.gz.tbi",
   "myeloseq.vep_ensembl_assembly": "GRCh38",
   "myeloseq.bqsr_known_sites": [
       "/storage1/fs1/bga/Active/gmsroot/gc2709/info/production_reference_GRCh38DH/accessory_vcf/omni25-ld-pruned-20000-2000-0.5-annotated.wchr.sites_only.b38.autosomes_only.vcf.gz",
@@ -14,7 +14,7 @@
   "myeloseq.arrayMode": true,
   "myeloseq.reference_sa": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.sa",
   "myeloseq.per_target_intervals": [],
-  "myeloseq.lofreq_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.maxVAF.vcf.gz",
+  "myeloseq.lofreq_pon2_file": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Lofreq_N/lofreq.merged.2percent.2N.maxVAF.vcf.gz",
   "myeloseq.umi_paired": false,
   "myeloseq.pon_pvalue": "2.114164905e-6",
   "myeloseq.target_bed": "/storage1/fs1/bolton/Active/data/hg38/bed/myeloseq.hg38.bed",
@@ -30,8 +30,8 @@
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20211-26b393cc7ab04120ac68cc2cbd4a15df/indels.hq.vcf.gz.tbi",
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20267-00cb8ff552914c17ad66d86031e10d30/indels.hq.vcf.gz.tbi"
   ],
-  "myeloseq.vardict_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/vardict.merged.BQSR.2N.maxVAF.vcf.gz.tbi",
-  "myeloseq.mutect_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.maxVAF.vcf.gz",
+  "myeloseq.vardict_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Vardict_N/vardict.merged.BQSR.2N.maxVAF.vcf.gz.tbi",
+  "myeloseq.mutect_pon2_file": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Mutect_N/mutect2.merged.SB.2N.maxVAF.vcf.gz",
   "myeloseq.bqsr_intervals": [
       "chr1",
       "chr2",
@@ -67,8 +67,8 @@
     {"bam":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_9_1.bam", "bai":"/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/11108_9_1.bam.bai"}
   ],
   "myeloseq.normalized_gnomad_exclude": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz",
-  "myeloseq.lofreq_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/lofreq.merged.2percent.2N.maxVAF.vcf.gz.tbi",
-  "myeloseq.vardict_pon2_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/vardict.merged.BQSR.2N.maxVAF.vcf.gz",
+  "myeloseq.lofreq_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Lofreq_N/lofreq.merged.2percent.2N.maxVAF.vcf.gz.tbi",
+  "myeloseq.vardict_pon2_file": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Vardict_N/vardict.merged.BQSR.2N.maxVAF.vcf.gz",
   "myeloseq.vep_pick": "pick",
   "myeloseq.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
   "myeloseq.bcbio_filter_string": "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 1600) || (INFO/QUAL < 27)))",

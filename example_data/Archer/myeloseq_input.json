@@ -1,5 +1,5 @@
 {
-  "myeloseq.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Mutect_N/mutect2.merged.SB.2N.maxVAF.vcf.gz.tbi ",
+  "myeloseq.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/MGI_Data/Normals/Mutect_N/mutect2.merged.SB.2N.maxVAF.vcf.gz.tbi",
   "myeloseq.vep_ensembl_assembly": "GRCh38",
   "myeloseq.bqsr_known_sites": [
       "/storage1/fs1/bga/Active/gmsroot/gc2709/info/production_reference_GRCh38DH/accessory_vcf/omni25-ld-pruned-20000-2000-0.5-annotated.wchr.sites_only.b38.autosomes_only.vcf.gz",
