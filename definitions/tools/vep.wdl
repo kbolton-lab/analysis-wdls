@@ -25,10 +25,10 @@ task vepTask {
     File? synonyms_file
   }
 
-  Float cache_size = 2*size(cache_dir_zip, "GB")  # doubled to unzip
+  Float cache_size = 3*size(cache_dir_zip, "GB")  # doubled to unzip
   Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
   Float reference_size = size([reference, reference_fai, reference_dict], "GB")
-  Int space_needed_gb = 10 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
+  Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
   runtime {
     memory: "64GB"
     bootDiskSizeGb: 30
@@ -68,7 +68,7 @@ task vepTask {
     ~{if defined(synonyms_file) then "--synonyms ~{synonyms_file}" else ""} \
     --sift p \
     --polyphen p \
-    --coding_only ~{coding_only} \
+    ~{if coding_only then "--coding_only" else ""} \
     --~{pick} \
     --dir ~{cache_dir} \
     --fasta ~{reference} \
@@ -79,10 +79,13 @@ task vepTask {
     --species ~{ensembl_species} \
     ~{additional_args} \
     ${custom_string}
+
+    bgzip ~{annotated_path} && tabix ~{annotated_path}.gz
   >>>
 
   output {
-    File annotated_vcf = annotated_path
+    File annotated_vcf = "~{annotated_path}.gz"
+    File annotated_vcf_tbi = "~{annotated_path}.gz.tbi"
     File vep_summary = annotated_path + "_summary.html"
   }
 }
@@ -147,6 +150,7 @@ workflow vep {
 
   output {
       File annotated_vcf = vepTask.annotated_vcf
+      File annotated_vcf_tbi = vepTask.annotated_vcf_tbi
       File vep_summary = vepTask.vep_summary
   }
 }

@@ -10,17 +10,28 @@ task normalFisher {
     }
 
 
-    Int space_needed_gb = 100 + round(size([vcf, pon, pon_tbi], "GB"))
+    Int space_needed_gb = 10 + round(size([vcf, pon, pon_tbi], "GB"))
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
+      cpu: cores
       docker: "kboltonlab/sam_bcftools_tabix_bgzip:1.0"
-      memory: "32GB"
+      memory: "6GB"
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<
         set -eou pipefail
 
-        name=$(basename ~{vcf} .vcf)
+        if [[ "~{vcf}" == *.gz ]]; then
+            name=$(basename ~{vcf} .vcf.gz)
+        else
+            name=$(basename ~{vcf} .vcf)
+        fi
 
         bcftools +fill-tags -Oz -o RD.vcf.gz ~{pon} -- -t "PON_RefDepth=sum(RD)"
         bcftools +fill-tags -Oz -o RD_AD.vcf.gz RD.vcf.gz -- -t "PON_AltDepth=sum(AD)" && tabix RD_AD.vcf.gz
@@ -54,7 +65,7 @@ task normalFisher {
             stop("Must supply (output file).n", call.=FALSE)
             }
 
-            df = read.table(args[1], header=F)
+            df = read.table(args[1], header=F, colClasses = c("character", "numeric", "character", "character", "numeric", "numeric", "numeric", "numeric"))
 
             if (length(colnames(df)) != 8) {
             stop("Must supply file with 8 columns: %CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%RD]\t[%AD]", call.=FALSE)
@@ -76,7 +87,7 @@ task normalFisher {
             })
             write.table(df, file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%RD]\t[%AD]\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
         elif [[ ~{caller} =~ $patt ]]
         then
@@ -92,7 +103,7 @@ task normalFisher {
             stop("Must supply (output file).n", call.=FALSE)
             }
 
-            df = read.table(args[1], header=F)
+            df = read.table(args[1], header=F, colClasses = c("character", "numeric", "character", "character", "numeric", "numeric", "character"))
 
             #https://statisticsglobe.com/split-data-frame-variable-into-multiple-columns-in-r
             df <- cbind(df, data.frame(do.call("rbind", strsplit(as.character(df$V7), ",", fixed = TRUE))))[,-7]
@@ -120,7 +131,7 @@ task normalFisher {
             })
             write.table(df[, -c(9:10)], file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t%INFO/DP4\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
         else
             echo '
@@ -135,7 +146,7 @@ task normalFisher {
             stop("Must supply (output file).n", call.=FALSE)
             }
 
-            df = read.table(args[1], header=F)
+            df = read.table(args[1], header=F, colClasses = c("character", "numeric", "character", "character", "numeric", "numeric", "character"))
 
             #https://statisticsglobe.com/split-data-frame-variable-into-multiple-columns-in-r
             df <- cbind(df, data.frame(do.call("rbind", strsplit(as.character(df$V7), ",", fixed = TRUE))))[,-7]
@@ -159,25 +170,30 @@ task normalFisher {
             })
             write.table(df, file=args[2], row.names = F, quote = F, col.names = F, sep = "\t")
             ' > fisherTestInput.R
-            bcftools annotate --threads 32 -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
+            bcftools annotate -a RD_AD.vcf.gz -c PON_RefDepth,PON_AltDepth $name.sample.vcf.gz -Oz -o $name.sample.pileup.vcf.gz;
             bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/PON_RefDepth\t%INFO/PON_AltDepth\t[%AD]\n' $name.sample.pileup.vcf.gz > $name.fisher.input;
 
         fi
         chmod u+x fisherTestInput.R
 
-
-        LC_ALL=C.UTF-8 Rscript --vanilla ./fisherTestInput.R $name.fisher.input $name.fisher.output
-        bgzip -f $name.fisher.output
-        tabix -f -s1 -b2 -e2 $name.fisher.output.gz
-        bcftools annotate -a $name.fisher.output.gz -h fisher.header -c CHROM,POS,REF,ALT,-,-,-,-,PON_FISHER $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
-        bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+        # Depending on how we split, we might have caller_vcf that doesn't have any variants called
+        if [ -s $name.fisher.input ]; then
+            LC_ALL=C.UTF-8 Rscript --vanilla ./fisherTestInput.R $name.fisher.input $name.fisher.output
+            bgzip -f $name.fisher.output
+            tabix -f -s1 -b2 -e2 $name.fisher.output.gz
+            bcftools annotate -a $name.fisher.output.gz -h fisher.header -c CHROM,POS,REF,ALT,-,-,-,-,PON_FISHER $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
+            bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+        else
+            bcftools annotate -h fisher.header $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
+            bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+        fi
     >>>
 
     output {
-        File pon_vcf = basename(vcf, ".vcf") + ".pileup.fisherPON.vcf.gz"
-        File pon_vcf_tbi = basename(vcf, ".vcf") + ".pileup.fisherPON.vcf.gz.tbi"
-        File pon_filtered_vcf = basename(vcf, ".vcf") + ".filtered.pileup.fisherPON.vcf.gz"
-        File pon_filtered_vcf_tbi = basename(vcf, ".vcf") + ".filtered.pileup.fisherPON.vcf.gz.tbi"
+        File pon_vcf = select_first([basename(vcf, ".vcf.gz") + ".pileup.fisherPON.vcf.gz",basename(vcf, ".vcf") + ".pileup.fisherPON.vcf.gz"])
+        File pon_vcf_tbi = select_first([basename(vcf, ".vcf.gz") + ".pileup.fisherPON.vcf.gz.tbi",basename(vcf, ".vcf") + ".pileup.fisherPON.vcf.gz.tbi"])
+        File pon_filtered_vcf = select_first([basename(vcf, ".vcf.gz") + ".filtered.pileup.fisherPON.vcf.gz",basename(vcf, ".vcf") + ".filtered.pileup.fisherPON.vcf.gz"])
+        File pon_filtered_vcf_tbi = select_first([basename(vcf, ".vcf.gz") + ".filtered.pileup.fisherPON.vcf.gz.tbi",basename(vcf, ".vcf") + ".filtered.pileup.fisherPON.vcf.gz.tbi"])
     }
 }
 

@@ -6,19 +6,23 @@ task bbmapRepair {
         File fastq2
     }
 
-    Int cores = 8
+    Int cores = 1
     Float data_size = size([fastq1, fastq2], "GB")
+    Int preemptible = 1
+    Int maxRetries = 0
 
     runtime {
         docker: "quay.io/biocontainers/bbmap:38.92--he522d1c_0"
-        memory: "24GB"
+        memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 10 + round(5*data_size)
-        disks: "local-disk ~{10 + round(5*data_size)} SSD"
+        bootDiskSizeGb: 10 + round(2*data_size)
+        disks: "local-disk ~{10 + round(2*data_size)} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     command <<<
-        repair.sh repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
+        repair.sh -Xmx6g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
     >>>
 
     output {

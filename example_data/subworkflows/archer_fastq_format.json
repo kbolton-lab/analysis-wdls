@@ -1,10 +1,10 @@
 {
-  "archer_fastq_format.sequence": {
+  "archerFastqFormat.sequence": {
       "sequence": {
         "fastq1": "/storage1/fs1/bolton/Active/data/TEST_DATA/Sample_R1.fastq.gz",
         "fastq2": "/storage1/fs1/bolton/Active/data/TEST_DATA/Sample_R2.fastq.gz"
       },
       "readgroup": "RG\tRD:Normal\tSM:Normal\tPL:Illumina\tCN:Archer"
   },
-  "archer_fastq_format.umi_length": 8
+  "archerFastqFormat.umi_length": 8
 }

@@ -18,12 +18,17 @@ task selectVariants {
     String? select_type
   }
 
-  Int space_needed_gb = 10 + round(size([vcf, vcf_tbi], "GB")*3 + size([reference, reference_fai, reference_dict, interval_list], "GB"))
+  Int space_needed_gb = 5 + round(size([vcf, vcf_tbi], "GB")*3 + size([reference, reference_fai, reference_dict, interval_list], "GB"))
+  Int preemptible = 1
+  Int maxRetries = 0
+  Int cores = 1
   runtime {
     docker: "broadinstitute/gatk:4.2.0.0"
     memory: "6GB"
-    bootDiskSizeGb: 25
     disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   String outfile = "~{output_vcf_basename}.vcf.gz"

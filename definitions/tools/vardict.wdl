@@ -18,13 +18,17 @@ task vardictNormal {
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
 
     runtime {
         docker: "kboltonlab/vardictjava:1.0"
-        memory: "128GB"
+        memory: "96GB"
         cpu: cores
         bootDiskSizeGb: space_needed_gb
         disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     String output_name = "vardict"
@@ -38,25 +42,25 @@ task vardictNormal {
             -N ~{tumor_sample_name} \
             -b "~{tumor_bam}|~{normal_bam}" \
             -c 1 -S 2 -E 3 -g 4 ~{interval_bed} \
-            -th 64 | \
+            -th ~{cores} | \
         /opt/VarDictJava/build/install/VarDict/bin/testsomatic.R | \
         /opt/VarDictJava/build/install/VarDict/bin/var2vcf_paired.pl \
             -N "~{tumor_sample_name}|~{normal_sample_name}" \
             -f ~{min_var_freq} > ~{output_name}.vcf
 
         /usr/bin/bgzip ~{output_name}.vcf && /usr/bin/tabix ~{output_name}.vcf.gz
-        
+
         # extract tumor before bcbio filter or both normal and tumor will be canidates for the filter
         /usr/bin/bcftools view -h \
             -s ~{tumor_sample_name} \
-            --threads 64 ~{output_name}.vcf.gz \
+            --threads ~{cores} ~{output_name}.vcf.gz \
             -Oz -o ~{output_name}.tumor.vcf.gz
         /usr/bin/tabix ~{output_name}.tumor.vcf.gz
-        
-        # extract normal 
+
+        # extract normal
         /usr/bin/bcftools view -h \
             -s ~{normal_sample_name} \
-            --threads 64 ~{output_name}.vcf.gz \
+            --threads ~{cores} ~{output_name}.vcf.gz \
             -Oz -o ~{output_name}.normal.vcf.gz
         /usr/bin/tabix ~{output_name}.normal.vcf.gz
     >>>
@@ -86,13 +90,17 @@ task vardictTumorOnly {
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
 
     runtime {
         docker: "kboltonlab/vardictjava:1.0"
-        memory: "128GB"
+        memory: "96GB"
         cpu: cores
         bootDiskSizeGb: space_needed_gb
         disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     String output_name = "vardict"
@@ -108,7 +116,7 @@ task vardictTumorOnly {
             -N ~{tumor_sample_name} \
             -b ~{tumor_bam} \
             -c 1 -S 2 -E 3 -g 4 ~{interval_bed} \
-            -th 64 | \
+            -th ~{cores} | \
         /opt/VarDictJava/build/install/VarDict/bin/teststrandbias.R | \
         /opt/VarDictJava/build/install/VarDict/bin/var2vcf_valid.pl \
             -N "~{tumor_sample_name}" \

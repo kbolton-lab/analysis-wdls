@@ -13,16 +13,21 @@ task lofreqTumorOnly {
       Float ? min_vaf = 0.0001
     }
 
-    Int cores = 2
+    Int cores = 4
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
       docker: "kboltonlab/lofreq:latest"
-      memory: "12GB"
+      memory: "24GB"
       cpu: cores
       bootDiskSizeGb: space_needed_gb
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<
@@ -30,15 +35,22 @@ task lofreqTumorOnly {
         set -o nounset
 
         /opt/lofreq/bin/lofreq indelqual --dindel -f ~{reference} -o output.indel.bam ~{tumor_bam}
-        /opt/lofreq/bin/lofreq call --no-default-filter -B -a 1 -b 1 -l ~{interval_bed} -f ~{reference} --call-indels -o lofreq.vcf output.indel.bam --force-overwrite
-        /opt/lofreq/bin/lofreq filter -i lofreq.vcf -o ~{output_name}.filtered.vcf -v 5 -a ~{min_vaf} -A 0.9 --sb-incl-indels --print-all
+        /opt/lofreq/bin/lofreq call-parallel --pp-threads ~{cores} -A -B -f ~{reference} --call-indels --bed ~{interval_bed} -o lofreq_pass.vcf output.indel.bam --force-overwrite
+        /opt/lofreq/bin/lofreq call-parallel --pp-threads ~{cores} --no-default-filter -B -a 1 -b 1 -l ~{interval_bed} -f ~{reference} --call-indels -o lofreq_call.vcf output.indel.bam --force-overwrite
+        /opt/lofreq/bin/lofreq filter -i lofreq_call.vcf -o lofreq_call.filtered.vcf -v 5 -a ~{min_vaf} -A 0.9 --sb-incl-indels --print-all
 
-        bgzip ~{output_name}.filtered.vcf && tabix ~{output_name}.filtered.vcf.gz
+        printf "##FILTER=<ID=CALL,Description=\"A variant that was called by Lofreq's Caller without any filters\">" > lofreq.header;
+        cat lofreq_call.vcf | sed 's/PASS/CALL/g' > call_to_pass.vcf
+        bgzip call_to_pass.vcf && tabix call_to_pass.vcf.gz
+        bgzip lofreq_pass.vcf && tabix lofreq_pass.vcf.gz
+        bcftools annotate --threads 32 -a lofreq_pass.vcf.gz -h lofreq.header -c FILTER call_to_pass.vcf.gz -Oz -o ~{output_name}.vcf.gz
+
+        tabix ~{output_name}.vcf.gz
     >>>
 
     output {
-        File vcf = "~{output_name}.filtered.vcf.gz"
-        File vcf_tbi = "~{output_name}.filtered.vcf.gz.tbi"
+        File vcf = "~{output_name}.vcf.gz"
+        File vcf_tbi = "~{output_name}.vcf.gz.tbi"
     }
 }
 
@@ -58,16 +70,21 @@ task lofreqNormal {
       String? output_name = "lofreq"
     }
 
-    Int cpu = 2
+    Int cpu = 4
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
       docker: "kboltonlab/lofreq:latest"
-      memory: "12GB"
+      memory: "24GB"
       cores: cpu
       bootDiskSizeGb: space_needed_gb
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     command <<<
@@ -75,7 +92,7 @@ task lofreqNormal {
         set -o nounset
 
         /opt/lofreq/bin/lofreq indelqual --dindel -f ~{reference} -o output.indel.bam ~{tumor_bam}
-        /opt/lofreq/bin/lofreq somatic --call-indels -n ~{normal_bam} -t output.indel.bam -f ~{reference} -l ~{interval_bed} -o lofreq_ --threads 8
+        /opt/lofreq/bin/lofreq somatic --call-indels -n ~{normal_bam} -t output.indel.bam -f ~{reference} -l ~{interval_bed} -o lofreq_ --threads ~{cores}
         tabix lofreq_somatic_final.snvs.vcf.gz
         tabix lofreq_somatic_final.indels.vcf.gz
         bcftools concat -a lofreq_somatic_final.snvs.vcf.gz lofreq_somatic_final.indels.vcf.gz > ~{output_name}.vcf

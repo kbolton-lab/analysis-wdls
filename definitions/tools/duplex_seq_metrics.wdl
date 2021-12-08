@@ -15,7 +15,7 @@ task duplexSeqMetrics {
         docker: "quay.io/biocontainers/fgbio:1.3.0--0"
         memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 10
+        bootDiskSizeGb: space_needed_gb
         disks: "local-disk ~{space_needed_gb} SSD"
     }
 

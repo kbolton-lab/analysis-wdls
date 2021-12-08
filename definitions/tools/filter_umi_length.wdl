@@ -7,15 +7,20 @@ task filterUmiLength {
         Int umi_length
     }
 
-    Int cores = 2
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
     Float data_size = size([fastq1, fastq2], "GB")
+    Int space_needed_gb = 10 + round(2*data_size)
 
     runtime {
         docker: "ubuntu:xenial"
-        memory: "4GB"
+        memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 10
-        disks: "local-disk ~{10 + round(5*data_size)} SSD"
+        disks: "local-disk ~{space_needed_gb} SSD"
+        bootDiskSizeGb: space_needed_gb
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     command <<<

@@ -7,13 +7,18 @@ task mergeBams {
     String name = "merged"
   }
 
-  Int cores = 4
-  Int space_needed_gb = 10 + round(4*size(bams, "GB"))
+  # If we are only copying the BAM, there's no need to spin up too many CPUs
+  Int cores = if length(bams) == 1 then 1 else 4
+  Int space_needed_gb = 10 + round(2*size(bams, "GB"))
+  Int preemptible = 1
+  Int maxRetries = 0
   runtime {
     docker: "mgibio/bam-merge:0.1"
     memory: "8GB"
     cpu: cores
     disks: "local-disk ~{space_needed_gb} SSD"
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   String outname = name + ".bam"

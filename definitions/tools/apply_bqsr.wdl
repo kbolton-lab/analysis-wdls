@@ -11,15 +11,21 @@ task applyBqsr {
     String output_name = "final"
   }
 
+  Int cores = 1
   Int space_needed_gb = 10 + round(size([bqsr_table, reference, reference_fai, reference_dict], "GB") + size([bam, bam_bai], "GB") * 2)
+  Int preemptible = 1
+  Int maxRetries = 0
   runtime {
+    cpu: cores
     docker: "broadinstitute/gatk:4.1.8.1"
-    memory: "18GB"
+    memory: "6GB"
     disks: "local-disk ~{space_needed_gb} SSD"
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   command <<<
-    /gatk/gatk --java-options -Xmx16g ApplyBQSR -O ~{output_name}.bam ~{sep=" " prefix("--static-quantized-quals ", [10, 20, 30])} -R ~{reference} -I ~{bam} -bqsr ~{bqsr_table}
+    /gatk/gatk --java-options -Xmx6g ApplyBQSR -O ~{output_name}.bam ~{sep=" " prefix("--static-quantized-quals ", [10, 20, 30])} -R ~{reference} -I ~{bam} -bqsr ~{bqsr_table}
   >>>
 
   output {

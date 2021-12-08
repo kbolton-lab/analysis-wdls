@@ -4,18 +4,25 @@ task bcftoolsFilterBcbio {
     input {
         File vcf
         File vcf_tbi
-        String filter_flag = "include"
+        String filter_flag = "exclude"
         String filter_string
         String? output_vcf_prefix = "bcftools_filter"
         String output_type = "z"
     }
 
-    Int space_needed_gb = 10 + round(size(vcf, "GB"))
+    Int space_needed_gb = 10 + 2*round(size(vcf, "GB"))
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
+      cpu: cores
       docker: "kboltonlab/bst:latest"
-      memory: "4GB"
+      memory: "6GB"
       bootDiskSizeGb: space_needed_gb
       disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
 
     String ff = if filter_flag == "include" then "-i" else "-e"

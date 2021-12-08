@@ -10,11 +10,18 @@ task bcftoolsNorm {
         File vcf_tbi
     }
 
-    Int space_needed_gb = 10 + round(size([vcf, vcf_tbi], "GB") + size([reference, reference_fai], "GB"))
+    Int space_needed_gb = 10 + round(size([vcf, vcf_tbi], "GB") * 2 + size([reference, reference_fai], "GB"))
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
     runtime {
-      memory: "9GB"
+      memory: "6GB"
       docker: "kboltonlab/bst"
       disks: "local-disk ~{space_needed_gb} SSD"
+      cpu: cores
+      preemptible: preemptible
+      maxRetries: maxRetries
     }
     command <<<
         /usr/local/bin/bcftools norm --multiallelics -any --output-type z --output bcftools_norm.vcf.gz ~{vcf} -f ~{reference}

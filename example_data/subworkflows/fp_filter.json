@@ -1,0 +1,12 @@
+{
+  "fpFilter.vcf": "/storage1/fs1/bolton/Active/projects/IChanTest/FakeVcfTest/mutect_fake.vcf.gz",
+  "fpFilter.variant_caller": "mutect",
+  "fpFilter.bam": "/storage1/fs1/bolton/Active/projects/IChanTest/Archer_CheckIn/3414142_S133/clipped.final.bam",
+  "fpFilter.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+  "fpFilter.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+  "fpFilter.vcf_tbi": "/storage1/fs1/bolton/Active/projects/IChanTest/FakeVcfTest/mutect_fake.vcf.gz.tbi",
+  "fpFilter.bam_bai": "/storage1/fs1/bolton/Active/projects/IChanTest/Archer_CheckIn/3414142_S133/clipped.final.bam.bai",
+  "fpFilter.min_var_freq": "0.0005",
+  "fpFilter.sample_name": "Sample",
+  "fpFilter.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa"
+}

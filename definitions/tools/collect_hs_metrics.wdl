@@ -20,10 +20,16 @@ task collectHsMetrics {
   }
 
   Int space_needed_gb = 10 + round(size([bam, bam_bai, reference, reference_fai, reference_dict, bait_intervals, target_intervals], "GB"))
+  Int preemptible = 1
+  Int maxRetries = 0
+  Int cores = 1
   runtime{
-    memory: "52GB"
+    memory: "6GB"
     docker: "broadinstitute/picard:2.23.6"
     disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
   }
 
   String bamroot = basename(bam, ".bam")
@@ -31,7 +37,7 @@ task collectHsMetrics {
   String per_target_txt = "~{bamroot}.~{output_prefix}-PerTargetCoverage.txt"
   String per_base_txt = "~{bamroot}.~{output_prefix}-PerBaseCoverage.txt"
   command <<<
-    /usr/bin/java -Xmx16g -jar /usr/picard/picard.jar CollectHsMetrics \
+    /usr/bin/java -Xmx6g -jar /usr/picard/picard.jar CollectHsMetrics \
     O=~{hs_txt} \
     I=~{bam} \
     R=~{reference} \

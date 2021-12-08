@@ -10,15 +10,18 @@ task fastqToBam {
         String platform
     }
 
-    Int cores = 2
-    Int space_needed_gb = 10 + round(10*size([fastq1, fastq2], "GB"))
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+    Int space_needed_gb = 10 + round(2*size([fastq1, fastq2], "GB"))
 
     runtime {
         docker: "mgibio/dna-alignment:1.0.0"
         memory: "6GB"
         cpu: cores
-        bootDiskSizeGb: 25
         disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     command <<<

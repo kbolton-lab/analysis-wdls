@@ -1,0 +1,63 @@
+{
+    "vep.coding_only": true,
+    "vep.reference": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa",
+    "vep.pick": "pick",
+    "vep.synonyms_file": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build50f99e75d14340ffb5b7d21b03887637/chromAlias.ensembl.txt",
+    "vep.plugins": ["Frameshift", "Wildtype"],
+    "vep.custom_annotations": [{
+        "force_report_coordinates" : true,
+        "method" : "exact",
+        "annotation" : {
+            "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz",
+            "secondary_files" : [
+                "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz.tbi"
+            ],
+            "data_format" : "vcf",
+            "name" : "gnomADe",
+            "vcf_fields" : [
+                "AF",
+                "AF_AFR",
+                "AF_AMR",
+                "AF_ASJ",
+                "AF_EAS",
+                "AF_FIN",
+                "AF_NFE",
+                "AF_OTH",
+                "AF_SAS"
+            ],
+            "gnomad_filter" : true,
+            "check_existing" : true
+        }
+        },
+        {
+            "force_report_coordinates" : true,
+            "method" : "exact",
+            "annotation" : {
+                "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz",
+                "secondary_files" : [
+                    "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz.tbi"
+                ],
+                "data_format" : "vcf",
+                "name" : "clinvar",
+                "vcf_fields" : [
+                    "CLINSIGN",
+                    "PHENOTYPE",
+                    "SCORE",
+                    "RCVACC",
+                    "TESTEDINGTR",
+                    "PHENOTYPELIST",
+                    "NUMSUBMIT",
+                    "GUIDELINES"
+                ],
+                "gnomad_filter" : true,
+                "check_existing" : true
+            }
+            }],
+    "vep.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
+    "vep.ensembl_species": "homo_sapiens",
+    "vep.ensembl_version": "104",
+    "vep.reference_dict": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.dict",
+    "vep.cache_dir_zip": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/ukbb_calls/pvcf/vep_zip.zip",
+    "vep.ensembl_assembly": "GRCh38",
+    "vep.vcf": "/storage1/fs1/bolton/Active/projects/IChanTest/FakeVcfTest/mutect_fake.vcf.gz"
+}

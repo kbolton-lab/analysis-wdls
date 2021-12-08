@@ -2,8 +2,7 @@ version 1.0
 
 import "../types.wdl"
 
-import "../tools/collect_insert_size_metrics.wdl" as cism
-import "../tools/collect_alignment_summary_metrics.wdl" as casm
+import "../tools/metrics.wdl" as m
 import "../tools/collect_hs_metrics.wdl" as chm
 import "../tools/samtools_flagstat.wdl" as sf
 import "../tools/select_variants.wdl" as sv
@@ -29,24 +28,14 @@ workflow qcExome {
     Array[LabelledFile] summary_intervals
   }
 
-  call cism.collectInsertSizeMetrics {
-    input:
-    bam=bam,
-    bam_bai=bam_bai,
-    reference=reference,
-    reference_fai=reference_fai,
-    reference_dict=reference_dict,
-    metric_accumulation_level=picard_metric_accumulation_level
-  }
-
-  call casm.collectAlignmentSummaryMetrics {
-    input:
-    bam=bam,
-    bam_bai=bam_bai,
-    reference=reference,
-    reference_fai=reference_fai,
-    reference_dict=reference_dict,
-    metric_accumulation_level=picard_metric_accumulation_level
+  call m.Metrics as collectAllMetrics {
+      input:
+      bam=bam,
+      bam_bai=bam_bai,
+      reference=reference,
+      reference_fai=reference_fai,
+      reference_dict=reference_dict,
+      metric_accumulation_level=picard_metric_accumulation_level
   }
 
   call chm.collectHsMetrics as collectRoiHsMetrics {
@@ -104,9 +93,9 @@ workflow qcExome {
   }
 
   output {
-    File insert_size_metrics = collectInsertSizeMetrics.insert_size_metrics
-    File insert_size_histogram = collectInsertSizeMetrics.insert_size_histogram
-    File alignment_summary_metrics = collectAlignmentSummaryMetrics.alignment_summary_metrics
+    File insert_size_metrics = collectAllMetrics.insert_size_metrics
+    File insert_size_histogram = collectAllMetrics.insert_size_histogram
+    File alignment_summary_metrics = collectAllMetrics.alignment_summary_metrics
     File hs_metrics = collectRoiHsMetrics.hs_metrics
     Array[File] per_target_coverage_metrics = collectDetailedHsMetrics.per_target_coverage_metrics
     Array[File] per_target_hs_metrics = collectDetailedHsMetrics.per_target_hs_metrics

@@ -21,6 +21,16 @@ struct LabelledFile {
   String label
 }
 
+struct bam_and_bai {
+    File bam
+    File bai
+}
+
+struct bam_and_bai_array {
+    Array[File] bams
+    Array[File] bais
+}
+
 # ---- vep_custom_annotation ----
 struct Info {
   File file
