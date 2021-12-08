@@ -33,7 +33,15 @@ ${(z)CROMWELL} run \
     -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/mutect_tool_home.json \
     /Users/brian/test/WDL/analysis-wdls/definitions/tools/mutect.wdl
 
+${(z)CROMWELL} run \
+    -t wdl \
+    -i /Users/brian/test/WDL/analysis-wdls/example_data/subworkflows/fp_filter_home.json \
+    /Users/brian/test/WDL/analysis-wdls/definitions/subworkflows/fp_filter.wdl
 
+${(z)CROMWELL} run \
+    -t wdl \
+    -i /Users/brian/test/WDL/analysis-wdls/example_data/tools/fp_filter_home.json \
+    /Users/brian/test/WDL/analysis-wdls/definitions/tools/fp_filter.wdl
 
 
 /opt/VarDictJava/build/install/VarDict/bin/VarDict \

@@ -1,16 +1,16 @@
 {
-  "somatic_tumor_only.tumor_bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.rehead.bam",
-  "somatic_tumor_only.tumor_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.rehead.bam.bai",
+  "somatic_tumor_only.tumor_bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/input.kraken_filtered.ends_trimmed.rehead.bam",
+  "somatic_tumor_only.tumor_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/input.kraken_filtered.ends_trimmed.rehead.bam.bai",
   "somatic_tumor_only.normalized_gnomad_file": "/storage1/fs1/bolton/Active/data/hg38/vcf/af-only-gnomad.biallelic.hg38.vcf.gz",
   "somatic_tumor_only.normalized_gnomad_file_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/af-only-gnomad.biallelic.hg38.vcf.gz.tbi",
   "somatic_tumor_only.pon": "/storage1/fs1/bolton/Active/data/hg38/vcf/1000G_omni2.5.hg38.vcf.gz",
   "somatic_tumor_only.pon_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/1000G_omni2.5.hg38.vcf.gz.tbi",
   "somatic_tumor_only.per_target_intervals": [{
-    "file": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.chr22.padded100.interval_list",
+    "file": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.padded100.interval_list",
     "label": "brian_is_cool"}],
   "somatic_tumor_only.scatter_count": 20,
   "somatic_tumor_only.summary_intervals": [{
-      "file": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.chr22.padded100.interval_list",
+      "file": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.padded100.interval_list",
       "label": "brian_is_cool"}],
 
   "somatic_tumor_only.vep_ensembl_assembly": "GRCh38",
@@ -30,9 +30,9 @@
   "somatic_tumor_only.omni_vcf": "/storage1/fs1/bga/Active/gmsroot/gc2709/info/production_reference_GRCh38DH/accessory_vcf/omni25-ld-pruned-20000-2000-0.5-annotated.wchr.sites_only.b38.autosomes_only.vcf.gz",
   "somatic_tumor_only.pon_pvalue": "6.825659e-07",
   "somatic_tumor_only.reference_dict": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/GCA_000001405.15_GRCh38_full_analysis_set.dict",
-  "somatic_tumor_only.target_intervals": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.chr22.padded100.interval_list",
+  "somatic_tumor_only.target_intervals": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.padded100.interval_list",
   "somatic_tumor_only.per_base_intervals": [{
-    "file": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.chr22.padded100.interval_list",
+    "file": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.padded100.interval_list",
     "label": "brian_is_cool"}],
   "somatic_tumor_only.bqsr_known_sites": [
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-19443-e48c595a620a432c93e8dd29e4af64f2/snvs.hq.vcf.gz",
@@ -116,14 +116,14 @@
               }],
   "somatic_tumor_only.normalized_gnomad_exclude_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.AF.exclude.0.005.norm.vcf.gz.tbi",
   "somatic_tumor_only.vep_ensembl_version": "104",
-  "somatic_tumor_only.tumor_sample_name": "DNA01917",
-  "somatic_tumor_only.target_bed": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.chr22.padded100.bed",
+  "somatic_tumor_only.tumor_sample_name": "input",
+  "somatic_tumor_only.target_bed": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.padded100.bed",
   "somatic_tumor_only.bqsr_known_sites_tbi": [
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-19443-e48c595a620a432c93e8dd29e4af64f2/snvs.hq.vcf.gz.tbi",
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20211-26b393cc7ab04120ac68cc2cbd4a15df/indels.hq.vcf.gz.tbi",
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20267-00cb8ff552914c17ad66d86031e10d30/indels.hq.vcf.gz.tbi"
   ],
-  "somatic_tumor_only.bait_intervals": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.chr22.padded100.interval_list",
+  "somatic_tumor_only.bait_intervals": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/twinstrand.targets.padded100.interval_list",
   
 
   "somatic_tumor_only.tumor_only": true,

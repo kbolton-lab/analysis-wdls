@@ -39,7 +39,7 @@ task mapq0 {
         done
       
 
-        printf "##INFO=<ID=MQ0,Number=1,Type=Integer,Description=\"Number of MAPQ == 0 reads covering this record\">\n##INFO=<ID=samtools_DP,Number=1,Type=Integer,Description=\"Number of MAPQ == 0 reads covering this record\">\n" > MQ0.header;
+        printf "##INFO=<ID=MQ0,Number=1,Type=Integer,Description=\"Number of MAPQ == 0 reads covering this record\">\n##INFO=<ID=samtools_DP,Number=1,Type=Integer,Description=\"Samtools depth at this position\">\n" > MQ0.header;
         
 
         /usr/local/bin/bgzip -f mapq0counts

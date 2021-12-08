@@ -16,7 +16,7 @@ import "../tools/index_bam.wdl" as ib
 import "../tools/interval_list_expand.wdl" as ile
 import "../tools/vep_brian.wdl" as vep
 
-workflow somatic_tumor_only {
+workflow somatic_tumor_normal {
     input {
         # Pipeline
         Int scatter_count = 10
@@ -73,7 +73,7 @@ workflow somatic_tumor_only {
         Boolean? arrayMode = false       # Decide if you would raather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
         File? pon_normal_bams
         Array[String]? bams              # This is just an array of Files (as Strings)... if you have the bam_fof it's easier just to use above and set this to empty array []
-        Boolean tumor_only = true
+        Boolean tumor_only = false
         Boolean mutect_artifact_detection_mode = false
         Float? mutect_max_alt_allele_in_normal_fraction
         Int? mutect_max_alt_alleles_in_normal_count
@@ -124,51 +124,51 @@ workflow somatic_tumor_only {
     }
     
 
-    call b.bqsr as bqsr {
-        input:
-            reference = reference,
-            reference_fai = reference_fai,
-            reference_dict = reference_dict,
-            bam = tumor_bam,
-            bam_bai = tumor_bai,
-            intervals = bqsr_intervals,
-            known_sites = bqsr_known_sites,
-            known_sites_tbi = bqsr_known_sites_tbi
-    }
+    # call b.bqsr as bqsr {
+    #     input:
+    #         reference = reference,
+    #         reference_fai = reference_fai,
+    #         reference_dict = reference_dict,
+    #         bam = tumor_bam,
+    #         bam_bai = tumor_bai,
+    #         intervals = bqsr_intervals,
+    #         known_sites = bqsr_known_sites,
+    #         known_sites_tbi = bqsr_known_sites_tbi
+    # }
 
-    call ab.applyBqsr as apply_bqsr {
-        input:
-            reference = reference,
-            reference_fai = reference_fai,
-            reference_dict = reference_dict,
-            bam = tumor_bam,
-            bam_bai = tumor_bai,
-            bqsr_table = bqsr.bqsr_table
-    }
+    # call ab.applyBqsr as apply_bqsr {
+    #     input:
+    #         reference = reference,
+    #         reference_fai = reference_fai,
+    #         reference_dict = reference_dict,
+    #         bam = tumor_bam,
+    #         bam_bai = tumor_bai,
+    #         bqsr_table = bqsr.bqsr_table
+    # }
 
-    call ib.indexBam as index_bam {
-        input:
-            bam = apply_bqsr.bqsr_bam
-    }
+    # call ib.indexBam as index_bam {
+    #     input:
+    #         bam = apply_bqsr.bqsr_bam
+    # }
 
-    call qe.qcExome as tumor_qc {
-        input:
-            bam = index_bam.indexed_bam,
-            bam_bai = index_bam.indexed_bam_bai,
-            reference = reference,
-            reference_fai = reference_fai,
-            reference_dict = reference_dict,
-            bait_intervals = bait_intervals,
-            target_intervals = target_intervals,
-            per_base_intervals = per_base_intervals,
-            per_target_intervals = per_target_intervals,
-            summary_intervals = summary_intervals,
-            omni_vcf = omni_vcf,
-            omni_vcf_tbi = omni_vcf_tbi,
-            picard_metric_accumulation_level = picard_metric_accumulation_level,
-            minimum_mapping_quality = qc_minimum_mapping_quality,
-            minimum_base_quality = qc_minimum_base_quality
-    }
+    # call qe.qcExome as tumor_qc {
+    #     input:
+    #         bam = index_bam.indexed_bam,
+    #         bam_bai = index_bam.indexed_bam_bai,
+    #         reference = reference,
+    #         reference_fai = reference_fai,
+    #         reference_dict = reference_dict,
+    #         bait_intervals = bait_intervals,
+    #         target_intervals = target_intervals,
+    #         per_base_intervals = per_base_intervals,
+    #         per_target_intervals = per_target_intervals,
+    #         summary_intervals = summary_intervals,
+    #         omni_vcf = omni_vcf,
+    #         omni_vcf_tbi = omni_vcf_tbi,
+    #         picard_metric_accumulation_level = picard_metric_accumulation_level,
+    #         minimum_mapping_quality = qc_minimum_mapping_quality,
+    #         minimum_base_quality = qc_minimum_base_quality
+    # }
 
     call ile.intervalListExpand as pad_target_intervals {
         input:
@@ -182,8 +182,10 @@ workflow somatic_tumor_only {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = tumor_bam,
+            tumor_bam_bai = tumor_bai,
+            normal_bam = normal_bam,
+            normal_bam_bai = normal_bai,
             interval_list = target_intervals,
             pon = pon,
             pon_tbi = pon_tbi,
@@ -230,8 +232,10 @@ workflow somatic_tumor_only {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = tumor_bam,
+            tumor_bam_bai = tumor_bai,
+            normal_bam = normal_bam,
+            normal_bam_bai = normal_bai,
             interval_list = target_intervals,
             gnomad_file = normalized_gnomad_file,
             gnomad_file_tbi = normalized_gnomad_file_tbi,
@@ -277,8 +281,10 @@ workflow somatic_tumor_only {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = tumor_bam,
+            tumor_bam_bai = tumor_bai,
+            normal_bam = normal_bam,
+            normal_bam_bai = normal_bai,
             interval_bed = target_bed,
             tumor_sample_name = tumor_sample_name,
             min_var_freq = af_threshold,
@@ -288,8 +294,8 @@ workflow somatic_tumor_only {
 
     call gamf.gnomadAndMapQ0Filter as vardict_gnomad_mapq0_filters {
         input:
-            caller_vcf = vardict.bcbio_filtered_vcf,
-            caller_vcf_tbi = vardict.bcbio_filtered_vcf_tbi,
+            caller_vcf = vardict.unfiltered_vcf,
+            caller_vcf_tbi = vardict.unfiltered_vcf_tbi,
             bam = tumor_bam,
             bam_bai = tumor_bai,
             gnomAD_exclude_vcf = normalized_gnomad_exclude,
@@ -319,8 +325,10 @@ workflow somatic_tumor_only {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = tumor_bam,
+            tumor_bam_bai = tumor_bai,
+            normal_bam = normal_bam,
+            normal_bam_bai = normal_bai,
             interval_list = target_intervals,
             scatter_count = scatter_count,
             tumor_sample_name = tumor_sample_name,
@@ -362,8 +370,10 @@ workflow somatic_tumor_only {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = tumor_bam,
+            tumor_bam_bai = tumor_bai,
+            normal_bam = normal_bam,
+            normal_bam_bai = normal_bai,
             interval_list = target_intervals,
             scatter_count = scatter_count,
             insert_size = pindel_insert_size,
@@ -409,8 +419,10 @@ workflow somatic_tumor_only {
             reference = reference,
             reference_fai = reference_fai,
             reference_dict = reference_dict,
-            tumor_bam = index_bam.indexed_bam,
-            tumor_bam_bai = index_bam.indexed_bam_bai,
+            tumor_bam = tumor_bam,
+            tumor_bam_bai = tumor_bai,
+            normal_bam = normal_bam,
+            normal_bam_bai = normal_bai,
             interval_list = target_intervals,
             scatter_count = scatter_count,
             tumor_sample_name = tumor_sample_name,
@@ -449,22 +461,9 @@ workflow somatic_tumor_only {
 
     output {
         # Alignments
-        
-        File bqsr_bam = index_bam.indexed_bam
-        File bqsr_bam_bai = index_bam.indexed_bam_bai
+        # File bqsr_bam = index_bam.indexed_bam
+        # File bqsr_bam_bai = index_bam.indexed_bam_bai
 
-        # Tumor QC
-        File tumor_insert_size_metrics = tumor_qc.insert_size_metrics
-        File tumor_alignment_summary_metrics = tumor_qc.alignment_summary_metrics
-        File tumor_hs_metrics = tumor_qc.hs_metrics
-        Array[File] tumor_per_target_coverage_metrics = tumor_qc.per_target_coverage_metrics
-        Array[File] tumor_per_target_hs_metrics = tumor_qc.per_target_hs_metrics
-        Array[File] tumor_per_base_coverage_metrics = tumor_qc.per_base_coverage_metrics
-        Array[File] tumor_per_base_hs_metrics = tumor_qc.per_base_hs_metrics
-        Array[File] tumor_summary_hs_metrics = tumor_qc.summary_hs_metrics
-        File tumor_flagstats = tumor_qc.flagstats
-        File tumor_verify_bam_id_metrics = tumor_qc.verify_bam_id_metrics
-        File tumor_verify_bam_id_depth = tumor_qc.verify_bam_id_depth
 
         # Mutect PoN
         File mutect_pon_full = mutect_pon.unfiltered_vcf # mutect_full.vcf.gz

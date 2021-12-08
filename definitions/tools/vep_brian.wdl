@@ -8,7 +8,6 @@ task vep {
     File cache_dir_zip
     File reference
     File reference_fai
-    File reference_dict
     String ensembl_assembly
     String ensembl_version
     String ensembl_species
@@ -22,7 +21,7 @@ task vep {
 
   Float cache_size = 2*size(cache_dir_zip, "GB")  # doubled to unzip
   Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
-  Float reference_size = size([reference, reference_fai, reference_dict], "GB")
+  Float reference_size = size([reference, reference_fai], "GB")
   Int space_needed_gb = 10 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
   runtime {
     memory: "64GB"
@@ -60,7 +59,7 @@ task vep {
     -o ~{annotated_path} \
     -i ~{vcf} \
     ~{if defined(synonyms_file) then "--synonyms ~{synonyms_file}" else ""} \
-    --coding_only ~{coding_only} \
+    ~{if coding_only then "--coding_only" else ""} \
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
@@ -86,7 +85,6 @@ workflow wf {
     File cache_dir_zip
     File reference
     File reference_fai
-    File reference_dict
     Array[String] plugins
     String ensembl_assembly
     String ensembl_version
@@ -104,7 +102,6 @@ workflow wf {
     cache_dir_zip=cache_dir_zip,
     reference=reference,
     reference_fai=reference_fai,
-    reference_dict=reference_dict,
     plugins=plugins,
     ensembl_assembly=ensembl_assembly,
     ensembl_version=ensembl_version,

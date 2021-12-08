@@ -69,7 +69,7 @@ workflow vardict {
       vcf = fpFilter.unfiltered_vcf,
       vcf_tbi = fpFilter.unfiltered_vcf_tbi,
       filter_string = bcbio_filter_string,
-      filter_flag = "include",
+      filter_flag = "exclude",
       output_type = "z",
       output_vcf_prefix = "vardict.bcbiofilter"
   }

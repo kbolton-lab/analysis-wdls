@@ -1,6 +1,8 @@
 {
   "somatic_tumor_only.tumor_bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.rehead.bam",
   "somatic_tumor_only.tumor_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DNA01917.kraken_filtered.ends_trimmed.chr22.rehead.bam.bai",
+  "somatic_tumor_only.normal_bam": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DevDNA.kraken_filtered.ends_trimmed.rehead.bqsr.chr22.bam",
+  "somatic_tumor_only.normal_bai": "/storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/DevDNA.kraken_filtered.ends_trimmed.bqsr.chr22.bam.bai",
   "somatic_tumor_only.normalized_gnomad_file": "/storage1/fs1/bolton/Active/data/hg38/vcf/af-only-gnomad.biallelic.hg38.vcf.gz",
   "somatic_tumor_only.normalized_gnomad_file_tbi": "/storage1/fs1/bolton/Active/data/hg38/vcf/af-only-gnomad.biallelic.hg38.vcf.gz.tbi",
   "somatic_tumor_only.pon": "/storage1/fs1/bolton/Active/data/hg38/vcf/1000G_omni2.5.hg38.vcf.gz",

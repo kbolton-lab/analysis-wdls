@@ -1,6 +1,6 @@
 version 1.0
 
-import "../subworkflows/fp_filter.wdl" as ff
+import "../subworkflows/fp_filter_matched.wdl" as ff
 import "../tools/index_vcf.wdl" as iv
 import "../tools/merge_vcf.wdl" as mv
 import "../tools/mutect.wdl" as m

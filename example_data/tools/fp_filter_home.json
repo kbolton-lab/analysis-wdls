@@ -1,0 +1,8 @@
+{
+    "wf.reference": "/Users/brian/apps/reference/GRCh38_full_analysis_set_plus_decoy_hla.fa",
+    "wf.reference_fai": "/Users/brian/Bolton/UKBB/analysis-workflows/example_data/detect_variants/GRCh38_full_analysis_set_plus_decoy_hla.fa.fai",
+    "wf.reference_dict": "/Users/brian/Bolton/UKBB/analysis-workflows/example_data/detect_variants/GRCh38_full_analysis_set_plus_decoy_hla.dict",
+    "wf.bam": "/Users/brian/test/5178777_23153_0_0.cram",
+    "wf.vcf": "/Users/brian/test/5178777_23153_0_0.mutect.fpfilter.vcf",
+    "wf.sample_name": "UKB_1292171_301673919"
+}

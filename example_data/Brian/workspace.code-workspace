@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../Bolton/UKBB/docs/DNAnexus/apps"
+		},
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../../../Bolton/UKBB/analysis-workflows"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,11 @@
+{
+    "fpFilter.reference": "/Users/brian/apps/reference/GRCh38_full_analysis_set_plus_decoy_hla.fa",
+    "fpFilter.reference_fai": "/Users/brian/Bolton/UKBB/analysis-workflows/example_data/detect_variants/GRCh38_full_analysis_set_plus_decoy_hla.fa.fai",
+    "fpFilter.reference_dict": "/Users/brian/Bolton/UKBB/analysis-workflows/example_data/detect_variants/GRCh38_full_analysis_set_plus_decoy_hla.dict",
+    "fpFilter.bam": "/Users/brian/test/5178777_23153_0_0.cram",
+    "fpFilter.bam_bai": "/Users/brian/test/5178777_23153_0_0.cram/crai",
+    "fpFilter.vcf": "/Users/brian/Bolton/UKBB/lung/fpfilter/5178777_23153_0_0.vcf.gz",
+    "fpFilter.vcf_tbi": "/Users/brian/Bolton/UKBB/lung/fpfilter/5178777_23153_0_0.vcf.gz.tbi",
+    "fpFilter.variant_caller": "mutect",
+    "fpFilter.sample_name": "UKB_1292171_301673919"
+}
