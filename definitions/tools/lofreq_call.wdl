@@ -70,7 +70,7 @@ task lofreqNormal {
       String? output_name = "lofreq"
     }
 
-    Int cpu = 4
+    Int cores = 4
     Float reference_size = size([reference, reference_fai], "GB")
     Float bam_size = size([tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai], "GB")
     Int space_needed_gb = 10 + round(reference_size + 2*bam_size + size(interval_bed, "GB"))
@@ -80,7 +80,7 @@ task lofreqNormal {
     runtime {
       docker: "kboltonlab/lofreq:latest"
       memory: "24GB"
-      cores: cpu
+      cpu: cores
       bootDiskSizeGb: space_needed_gb
       disks: "local-disk ~{space_needed_gb} SSD"
       preemptible: preemptible
