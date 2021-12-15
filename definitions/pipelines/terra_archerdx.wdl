@@ -1,16 +1,5 @@
 version 1.0
 
-struct Sequence {
-  File? bam
-  File? fastq1
-  File? fastq2
-}
-# assume either bam or fastqs defined
-struct SequenceData {
-  Sequence sequence
-  String readgroup
-}
-
 struct TrimmingOptions {
   File adapters
   Int min_overlap
@@ -54,7 +43,9 @@ workflow archerdx {
         Int scatter_count = 20
 
         # Sequence and BAM Information
-        Array[SequenceData] sequence
+        File fastq_one
+        File fastq_two
+        File? bam_file
         Array[String] read_structure
         String? tumor_name = "tumor"
         String tumor_sample_name
@@ -157,74 +148,57 @@ workflow archerdx {
         String filter_flag = "include"
     }
 
-    scatter(seq_data in sequence) {
-        call filterUmiLength as filterUMI {
-            input:
-            fastq1 = seq_data.sequence.fastq1,
-            fastq2 = seq_data.sequence.fastq2,
-            umi_length = umi_length
-        }
-
-        call bbmapRepair as repair {
-            input:
-            fastq1 = filterUMI.fastq1_filtered,
-            fastq2 = filterUMI.fastq2_filtered
-        }
-
-        call fastqToBam as fastq_to_bam {
-            input:
-            fastq1 = repair.fastq1_repair,
-            fastq2 = repair.fastq2_repair,
-            sample_name = tumor_sample_name,
-            library_name = "Library",
-            platform_unit = "Illumina",
-            platform = "ArcherDX"
-        }
+    call filterUmiLength as filterUMI {
+        input:
+        fastq1 = fastq_one,
+        fastq2 = fastq_two,
+        umi_length = umi_length
     }
 
-    scatter(bam_data in fastq_to_bam.bam) {
-        call extractUmis as extract_umis {
-            input:
-            bam = bam_data,
-            read_structure = read_structure,
-            umi_paired = umi_paired
-        }
-
-        call markIlluminaAdapters as mark_illumina_adapters {
-            input:
-            bam = extract_umis.umi_extracted_bam
-        }
-
-        call umiAlign as align {
-            input:
-            bam = mark_illumina_adapters.marked_bam,
-            reference = reference,
-            reference_fai = reference_fai,
-            reference_dict = reference_dict,
-            reference_amb = reference_amb,
-            reference_ann = reference_ann,
-            reference_bwt = reference_bwt,
-            reference_pac = reference_pac,
-            reference_sa = reference_sa
-        }
+    call bbmapRepair as repair {
+        input:
+        fastq1 = filterUMI.fastq1_filtered,
+        fastq2 = filterUMI.fastq2_filtered
     }
 
-    # I don't see why we need to spin up an instance to merge non-existent BAMs
-    if (length(align.aligned_bam) > 1) {
-        call mergeBams as merge_bams {
-            input:
-            bams = align.aligned_bam
-        }
+    call fastqToBam as fastq_to_bam {
+        input:
+        fastq1 = repair.fastq1_repair,
+        fastq2 = repair.fastq2_repair,
+        sample_name = tumor_sample_name,
+        library_name = "Library",
+        platform_unit = "Illumina",
+        platform = "ArcherDX"
     }
 
-    # Just take the BAM out of the array and move it to the next tool
-    if (length(align.aligned_bam) == 1) {
-        File single_bam = align.aligned_bam[0]
+    call extractUmis as extract_umis {
+        input:
+        bam = fastq_to_bam.bam,
+        read_structure = read_structure,
+        umi_paired = umi_paired
+    }
+
+    call markIlluminaAdapters as mark_illumina_adapters {
+        input:
+        bam = extract_umis.umi_extracted_bam
+    }
+
+    call umiAlign as align {
+        input:
+        bam = mark_illumina_adapters.marked_bam,
+        reference = reference,
+        reference_fai = reference_fai,
+        reference_dict = reference_dict,
+        reference_amb = reference_amb,
+        reference_ann = reference_ann,
+        reference_bwt = reference_bwt,
+        reference_pac = reference_pac,
+        reference_sa = reference_sa
     }
 
     call groupReadsAndConsensus as group_reads_by_umi_and_call_molecular_consensus {
         input:
-        bam = select_first([merge_bams.merged_bam, single_bam]),
+        bam = align.aligned_bam,
         umi_paired = umi_paired,
     }
 
@@ -1015,61 +989,6 @@ task umiAlign {
         File aligned_bam = "aligned.bam"
         File aligned_bam_bai = "aligned.bai"
     }
-}
-
-task mergeBams {
-  input {
-    Array[File] bams
-    Boolean sorted = false
-    String name = "merged"
-  }
-
-  # If we are only copying the BAM, there's no need to spin up too many CPUs
-  Int cores = if length(bams) == 1 then 1 else 4
-  Int space_needed_gb = 10 + round(2*size(bams, "GB"))
-  Int preemptible = 1
-  Int maxRetries = 0
-  runtime {
-    docker: "mgibio/bam-merge:0.1"
-    memory: "8GB"
-    cpu: cores
-    disks: "local-disk ~{space_needed_gb} SSD"
-    preemptible: preemptible
-    maxRetries: maxRetries
-  }
-
-  String outname = name + ".bam"
-  String S = "$"  # https://github.com/broadinstitute/cromwell/issues/1819
-  command <<<
-    #!/bin/bash
-    set -o pipefail
-    set -o errexit
-    set -o nounset
-
-    BAMS=(~{sep=" " bams})
-    NUM_BAMS=~{length(bams)}
-    #if there is only one bam, just copy it and index it
-    if [[ $NUM_BAMS -eq 1 ]]; then
-        cp "$BAMS" "~{outname}";
-    else
-        if [[ "~{sorted}" == "true" ]];then
-            /usr/bin/sambamba merge -t "~{cores}" "~{outname}" "~{S}{BAMS[@]}"
-        else #unsorted bams, use picard
-            args=(OUTPUT="~{outname}" ASSUME_SORTED=true USE_THREADING=true SORT_ORDER=unsorted VALIDATION_STRINGENCY=LENIENT)
-            for i in "~{S}{BAMS[@]}";do
-                args+=("INPUT=$i")
-            done
-            java -jar -Xmx6g /opt/picard/picard.jar MergeSamFiles "~{S}{args[@]}"
-        fi
-    fi
-    if [[ ~{sorted} == true ]];then
-        /usr/bin/sambamba index "~{outname}"
-    fi
-  >>>
-
-  output {
-    File merged_bam = outname
-  }
 }
 
 task groupReadsAndConsensus {
