@@ -2685,7 +2685,7 @@ task catOut {
   >>>
 
   output {
-    File pindel_out = "pinde.head"
+    File pindel_out = "pindel.head"
   }
 }
 
