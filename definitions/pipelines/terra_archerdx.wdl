@@ -96,10 +96,10 @@ workflow archerdx {
         String? pon_pvalue = "2.114164905e-6"
 
         # Pindel
-        #Int pindel_insert_size = 400
-        #String? ref_name = "GRCh38DH"
-        #String? ref_date = "20161216"
-        #Int? pindel_min_supporting_reads = 3
+        Int pindel_insert_size = 400
+        String? ref_name = "GRCh38DH"
+        String? ref_date = "20161216"
+        Int? pindel_min_supporting_reads = 3
 
         String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))"
 
@@ -110,8 +110,8 @@ workflow archerdx {
         File lofreq_pon2_file_tbi
         File vardict_pon2_file
         File vardict_pon2_file_tbi
-        #File pindel_pon2_file
-        #File pindel_pon2_file_tbi
+        File pindel_pon2_file
+        File pindel_pon2_file_tbi
 
         # TODO: R Stuff
         # File impact_annotation
@@ -395,19 +395,19 @@ workflow archerdx {
           vcf=mutectNormalize.normalized_vcf,
           vcf_tbi=mutectNormalize.normalized_vcf_tbi
         }
-        #call bcftoolsIsecComplement as mutect_isec_complement_gnomAD {
-        #    input:
-        #    vcf = mutectDecomposeVariants.decomposed_vcf,
-        #    vcf_tbi = mutectDecomposeVariants.decomposed_vcf_tbi,
-        #    exclude_vcf = normalized_gnomad_exclude,
-        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        #    output_vcf_name = "mutect." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-        #    output_type = "z"
-        #}
+        call bcftoolsIsecComplement as mutect_isec_complement_gnomAD {
+            input:
+            vcf = mutectDecomposeVariants.decomposed_vcf,
+            vcf_tbi = mutectDecomposeVariants.decomposed_vcf_tbi,
+            exclude_vcf = normalized_gnomad_exclude,
+            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+            output_vcf_name = "mutect." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+            output_type = "z"
+        }
         call pon2Percent as mutect_pon2 {
             input:
-            #vcf = mutect_isec_complement_gnomAD.complement_vcf,
-            vcf = mutectDecomposeVariants.decomposed_vcf,
+            vcf = mutect_isec_complement_gnomAD.complement_vcf,
+            #vcf = mutectDecomposeVariants.decomposed_vcf,
             vcf2PON = mutect_pon2_file,
             vcf2PON_tbi = mutect_pon2_file_tbi,
             caller = "mutect",
@@ -453,19 +453,19 @@ workflow archerdx {
           vcf=vardictNormalize.normalized_vcf,
           vcf_tbi=vardictNormalize.normalized_vcf_tbi
         }
-        #call bcftoolsIsecComplement as vardict_isec_complement_gnomAD {
-        #    input:
-        #    vcf = vardictDecomposeVariants.decomposed_vcf,
-        #    vcf_tbi = vardictDecomposeVariants.decomposed_vcf_tbi,
-        #    exclude_vcf = normalized_gnomad_exclude,
-        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        #    output_vcf_name = "vardict." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-        #    output_type = "z"
-        #}
+        call bcftoolsIsecComplement as vardict_isec_complement_gnomAD {
+            input:
+            vcf = vardictDecomposeVariants.decomposed_vcf,
+            vcf_tbi = vardictDecomposeVariants.decomposed_vcf_tbi,
+            exclude_vcf = normalized_gnomad_exclude,
+            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+            output_vcf_name = "vardict." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+            output_type = "z"
+        }
         call pon2Percent as vardict_pon2 {
             input:
-            #vcf = vardict_isec_complement_gnomAD.complement_vcf,
-            vcf = vardictDecomposeVariants.decomposed_vcf,
+            vcf = vardict_isec_complement_gnomAD.complement_vcf,
+            #vcf = vardictDecomposeVariants.decomposed_vcf,
             vcf2PON = vardict_pon2_file,
             vcf2PON_tbi = vardict_pon2_file_tbi,
             caller = "vardict",
@@ -505,26 +505,88 @@ workflow archerdx {
           vcf=lofreqNormalize.normalized_vcf,
           vcf_tbi=lofreqNormalize.normalized_vcf_tbi
         }
-        #call bcftoolsIsecComplement as lofreq_isec_complement_gnomAD {
-        #    input:
-        #    vcf = lofreqDecomposeVariants.decomposed_vcf,
-        #    vcf_tbi = lofreqDecomposeVariants.decomposed_vcf_tbi,
-        #    exclude_vcf = normalized_gnomad_exclude,
-        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        #    output_vcf_name = "lofreq." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-        #    output_type = "z"
-        #}
+        call bcftoolsIsecComplement as lofreq_isec_complement_gnomAD {
+            input:
+            vcf = lofreqDecomposeVariants.decomposed_vcf,
+            vcf_tbi = lofreqDecomposeVariants.decomposed_vcf_tbi,
+            exclude_vcf = normalized_gnomad_exclude,
+            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+            output_vcf_name = "lofreq." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+            output_type = "z"
+        }
         call pon2Percent as lofreq_pon2 {
             input:
-            #vcf = lofreq_isec_complement_gnomAD.complement_vcf,
-            vcf = lofreqDecomposeVariants.decomposed_vcf,
+            vcf = lofreq_isec_complement_gnomAD.complement_vcf,
+            #vcf = lofreqDecomposeVariants.decomposed_vcf,
             vcf2PON = lofreq_pon2_file,
             vcf2PON_tbi = lofreq_pon2_file_tbi,
             caller = "lofreq",
             sample_name = tumor_sample_name
         }
 
-        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf]){
+        # Pindel
+        call pindelTumorOnly as pindelTask {
+            input:
+            reference=reference,
+            reference_fai=reference_fai,
+            reference_dict=reference_dict,
+            tumor_bam = index_bam.indexed_bam,
+            tumor_bam_bai = index_bam.indexed_bam_bai,
+            region_file=chr_bed,
+            insert_size=pindel_insert_size,
+            tumor_sample_name=tumor_sample_name
+        }
+        call catOut as pindelCat {
+          input: pindel_outs=[pindelTask.deletions, pindelTask.insertions, pindelTask.tandems, pindelTask.long_insertions, pindelTask.inversions]
+        }
+        call pindelToVcf as pindel2vcf {
+            input:
+            reference=reference,
+            reference_fai=reference_fai,
+            reference_dict=reference_dict,
+            pindel_output_summary=pindelCat.pindel_out,
+            ref_name = ref_name,
+            ref_date = ref_date,
+            min_supporting_reads = pindel_min_supporting_reads
+        }
+        call removeEndTags {
+          input: vcf=pindel2vcf.pindel_vcf
+        }
+        call vcfSanitize as pindelSanitizeVcf {
+          input: vcf=removeEndTags.processed_vcf
+        }
+        call bcftoolsNorm as pindelNormalize {
+            input:
+            reference=reference,
+            reference_fai=reference_fai,
+            vcf=pindelSanitizeVcf.sanitized_vcf,
+            vcf_tbi=pindelSanitizeVcf.sanitized_vcf_tbi
+        }
+        call vtDecompose as pindelDecomposeVariants {
+          input:
+          vcf=pindelNormalize.normalized_vcf,
+          vcf_tbi=pindelNormalize.normalized_vcf_tbi
+        }
+        call bcftoolsIsecComplement as pindel_isec_complement_gnomAD {
+            input:
+            vcf = pindelDecomposeVariants.decomposed_vcf,
+            vcf_tbi = pindelDecomposeVariants.decomposed_vcf_tbi,
+            exclude_vcf = normalized_gnomad_exclude,
+            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
+            output_vcf_name = "pindel." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
+            output_type = "z"
+        }
+        call pon2Percent as pindel_pon2 {
+            input:
+            vcf = pindel_isec_complement_gnomAD.complement_vcf,
+            #vcf = pindelDecomposeVariants.decomposed_vcf,
+            vcf2PON = pindel_pon2_file,
+            vcf2PON_tbi = pindel_pon2_file_tbi,
+            caller = "pindel",
+            sample_name = tumor_sample_name
+        }
+
+        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf, pindel_pon2.annotated_vcf]){
             call createFakeVcf as fake_vcf {
                 input:
                 vcf = caller_vcf,
@@ -680,6 +742,31 @@ workflow archerdx {
             caller_prefix = "lofreq",
             sample_name = tumor_sample_name
         }
+
+        call normalFisher as pindel_call_R_fisher {
+            input:
+            vcf = pindel_pon2.annotated_vcf,
+            pon = pileup_merge.merged_vcf,
+            pon_tbi = pileup_merge.merged_vcf_tbi,
+            p_value = pon_pvalue,
+            caller = "pindel"
+        }
+
+        call indexVcf as pindel_index_pon_filtered_vcf {
+            input: vcf = pindel_call_R_fisher.pon_filtered_vcf
+        }
+
+        call annotateVcf as pindel_annotate_vcf {
+            input:
+            vcf = pindel_index_pon_filtered_vcf.indexed_vcf,
+            vcf_tbi = pindel_index_pon_filtered_vcf.indexed_vcf_tbi,
+            fp_filter = firstFilter.filtered_vcf,
+            fp_filter_tbi = firstFilter.filtered_vcf_tbi,
+            vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
+            caller_prefix = "pindel",
+            sample_name = tumor_sample_name
+        }
     }
 
     call mergeVcf as merge_mutect_full {
@@ -739,6 +826,25 @@ workflow archerdx {
             merged_vcf_basename = "lofreq." + tumor_sample_name + ".final.annotated"
     }
 
+    call mergeVcf as merge_pindel_full {
+        input:
+            vcfs = pindelDecomposeVariants.decomposed_vcf,
+            vcf_tbis = pindelDecomposeVariants.decomposed_vcf_tbi,
+            merged_vcf_basename = "pindel_full." + tumor_sample_name
+    }
+    call mergeVcf as merge_pindel_pon {
+        input:
+            vcfs = pindel_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = pindel_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "pindel." + tumor_sample_name + ".pileup.fisherPON"
+    }
+    call mergeVcf as merge_pindel_final {
+        input:
+            vcfs = pindel_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = pindel_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "pindel." + tumor_sample_name + ".final.annotated"
+    }
+
     call mergeVcf as merge_pon {
         input:
             vcfs = pileup_merge.merged_vcf,
@@ -762,7 +868,7 @@ workflow archerdx {
 
     output {
         # Alignments
-        #File aligned_bam = alignment_workflow.aligned_bam
+        File aligned_bam = index_align_bam.indexed_bam
         File bqsr_bam = index_bam.indexed_bam
 
         # Tumor QC
@@ -792,6 +898,11 @@ workflow archerdx {
         File vardict_full = merge_vardict_full.merged_vcf                               # Raw Vardict Ouput
         File vardict_pon_annotated_vcf = merge_vardict_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
         File vardict_vep_annotated_vcf = merge_vardict_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
+
+        # Pindel
+        File pindel_full = merge_pindel_full.merged_vcf                               # Raw Vardict Ouput
+        File pindel_pon_annotated_vcf = merge_pindel_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File pindel_vep_annotated_vcf = merge_pindel_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
         File pon_total_counts = merge_pon.merged_vcf                                    # PoN Pileup Results
         File fpfilter_results = merge_fp_filter.merged_vcf
@@ -2503,4 +2614,141 @@ task fastqToBam {
     output {
         File bam = "unaligned.bam"
     }
+}
+
+# Pindel Stuff
+task pindelTumorOnly {
+    input {
+        File reference
+        File reference_fai
+        File reference_dict
+        File tumor_bam
+        File tumor_bam_bai
+        File region_file
+        String tumor_sample_name
+        String? chromosome
+        Int insert_size = 400
+    }
+
+    Int cores = 4
+    Int preemptible = 1
+    Int maxRetries = 0
+    Int space_needed_gb = 10 + round(size([reference, reference_fai, reference_dict, tumor_bam, tumor_bam_bai, region_file], "GB"))
+    runtime {
+        bootDiskSizeGb: 100
+        cpu: cores
+        disks: "local-disk ~{space_needed_gb} SSD"
+        docker: "mgibio/cle:v1.4.2"
+        memory: "24GB"
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        echo -e "~{tumor_bam}\t~{insert_size}\t~{tumor_sample_name}" >> pindel.config
+
+        /usr/bin/pindel -i pindel.config -w 30 -T ~{cores} -o all -f ~{reference} \
+        ~{if defined(chromosome) then "-c ~{chromosome}" else ""} \
+        ~{if defined(region_file) then "-j ~{region_file}" else ""}
+    >>>
+
+  # TODO: how much space to allocate?
+    output {
+        File deletions = "all_D"
+        File insertions = "all_SI"
+        File tandems = "all_TD"
+        File long_insertions = "all_LI"
+        File inversions = "all_INV"
+    }
+}
+
+task catOut {
+  input {
+    Array[File] pindel_outs
+  }
+
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+  Int space_needed_gb = 10 + round(size(pindel_outs, "GB")*2)
+  runtime {
+    memory: "6GB"
+    docker: "ubuntu:xenial"
+    disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
+  }
+
+  command <<<
+    /bin/cat ~{sep=" " pindel_outs} | /bin/grep "ChrID" /dev/stdin > pindel.head
+  >>>
+
+  output {
+    File pindel_out = "pinde.head"
+  }
+}
+
+task pindelToVcf {
+    input {
+        File pindel_output_summary
+        File reference
+        File reference_fai
+        File reference_dict
+        String? ref_name = "GRCh38DH"
+        String? ref_date = "20161216"
+        Int? min_supporting_reads = 3
+        String? output_name = "pindel.vcf"
+    }
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+    Int space_needed_gb = 10 + round(size([reference, reference_fai, reference_dict, pindel_output_summary], "GB"))
+    runtime {
+      memory: "6GB"
+      docker: "mgibio/cle:v1.3.1"
+      disks: "local-disk ~{space_needed_gb} SSD"
+      cpu: cores
+      preemptible: preemptible
+      maxRetries: maxRetries
+    }
+
+    command <<<
+        /usr/bin/pindel2vcf -G -p ~{pindel_output_summary} -r ~{reference} -R ~{ref_name} -e ~{min_supporting_reads} -d ~{ref_date} -v ~{output_name}
+    >>>
+
+    output {
+        File pindel_vcf = "~{output_name}"
+    }
+}
+
+task removeEndTags {
+  input {
+    File vcf
+  }
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+  Int space_needed_gb = 10 + round(size(vcf, "GB")*2)
+  runtime {
+    memory: "6GB"
+    docker: "kboltonlab/bst:latest"
+    disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
+  }
+
+  String outfile = "pindel.noend.vcf.gz"
+  command <<<
+      /usr/local/bin/bgzip -c ~{vcf} > pindel.vcf.gz
+      /usr/local/bin/tabix -p vcf pindel.vcf.gz
+      /opt/bcftools/bin/bcftools annotate -x INFO/END -Oz -o ~{outfile} pindel.vcf.gz
+      /usr/local/bin/tabix -p vcf ~{outfile}
+  >>>
+
+  output {
+    File processed_vcf = outfile
+    File processed_vcf_tbi = "~{outfile}.tbi"
+  }
 }
