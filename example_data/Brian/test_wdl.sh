@@ -118,3 +118,16 @@ done
 for sample in $(ls -d * | grep DNA); do
     cp $sample/vardict.$sample.mapq0_filter_annotated.vcf.gz vardict && gunzip -f vardict/vardict.$sample.mapq0_filter_annotated.vcf.gz
 done
+
+
+/opt/java/openjdk/bin/java -Dconfig.file=/storage1/fs1/bolton/Active/data/presets/cromwell.config -jar /app/cromwell.jar run -t wdl -i /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/example_data/tools/fp_filter.json /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/definitions/tools/fp_filter.wdl
+
+/usr/bin/perl /usr/bin/fpfilter.pl --bam-readcount /usr/bin/bam-readcount --samtools /opt/samtools/bin/samtools --output fpfilter.vcf --reference /storage1/fs1/bolton/Active/projects/mocha/UKBB/exome/GRCh38_full_analysis_set_plus_decoy_hla.fa --bam-file cromwell-executions/wf/03ae9e77-5d85-4ce0-9936-d4d609072384/call-fpFilter/inputs/208882098/1385418_23153_0_0.bqsr.bam --vcf-file cromwell-executions/wf/03ae9e77-5d85-4ce0-9936-d4d609072384/call-fpFilter/inputs/1948159467/1385418_23153_0_0.filtered.vcf.gz --sample UKB_5714275_236171340 --min-var-freq 0.05
+
+/usr/bin/perl /usr/bin/fpfilter.pl --bam-readcount /usr/bin/bam-readcount --samtools /opt/samtools/bin/samtools --output fpfilter.vcf --reference /storage1/fs1/bolton/Active/projects/mocha/UKBB/exome/GRCh38_full_analysis_set_plus_decoy_hla.fa --bam-file cromwell-executions/wf/03ae9e77-5d85-4ce0-9936-d4d609072384/call-fpFilter/inputs/208882098/1385418_23153_0_0.bqsr.bam --vcf-file cromwell-executions/wf/03ae9e77-5d85-4ce0-9936-d4d609072384/call-fpFilter/inputs/1948159467/1385418_23153_0_0.filtered.vcf.gz --sample UKB_5714275_236171340 --min-var-freq 0.05
+
+
+for sample in $(cat /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/results/samples.txt | tail -n+2); do
+    cd /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/results/$sample
+    bsub -oo $sample.pindel.log -G compute-bolton -g /bwileytest -q general -M 8G -R 'select[mem>8G] rusage[mem=8G]' -a 'docker(broadinstitute/cromwell:dev)' /opt/java/openjdk/bin/java -Dconfig.file=/storage1/fs1/bolton/Active/data/presets/cromwell.config -jar /app/cromwell.jar run -o twinstrand_template.json -t wdl -i somatic_tumor_only_template.pindel.json /storage1/fs1/bolton/Active/projects/TwinStrand/PRJ00087.2021.05.24.deliverables/wdl/analysis-wdls/definitions/pipelines/somatic_tumor_aligned_pindel.wdl
+done

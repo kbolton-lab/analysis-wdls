@@ -1,0 +1,8 @@
+{
+    "wf.reference": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/exome/GRCh38_full_analysis_set_plus_decoy_hla.fa",
+    "wf.reference_fai": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/exome/GRCh38_full_analysis_set_plus_decoy_hla.fa.fai",
+    "wf.reference_dict": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/exome/GRCh38_full_analysis_set_plus_decoy_hla.dict",
+    "wf.bam": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/exome/young/bqsr_bams/1385418_23153_0_0.bqsr.bam",
+    "wf.vcf": "/storage1/fs1/bolton/Active/projects/mocha/UKBB/exome/young/1385418_23153_0_0.filtered.vcf.gz",
+    "wf.sample_name": "UKB_5714275_236171340"
+}

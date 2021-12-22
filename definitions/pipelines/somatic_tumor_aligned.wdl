@@ -9,7 +9,6 @@ import "../subworkflows/lofreq.wdl" as l
 import "../subworkflows/vardict.wdl" as v
 import "../subworkflows/varscan.wdl" as vs
 import "../subworkflows/pindel.wdl" as p
-
 import "../tools/bqsr.wdl" as b
 import "../tools/apply_bqsr.wdl" as ab
 import "../tools/index_bam.wdl" as ib
@@ -213,7 +212,6 @@ workflow somatic_tumor_only {
             cache_dir_zip = vep_cache_dir_zip,
             reference = reference,
             reference_fai = reference_fai,
-            reference_dict = reference_dict,
             plugins = vep_plugins,
             ensembl_assembly = vep_ensembl_assembly,
             ensembl_version = vep_ensembl_version,
@@ -259,7 +257,6 @@ workflow somatic_tumor_only {
             cache_dir_zip = vep_cache_dir_zip,
             reference = reference,
             reference_fai = reference_fai,
-            reference_dict = reference_dict,
             plugins = vep_plugins,
             ensembl_assembly = vep_ensembl_assembly,
             ensembl_version = vep_ensembl_version,
@@ -303,7 +300,6 @@ workflow somatic_tumor_only {
             cache_dir_zip = vep_cache_dir_zip,
             reference = reference,
             reference_fai = reference_fai,
-            reference_dict = reference_dict,
             plugins = vep_plugins,
             ensembl_assembly = vep_ensembl_assembly,
             ensembl_version = vep_ensembl_version,
@@ -321,8 +317,7 @@ workflow somatic_tumor_only {
             reference_dict = reference_dict,
             tumor_bam = index_bam.indexed_bam,
             tumor_bam_bai = index_bam.indexed_bam_bai,
-            interval_list = target_intervals,
-            scatter_count = scatter_count,
+            interval_bed = target_bed,
             tumor_sample_name = tumor_sample_name,
             min_var_freq = af_threshold,
             tumor_only = tumor_only
@@ -345,7 +340,6 @@ workflow somatic_tumor_only {
             cache_dir_zip = vep_cache_dir_zip,
             reference = reference,
             reference_fai = reference_fai,
-            reference_dict = reference_dict,
             plugins = vep_plugins,
             ensembl_assembly = vep_ensembl_assembly,
             ensembl_version = vep_ensembl_version,
@@ -392,7 +386,6 @@ workflow somatic_tumor_only {
             cache_dir_zip = vep_cache_dir_zip,
             reference = reference,
             reference_fai = reference_fai,
-            reference_dict = reference_dict,
             plugins = vep_plugins,
             ensembl_assembly = vep_ensembl_assembly,
             ensembl_version = vep_ensembl_version,
@@ -435,7 +428,6 @@ workflow somatic_tumor_only {
             cache_dir_zip = vep_cache_dir_zip,
             reference = reference,
             reference_fai = reference_fai,
-            reference_dict = reference_dict,
             plugins = vep_plugins,
             ensembl_assembly = vep_ensembl_assembly,
             ensembl_version = vep_ensembl_version,

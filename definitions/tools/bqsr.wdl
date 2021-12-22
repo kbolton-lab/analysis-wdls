@@ -16,7 +16,7 @@ task bqsr {
   }
 
   Int cores = 1
-  Int space_needed_gb = 10 + round(size([known_sites,known_sites_tbi], "GB") + size([reference, reference_fai, reference_dict, bam, bam_bai], "GB"))
+  Int space_needed_gb = 10 + round(size(flatten([known_sites,known_sites_tbi]), "GB") + size([reference, reference_fai, reference_dict, bam, bam_bai], "GB"))
   Int preemptible = 1
   Int maxRetries = 0
   runtime {

@@ -7,6 +7,7 @@ import "../tools/msk_get_base_counts.wdl" as mgbc
 import "../tools/normal_fisher.wdl" as nf
 import "../tools/index_vcf.wdl" as iv
 import "../tools/merge_vcf.wdl" as mv
+import "../tools/bcftools_merge.wdl"as bm
 
 workflow gnomadAndPoNFilter {
     input {
@@ -75,8 +76,8 @@ workflow gnomadAndPoNFilter {
     call nf.normalFisher as call_R_fisher {
         input:
         vcf = isec_complement_gnomAD.complement_vcf,
-        pon = select_first([merge.merged_vcf, get_pileup_counts.pileup]),
-        pon_tbi = select_first([merge.merged_vcf_tbi, get_pileup_counts.pileup_tbi]),
+        pon = select_first([mergeMulti.merged_vcf, get_pileup_counts.pileup]),
+        pon_tbi = select_first([mergeMulti.merged_vcf_tbi, get_pileup_counts.pileup_tbi]),
         p_value = pon_pvalue,
         caller = caller_prefix
     }
@@ -94,7 +95,7 @@ workflow gnomadAndPoNFilter {
         File processed_gnomAD_filtered_vcf_tbi = index_pon_vcf.indexed_vcf_tbi
         File processed_filtered_vcf = index_pon_filtered_vcf.indexed_vcf
         File processed_filtered_vcf_tbi = index_pon_filtered_vcf.indexed_vcf_tbi
-        File pon_total_counts = select_first([merge.merged_vcf, get_pileup_counts.pileup])
-        File pon_total_counts_tbi = select_first([merge.merged_vcf_tbi, get_pileup_counts.pileup_tbi])
+        File pon_total_counts = select_first([mergeMulti.merged_vcf, get_pileup_counts.pileup])
+        File pon_total_counts_tbi = select_first([mergeMulti.merged_vcf_tbi, get_pileup_counts.pileup_tbi])
     }
 }
