@@ -13,7 +13,7 @@ task bbmapRepair {
 
     runtime {
         docker: "quay.io/biocontainers/bbmap:38.92--he522d1c_0"
-        memory: "6GB"
+        memory: "12GB"
         cpu: cores
         bootDiskSizeGb: 10 + round(2*data_size)
         disks: "local-disk ~{10 + round(2*data_size)} SSD"
@@ -22,7 +22,7 @@ task bbmapRepair {
     }
 
     command <<<
-        repair.sh -Xmx6g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
+        repair.sh -Xmx10g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
     >>>
 
     output {

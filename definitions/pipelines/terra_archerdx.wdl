@@ -972,7 +972,7 @@ task bbmapRepair {
 
     runtime {
         docker: "quay.io/biocontainers/bbmap:38.92--he522d1c_0"
-        memory: "6GB"
+        memory: "12GB"
         cpu: cores
         bootDiskSizeGb: 10 + round(2*data_size)
         disks: "local-disk ~{10 + round(2*data_size)} SSD"
@@ -981,7 +981,7 @@ task bbmapRepair {
     }
 
     command <<<
-        repair.sh -Xmx6g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
+        repair.sh -Xmx10g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
     >>>
 
     output {
@@ -2632,7 +2632,7 @@ task pindelTumorOnly {
 
     Int cores = 4
     Int preemptible = 1
-    Int maxRetries = 0
+    Int maxRetries = 5
     Int space_needed_gb = 10 + round(size([reference, reference_fai, reference_dict, tumor_bam, tumor_bam_bai, region_file], "GB"))
     runtime {
         bootDiskSizeGb: 100
@@ -2743,7 +2743,7 @@ task removeEndTags {
   command <<<
       /usr/local/bin/bgzip -c ~{vcf} > pindel.vcf.gz
       /usr/local/bin/tabix -p vcf pindel.vcf.gz
-      /opt/bcftools/bin/bcftools annotate -x INFO/END -Oz -o ~{outfile} pindel.vcf.gz
+      /usr/local/bin/bcftools annotate -x INFO/END -Oz -o ~{outfile} pindel.vcf.gz
       /usr/local/bin/tabix -p vcf ~{outfile}
   >>>
 
