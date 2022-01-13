@@ -160,5 +160,14 @@
   "myeloseq.tumor_sample_name": "<sample_name_input>",
   "myeloseq.reference_bwt": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.bwt",
   "myeloseq.annotate_coding_only": true,
-  "myeloseq.input_bam": ["<bam_input>"]
+  "myeloseq.input_bam": ["<bam_input>"],
+  "myeloseq.bolton_bick_vars": "/storage1/fs1/bolton/Active/projects/annotation_files/bick.bolton.vars3.txt",
+  "myeloseq.mut2_bick": "/storage1/fs1/bolton/Active/projects/annotation_files/topmed.n2.mutation.1.c.p.txt",
+  "myeloseq.mut2_kelly": "/storage1/fs1/bolton/Active/projects/annotation_files/kelly.n2.mutation.1.c.p.txt",
+  "myeloseq.matches2": "/storage1/fs1/bolton/Active/projects/annotation_files/matches.2.c.p.txt",
+  "myeloseq.TSG_file": "/storage1/fs1/bolton/Active/projects/annotation_files/gene_census_TSG.txt",
+  "myeloseq.oncoKB_curated": "/storage1/fs1/bolton/Active/projects/annotation_files/all_curated_genes_v2.0.tsv",
+  "myeloseq.pd_annotation_file": "/storage1/fs1/bolton/Active/projects/annotation_files/pd_table_kbreview_bick_trunc2.txt",
+  "myeloseq.pan_myeloid": "/storage1/fs1/bolton/Active/projects/annotation_files/panmyeloid_variant_counts.vep.annotated.vcf.tsv",
+  "myeloseq.cosmic_dir_zip": "/storage1/fs1/bolton/Active/projects/annotation_files/cosmic/cosmic_zip.zip"
 }

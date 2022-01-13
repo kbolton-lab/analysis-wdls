@@ -182,5 +182,14 @@
   "archerdx.pon_normal_bams_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pon.sample.bam.cloud.txt",
   "archerdx.synonyms_file": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build50f99e75d14340ffb5b7d21b03887637/chromAlias.ensembl.txt",
   "archerdx.vep_pick": "pick",
-  "archerdx.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.maxVAF.vcf.gz.tbi"
+  "archerdx.mutect_pon2_file_tbi": "/storage1/fs1/bolton/Active/projects/Archer/Normals/mutect2.merged.SB.2N.maxVAF.vcf.gz.tbi",
+  "archerdx.bolton_bick_vars": "/storage1/fs1/bolton/Active/projects/annotation_files/bick.bolton.vars3.txt",
+  "archerdx.mut2_bick": "/storage1/fs1/bolton/Active/projects/annotation_files/topmed.n2.mutation.1.c.p.txt",
+  "archerdx.mut2_kelly": "/storage1/fs1/bolton/Active/projects/annotation_files/kelly.n2.mutation.1.c.p.txt",
+  "archerdx.matches2": "/storage1/fs1/bolton/Active/projects/annotation_files/matches.2.c.p.txt",
+  "archerdx.TSG_file": "/storage1/fs1/bolton/Active/projects/annotation_files/gene_census_TSG.txt",
+  "archerdx.oncoKB_curated": "/storage1/fs1/bolton/Active/projects/annotation_files/all_curated_genes_v2.0.tsv",
+  "archerdx.pd_annotation_file": "/storage1/fs1/bolton/Active/projects/annotation_files/pd_table_kbreview_bick_trunc2.txt",
+  "archerdx.pan_myeloid": "/storage1/fs1/bolton/Active/projects/annotation_files/panmyeloid_variant_counts.vep.annotated.vcf.tsv",
+  "archerdx.cosmic_dir_zip": "/storage1/fs1/bolton/Active/projects/annotation_files/cosmic/cosmic_zip.zip"
 }

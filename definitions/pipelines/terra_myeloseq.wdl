@@ -37,18 +37,15 @@ struct VepCustomAnnotation {
   Info annotation
 }
 
-workflow archerdx {
+workflow myeloseq {
     input {
         # Pipeline
         Int scatter_count = 20
 
         # Sequence and BAM Information
-        File fastq_one
-        File fastq_two
-        File? bam_file
+        File bam_file
         File? bam_file_bai
         Boolean? aligned = false
-        Array[String] read_structure
         String? tumor_name = "tumor"
         String tumor_sample_name
         File target_intervals
@@ -66,7 +63,6 @@ workflow archerdx {
 
         # FASTQ Preprocessing
         Boolean? umi_paired = true
-        Int umi_length = 8
         Array[Int] min_reads = [1]
         Float? max_read_error_rate = 0.05
         Float? max_base_error_rate = 0.1
@@ -95,7 +91,7 @@ workflow archerdx {
         Array[bam_and_bai] pon_bams     # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
         Float? af_threshold = 0.0001
-        String? pon_pvalue = "2.114164905e-6"
+        String? pon_pvalue = "1.59442843e-7"
 
         # Pindel
         Int pindel_insert_size = 400
@@ -103,7 +99,7 @@ workflow archerdx {
         String? ref_date = "20161216"
         Int? pindel_min_supporting_reads = 3
 
-        String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))"
+        String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 1600) || (INFO/QUAL < 27)))"
 
         # PoN2
         File mutect_pon2_file
@@ -112,8 +108,8 @@ workflow archerdx {
         File lofreq_pon2_file_tbi
         File vardict_pon2_file
         File vardict_pon2_file_tbi
-        File pindel_pon2_file
-        File pindel_pon2_file_tbi
+        #File pindel_pon2_file
+        #File pindel_pon2_file_tbi
 
         # R Stuff
         File bolton_bick_vars
@@ -149,39 +145,9 @@ workflow archerdx {
     }
 
     if (!aligned) {
-        call filterUmiLength as filterUMI {
-            input:
-            fastq1 = fastq_one,
-            fastq2 = fastq_two,
-            umi_length = umi_length
-        }
-
-        call bbmapRepair as repair {
-            input:
-            fastq1 = filterUMI.fastq1_filtered,
-            fastq2 = filterUMI.fastq2_filtered
-        }
-
-        call fastqToBam as fastq_to_bam {
-            input:
-            fastq1 = repair.fastq1_repair,
-            fastq2 = repair.fastq2_repair,
-            sample_name = tumor_sample_name,
-            library_name = "Library",
-            platform_unit = "Illumina",
-            platform = "ArcherDX"
-        }
-
-        call extractUmis as extract_umis {
-            input:
-            bam = fastq_to_bam.bam,
-            read_structure = read_structure,
-            umi_paired = umi_paired
-        }
-
         call markIlluminaAdapters as mark_illumina_adapters {
             input:
-            bam = extract_umis.umi_extracted_bam
+            bam = bam_file
         }
 
         call umiAlign as align {
@@ -568,26 +534,8 @@ workflow archerdx {
           vcf=pindelNormalize.normalized_vcf,
           vcf_tbi=pindelNormalize.normalized_vcf_tbi
         }
-        call bcftoolsIsecComplement as pindel_isec_complement_gnomAD {
-            input:
-            vcf = pindelDecomposeVariants.decomposed_vcf,
-            vcf_tbi = pindelDecomposeVariants.decomposed_vcf_tbi,
-            exclude_vcf = normalized_gnomad_exclude,
-            exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-            output_vcf_name = "pindel." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-            output_type = "z"
-        }
-        call pon2Percent as pindel_pon2 {
-            input:
-            vcf = pindel_isec_complement_gnomAD.complement_vcf,
-            #vcf = pindelDecomposeVariants.decomposed_vcf,
-            vcf2PON = pindel_pon2_file,
-            vcf2PON_tbi = pindel_pon2_file_tbi,
-            caller = "pindel",
-            sample_name = tumor_sample_name
-        }
 
-        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf, pindel_pon2.annotated_vcf]){
+        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf]){
             call createFakeVcf as fake_vcf {
                 input:
                 vcf = caller_vcf,
@@ -743,31 +691,6 @@ workflow archerdx {
             caller_prefix = "lofreq",
             sample_name = tumor_sample_name
         }
-
-        call normalFisher as pindel_call_R_fisher {
-            input:
-            vcf = pindel_pon2.annotated_vcf,
-            pon = pileup_merge.merged_vcf,
-            pon_tbi = pileup_merge.merged_vcf_tbi,
-            p_value = pon_pvalue,
-            caller = "pindel"
-        }
-
-        call indexVcf as pindel_index_pon_filtered_vcf {
-            input: vcf = pindel_call_R_fisher.pon_filtered_vcf
-        }
-
-        call annotateVcf as pindel_annotate_vcf {
-            input:
-            vcf = pindel_index_pon_filtered_vcf.indexed_vcf,
-            vcf_tbi = pindel_index_pon_filtered_vcf.indexed_vcf_tbi,
-            fp_filter = firstFilter.filtered_vcf,
-            fp_filter_tbi = firstFilter.filtered_vcf_tbi,
-            vep = vep.annotated_vcf,
-            vep_tbi = vep.annotated_vcf_tbi,
-            caller_prefix = "pindel",
-            sample_name = tumor_sample_name
-        }
     }
 
     call mergeVcf as merge_mutect_full {
@@ -832,18 +755,6 @@ workflow archerdx {
             vcfs = pindelDecomposeVariants.decomposed_vcf,
             vcf_tbis = pindelDecomposeVariants.decomposed_vcf_tbi,
             merged_vcf_basename = "pindel_full." + tumor_sample_name
-    }
-    call mergeVcf as merge_pindel_pon {
-        input:
-            vcfs = pindel_annotate_vcf.pon_annotated_vcf,
-            vcf_tbis = pindel_annotate_vcf.pon_annotated_vcf_tbi,
-            merged_vcf_basename = "pindel." + tumor_sample_name + ".pileup.fisherPON"
-    }
-    call mergeVcf as merge_pindel_final {
-        input:
-            vcfs = pindel_annotate_vcf.final_annotated_vcf,
-            vcf_tbis = pindel_annotate_vcf.final_annotated_vcf_tbi,
-            merged_vcf_basename = "pindel." + tumor_sample_name + ".final.annotated"
     }
 
     call mergeVcf as merge_pon {
@@ -947,8 +858,8 @@ workflow archerdx {
 
         # Pindel
         File pindel_full = merge_pindel_full.merged_vcf                               # Raw Vardict Ouput
-        File pindel_pon_annotated_vcf = merge_pindel_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
-        File pindel_vep_annotated_vcf = merge_pindel_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
+        #File pindel_pon_annotated_vcf = merge_pindel_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        #File pindel_vep_annotated_vcf = merge_pindel_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
         File pon_total_counts = merge_pon.merged_vcf                                    # PoN Pileup Results
         File fpfilter_results = merge_fp_filter.merged_vcf
@@ -960,121 +871,6 @@ workflow archerdx {
         File mutect_annotate_pd = annotateRMutect.vcf_annotate_pd
         File lofreq_annotate_pd = annotateRLofreq.vcf_annotate_pd
         File vardict_annotate_pd = annotateRVardict.vcf_annotate_pd
-    }
-}
-
-task filterUmiLength {
-    input {
-        File? fastq1
-        File? fastq2
-        Int umi_length
-    }
-
-    Int cores = 1
-    Int preemptible = 1
-    Int maxRetries = 0
-    Float data_size = size([fastq1, fastq2], "GB")
-    Int space_needed_gb = 10 + round(2*data_size)
-
-    runtime {
-        docker: "ubuntu:xenial"
-        memory: "6GB"
-        cpu: cores
-        disks: "local-disk ~{space_needed_gb} SSD"
-        bootDiskSizeGb: space_needed_gb
-        preemptible: preemptible
-        maxRetries: maxRetries
-    }
-
-    command <<<
-        set -o pipefail
-        set -o errexit
-        set -o nounset
-
-        FASTQ_ONE="~{fastq1}"
-        FASTQ_TWO="~{fastq2}"
-        UMI_LENGTH="~{umi_length}"
-
-        zcat $FASTQ_ONE | awk -v regex="AACCGCCAGGAGT" -v umi_length="$UMI_LENGTH" 'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; split(seq,a,regex); if (length(a[1]) == umi_length) {print header, seq, qheader, qseq}}' > R1_filtered.fastq
-        gzip R1_filtered.fastq
-        cp $FASTQ_TWO R2_filtered.fastq.gz
-    >>>
-
-    output {
-        File fastq1_filtered = "R1_filtered.fastq.gz"
-        File fastq2_filtered = "R2_filtered.fastq.gz"
-    }
-}
-
-task bbmapRepair {
-    input {
-        File fastq1
-        File fastq2
-    }
-
-    Int cores = 1
-    Float data_size = size([fastq1, fastq2], "GB")
-    Int preemptible = 1
-    Int maxRetries = 0
-
-    runtime {
-        docker: "quay.io/biocontainers/bbmap:38.92--he522d1c_0"
-        memory: "12GB"
-        cpu: cores
-        bootDiskSizeGb: 10 + round(2*data_size)
-        disks: "local-disk ~{10 + round(2*data_size)} SSD"
-        preemptible: preemptible
-        maxRetries: maxRetries
-    }
-
-    command <<<
-        repair.sh -Xmx10g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
-    >>>
-
-    output {
-        Array[File] fastqs = ["R1.fixed.fastq.gz", "R2.fixed.fastq.gz"]
-        File fastq1_repair = "R1.fixed.fastq.gz"
-        File fastq2_repair = "R2.fixed.fastq.gz"
-    }
-}
-
-task extractUmis {
-    input {
-        File bam
-        Array[String] read_structure
-        Boolean? umi_paired = true
-    }
-
-    Int cores = 1
-    Int space_needed_gb = 10 + round(2*size(bam, "GB"))
-    Int preemptible = 1
-    Int maxRetries = 0
-
-    runtime {
-        docker: "quay.io/biocontainers/fgbio:1.3.0--0"
-        memory: "6GB"
-        cpu: cores
-        disks: "local-disk ~{space_needed_gb} SSD"
-        preemptible: preemptible
-        maxRetries: maxRetries
-    }
-
-    command <<<
-        set -eo pipefail
-
-        PAIRED=~{umi_paired}
-        BAM="~{bam}"
-        READ_STRUCUTRE="~{sep=" " read_structure}"
-
-        if [ "$PAIRED" == true ]; then
-            /usr/local/bin/fgbio ExtractUmisFromBam --molecular-index-tags ZA ZB --single-tag RX --input $BAM --read-structure $READ_STRUCUTRE --output umi_extracted.bam
-        else
-            /usr/local/bin/fgbio ExtractUmisFromBam --molecular-index-tags ZA --single-tag RX --input $BAM --read-structure $READ_STRUCUTRE --output umi_extracted.bam
-        fi
-    >>>
-
-    output {
-        File umi_extracted_bam = "umi_extracted.bam"
     }
 }
 

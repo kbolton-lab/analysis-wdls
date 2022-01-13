@@ -70,7 +70,7 @@ task bcftoolsMerge {
   Int maxRetries = 0
 
   runtime {
-    docker: "kboltonlab/bst:latest"
+    docker: "kboltonlab/sam_bcftools_tabix_bgzip:1.0"
     memory: "6GB"
     disks: "local-disk ~{space_needed_gb} SSD"
     cpu: cores
@@ -246,14 +246,16 @@ task normalFisher {
 
             df$fisher.exact.pval <- apply(df, 1, function(x) {
             x <- as.numeric(x[-c(1,2,3,4)])
+            #x[1] PoN Ref Depth & x[2] is PoN Alt Depth
+            #x[3] Ref Depth & x[4] is Alternate Depth
             if ((x[1]+x[2]==0) | (x[3]+x[4]==0)){
-                return(0)
+                return(0)   #PoN doesnt have this variant at all, or the sample doesnt have this variant
             } else if (x[2]==0 & x[1]!=0) {
-                return(0)
+                return(0)   #The variant does not exist in the PoN, only reference
             } else if ((x[1]==0 & x[2]!=0) | (x[3]==0 & x[4]!=0)) {
-                return(1)
+                return(1)   #Reference is incorrect, this is a germline SNP in which it is ALL alt
             } else if (x[2]/(x[1]+x[2]) >= x[4]/(x[3]+x[4])) {
-                return(1)
+                return(1)   #The VAF in the PoN is higher than the VAF in the Sample. (One sided Fisher Test)
             } else {
                 return(fisher.test(matrix(c(x[1], x[2], x[3], x[4]), ncol=2))$p.value)
             }

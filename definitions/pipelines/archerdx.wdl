@@ -21,6 +21,7 @@ import "../tools/pon2percent.wdl" as pp
 import "../tools/split_bed_to_chr.wdl" as sbtc
 import "../tools/merge_vcf.wdl" as mv
 import "../tools/create_fake_vcf.wdl" as cfv
+import "../tools/archer_R_annotate.wdl" as ara
 
 workflow archerdx {
     input {
@@ -96,18 +97,16 @@ workflow archerdx {
         #File pindel_pon2_file
         #File pindel_pon2_file_tbi
 
-        # TODO: R Stuff
-        # File impact_annotation
-        # File topmed_annotation
-        # File cosmic_annotation
-        # File tsg_annotation
-        # File oncoKB_annotation
-        # File pd_table_annotation
-        # File panmyeloid_annotation
-        # File blacklist_annotation
-        # File segemental_duplications_annotation
-        # File simple_repeats_annotation
-        # File repeat_masker_annotation
+        # R Stuff
+        File bolton_bick_vars
+        File mut2_bick
+        File mut2_kelly
+        File matches2
+        File TSG_file
+        File oncoKB_curated
+        File pd_annotation_file
+        File pan_myeloid
+        File cosmic_dir_zip
 
         # VEP
         File vep_cache_dir_zip
@@ -489,6 +488,51 @@ workflow archerdx {
             merged_vcf_basename = tumor_sample_name + ".vep"
     }
 
+    call ara.archerRAnnotate as annotateRMutect {
+        input:
+            vcf = merge_mutect_final.merged_vcf,
+            caller = "mutect",
+            bolton_bick_vars = bolton_bick_vars,
+            mut2_bick = mut2_bick,
+            mut2_kelly = mut2_kelly,
+            matches2 = matches2,
+            TSG_file = TSG_file,
+            oncoKB_curated = oncoKB_curated,
+            pd_annotation_file = pd_annotation_file,
+            pan_myeloid = pan_myeloid,
+            cosmic_dir_zip = cosmic_dir_zip
+    }
+
+    call ara.archerRAnnotate as annotateRLofreq {
+        input:
+            vcf = merge_lofreq_final.merged_vcf,
+            caller = "lofreq",
+            bolton_bick_vars = bolton_bick_vars,
+            mut2_bick = mut2_bick,
+            mut2_kelly = mut2_kelly,
+            matches2 = matches2,
+            TSG_file = TSG_file,
+            oncoKB_curated = oncoKB_curated,
+            pd_annotation_file = pd_annotation_file,
+            pan_myeloid = pan_myeloid,
+            cosmic_dir_zip = cosmic_dir_zip
+    }
+
+    call ara.archerRAnnotate as annotateRVardict {
+        input:
+            vcf = merge_vardict_final.merged_vcf,
+            caller = "vardict",
+            bolton_bick_vars = bolton_bick_vars,
+            mut2_bick = mut2_bick,
+            mut2_kelly = mut2_kelly,
+            matches2 = matches2,
+            TSG_file = TSG_file,
+            oncoKB_curated = oncoKB_curated,
+            pd_annotation_file = pd_annotation_file,
+            pan_myeloid = pan_myeloid,
+            cosmic_dir_zip = cosmic_dir_zip
+    }
+
     output {
         # Alignments
         File aligned_bam = alignment_workflow.aligned_bam
@@ -528,30 +572,9 @@ workflow archerdx {
 
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 
-        # TODO: Maybe Implement R Things
-        # File final_tsv = final_annotation.final_tsv
-        # File column_check = final_annotation.column_check
+        # R Things
+        File mutect_annotate_pd = annotateRMutect.vcf_annotate_pd
+        File lofreq_annotate_pd = annotateRLofreq.vcf_annotate_pd
+        File vardict_annotate_pd = annotateRVardict.vcf_annotate_pd
     }
 }
-
-    # final_annotation:
-    #     run: ../tools/annotate_CH_pd.cwl
-    #     in:
-    #         mutect_vcf: mutect_pon2/annotated_vcf
-    #         varscan_vcf: varscan_pon2/annotated_vcf
-    #         vardict_vcf: vardict_pon2/annotated_vcf
-    #         pindel_vcf: pindel_pon2/annotated_vcf
-    #         sample_name: tumor_sample_name
-    #         impact_annotation: impact_annotation
-    #         topmed_annotation: topmed_annotation
-    #         cosmic_annotation: cosmic_annotation
-    #         tsg_annotation: tsg_annotation
-    #         oncoKB_annotation: oncoKB_annotation
-    #         pd_table_annotation: pd_table_annotation
-    #         panmyeloid_annotation: panmyeloid_annotation
-    #         blacklist_annotation: blacklist_annotation
-    #         segemental_duplications_annotation: segemental_duplications_annotation
-    #         simple_repeats_annotation: simple_repeats_annotation
-    #         repeat_masker_annotation: repeat_masker_annotation
-    #     out:
-    #         [final_tsv, column_check]
