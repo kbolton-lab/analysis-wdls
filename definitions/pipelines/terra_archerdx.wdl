@@ -912,6 +912,16 @@ workflow archerdx {
             cosmic_dir_zip = cosmic_dir_zip
     }
 
+    call XGBModel as model {
+        input:
+            lofreq_tsv = annotateRLofreq.vcf_annotate_pd,
+            mutect_tsv = annotateRMutect.vcf_annotate_pd,
+            vardict_tsv  = annotateRVardict.vcf_annotate_pd,
+            pindel_full_vcf = merge_pindel_full.merged_vcf,
+            pon = merge_pon.merged_vcf,
+            tumor_sample_name = tumor_sample_name
+    }
+
     output {
         # Alignments
         File? aligned_bam = index_align_bam.indexed_bam
@@ -960,6 +970,12 @@ workflow archerdx {
         File mutect_annotate_pd = annotateRMutect.vcf_annotate_pd
         File lofreq_annotate_pd = annotateRLofreq.vcf_annotate_pd
         File vardict_annotate_pd = annotateRVardict.vcf_annotate_pd
+
+        # Model
+        File model_output = model.model_output
+        File mutect_complex = model.mutect_complex
+        File pindel_complex = model.pindel_complex
+        File lofreq_complex = model.lofreq_complex
     }
 }
 
@@ -2858,5 +2874,42 @@ task archerRAnnotate {
 
     output {
         File vcf_annotate_pd = basename(vcf, ".vcf.gz") + ".tsv"
+    }
+}
+
+task XGBModel {
+    input {
+        File lofreq_tsv
+        File mutect_tsv
+        File vardict_tsv
+        File pindel_full_vcf
+        File pon
+        String tumor_sample_name
+    }
+
+    Float file_size = size([lofreq_tsv, mutect_tsv, vardict_tsv, pindel_full_vcf, pon], "GB")
+    Int space_needed_gb = 10 + round(file_size)
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+      cpu: cores
+      docker: "kboltonlab/predict_xgb:latest"
+      memory: "6GB"
+      disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
+    }
+
+    command <<<
+        /usr/local/julia/bin/julia /opt/bin/main.jl ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon}
+    >>>
+
+    output {
+        File model_output = "output_~{tumor_sample_name}.tsv.gz"
+        File mutect_complex = "mutect_complex_~{tumor_sample_name}.tsv.gz"
+        File pindel_complex = "pindel_complex_~{tumor_sample_name}.tsv.gz"
+        File lofreq_complex = "lofreq_complex_~{tumor_sample_name}.tsv.gz"
     }
 }
