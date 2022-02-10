@@ -867,10 +867,11 @@ workflow archerdx {
             merged_vcf_basename = tumor_sample_name + ".vep"
     }
 
-    call archerRAnnotate as annotateRMutect {
+    call archerRAnnotate as annotatePD {
         input:
-            vcf = merge_mutect_final.merged_vcf,
-            caller = "mutect",
+            mutect_vcf = merge_mutect_final.merged_vcf,
+            lofreq_vcf = merge_lofreq_final.merged_vcf,
+            vardict_vcf = merge_vardict_final.merged_vcf,
             bolton_bick_vars = bolton_bick_vars,
             mut2_bick = mut2_bick,
             mut2_kelly = mut2_kelly,
@@ -879,44 +880,8 @@ workflow archerdx {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
-            cosmic_dir_zip = cosmic_dir_zip
-    }
-
-    call archerRAnnotate as annotateRLofreq {
-        input:
-            vcf = merge_lofreq_final.merged_vcf,
-            caller = "lofreq",
-            bolton_bick_vars = bolton_bick_vars,
-            mut2_bick = mut2_bick,
-            mut2_kelly = mut2_kelly,
-            matches2 = matches2,
-            TSG_file = TSG_file,
-            oncoKB_curated = oncoKB_curated,
-            pd_annotation_file = pd_annotation_file,
-            pan_myeloid = pan_myeloid,
-            cosmic_dir_zip = cosmic_dir_zip
-    }
-
-    call archerRAnnotate as annotateRVardict {
-        input:
-            vcf = merge_vardict_final.merged_vcf,
-            caller = "vardict",
-            bolton_bick_vars = bolton_bick_vars,
-            mut2_bick = mut2_bick,
-            mut2_kelly = mut2_kelly,
-            matches2 = matches2,
-            TSG_file = TSG_file,
-            oncoKB_curated = oncoKB_curated,
-            pd_annotation_file = pd_annotation_file,
-            pan_myeloid = pan_myeloid,
-            cosmic_dir_zip = cosmic_dir_zip
-    }
-
-    call XGBModel as model {
-        input:
-            lofreq_tsv = annotateRLofreq.vcf_annotate_pd,
-            mutect_tsv = annotateRMutect.vcf_annotate_pd,
-            vardict_tsv  = annotateRVardict.vcf_annotate_pd,
+            cosmic_dir_zip = cosmic_dir_zip,
+            pon_pvalue = pon_pvalue,
             pindel_full_vcf = merge_pindel_full.merged_vcf,
             pon = merge_pon.merged_vcf,
             tumor_sample_name = tumor_sample_name
@@ -967,15 +932,15 @@ workflow archerdx {
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 
         # R Things
-        File mutect_annotate_pd = annotateRMutect.vcf_annotate_pd
-        File lofreq_annotate_pd = annotateRLofreq.vcf_annotate_pd
-        File vardict_annotate_pd = annotateRVardict.vcf_annotate_pd
+        File mutect_annotate_pd = annotatePD.mutect_vcf_annotate_pd
+        File lofreq_annotate_pd = annotatePD.lofreq_vcf_annotate_pd
+        File vardict_annotate_pd = annotatePD.vardict_vcf_annotate_pd
 
         # Model
-        File model_output = model.model_output
-        File mutect_complex = model.mutect_complex
-        File pindel_complex = model.pindel_complex
-        File lofreq_complex = model.lofreq_complex
+        File model_output = annotatePD.model_output
+        File mutect_complex = annotatePD.mutect_complex
+        File pindel_complex = annotatePD.pindel_complex
+        File lofreq_complex = annotatePD.lofreq_complex
     }
 }
 
@@ -2629,10 +2594,17 @@ task annotateVcf {
     }
 
     command <<<
-        zcat ~{fp_filter} | grep '##' | tail -n +4  > fp_filter.header;
+        #zcat ~{fp_filter} | grep '##' | tail -n +4  > fp_filter.header;
+        zcat ~{fp_filter} | grep '##FILTER' > fp_filter.header;
+        zcat ~{fp_filter} | grep -v '#' > fp_filter.results;
         zcat ~{vep} | grep '##' | tail -n +3 > vep.header;
 
-        bcftools annotate -a ~{fp_filter} -h fp_filter.header -c =FILTER ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
+        printf "##INFO=<ID=FP_filter,Number=.,Type=String,Description=\"Result from FP Filter\">" >> fp_filter.header;
+
+        bgzip -f fp_filter.results
+        tabix -f -s1 -b2 -e2 fp_filter.results.gz
+
+        bcftools annotate -a fp_filter.results.gz -h fp_filter.header -c CHROM,POS,ID,REF,ALT,-,FP_filter ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
         tabix ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
         bcftools annotate -a ~{vep} -h vep.header -c CSQ ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
         tabix ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
@@ -2818,8 +2790,9 @@ task removeEndTags {
 
 task archerRAnnotate {
     input {
-        File vcf
-        String caller = "caller"
+        File mutect_vcf
+        File lofreq_vcf
+        File vardict_vcf
         File bolton_bick_vars
         File mut2_bick
         File mut2_kelly
@@ -2829,12 +2802,18 @@ task archerRAnnotate {
         File pd_annotation_file
         File pan_myeloid
         File cosmic_dir_zip
+        String? pon_pvalue = "2.114164905e-6"
+        File pindel_full_vcf
+        File pon
+        String tumor_sample_name
+
     }
 
-    Float file_size = size([vcf, bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file, pan_myeloid], "GB")
+    Float caller_size = size([mutect_vcf, lofreq_vcf, vardict_vcf, pindel_full_vcf, pon], "GB")
+    Float file_size = size([bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file, pan_myeloid], "GB")
     Float cosmic_size = 3*size(cosmic_dir_zip, "GB")
-    Int space_needed_gb = 10 + round(file_size + cosmic_size)
-    Int cores = 8
+    Int space_needed_gb = 10 + round(caller_size + file_size + cosmic_size)
+    Int cores = 1
     Int preemptible = 1
     Int maxRetries = 0
 
@@ -2852,15 +2831,9 @@ task archerRAnnotate {
     command <<<
         set -eou pipefail
 
-        if [[ "~{vcf}" == *.gz ]]; then
-            name=$(basename ~{vcf} .vcf.gz)
-        else
-            name=$(basename ~{vcf} .vcf)
-        fi
-
         unzip -qq ~{cosmic_dir_zip}
 
-        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{vcf} --out ${name}.tsv --caller ~{caller} \
+        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{mutect_vcf} --out $(basename ~{mutect_vcf} .vcf.gz) --caller mutect \
         --bolton_bick_vars ~{bolton_bick_vars} \
         --mut2_bick ~{mut2_bick} \
         --mut2_kelly ~{mut2_kelly} \
@@ -2869,44 +2842,40 @@ task archerRAnnotate {
         --oncoKB_curated ~{oncoKB_curated} \
         --pd_annotation_file ~{pd_annotation_file} \
         --pan_myeloid ~{pan_myeloid} \
-        --cosmic_dir ~{cosmic_dir}
+        --cosmic_dir ~{cosmic_dir} \
+        --p_value ~{pon_pvalue}
+
+        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{lofreq_vcf} --out $(basename ~{lofreq_vcf} .vcf.gz) --caller lofreq \
+        --bolton_bick_vars ~{bolton_bick_vars} \
+        --mut2_bick ~{mut2_bick} \
+        --mut2_kelly ~{mut2_kelly} \
+        --matches2 ~{matches2} \
+        --TSG_file ~{TSG_file} \
+        --oncoKB_curated ~{oncoKB_curated} \
+        --pd_annotation_file ~{pd_annotation_file} \
+        --pan_myeloid ~{pan_myeloid} \
+        --cosmic_dir ~{cosmic_dir} \
+        --p_value ~{pon_pvalue}
+
+        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{vardict_vcf} --out $(basename ~{vardict_vcf} .vcf.gz) --caller vardict \
+        --bolton_bick_vars ~{bolton_bick_vars} \
+        --mut2_bick ~{mut2_bick} \
+        --mut2_kelly ~{mut2_kelly} \
+        --matches2 ~{matches2} \
+        --TSG_file ~{TSG_file} \
+        --oncoKB_curated ~{oncoKB_curated} \
+        --pd_annotation_file ~{pd_annotation_file} \
+        --pan_myeloid ~{pan_myeloid} \
+        --cosmic_dir ~{cosmic_dir} \
+        --p_value ~{pon_pvalue}
+
+        /opt/bin/xgbappcompiled/bin/xgbapp $(basename ~{lofreq_vcf} .vcf.gz).tsv $(basename ~{mutect_vcf} .vcf.gz).tsv $(basename ~{vardict_vcf} .vcf.gz).tsv ~{pindel_full_vcf} ~{pon} ""
     >>>
 
     output {
-        File vcf_annotate_pd = basename(vcf, ".vcf.gz") + ".tsv"
-    }
-}
-
-task XGBModel {
-    input {
-        File lofreq_tsv
-        File mutect_tsv
-        File vardict_tsv
-        File pindel_full_vcf
-        File pon
-        String tumor_sample_name
-    }
-
-    Float file_size = size([lofreq_tsv, mutect_tsv, vardict_tsv, pindel_full_vcf, pon], "GB")
-    Int space_needed_gb = 10 + round(file_size)
-    Int cores = 1
-    Int preemptible = 1
-    Int maxRetries = 0
-
-    runtime {
-      cpu: cores
-      docker: "kboltonlab/predict_xgb:latest"
-      memory: "6GB"
-      disks: "local-disk ~{space_needed_gb} SSD"
-      preemptible: preemptible
-      maxRetries: maxRetries
-    }
-
-    command <<<
-        /usr/local/julia/bin/julia /opt/bin/main.jl ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon}
-    >>>
-
-    output {
+        File mutect_vcf_annotate_pd = basename(mutect_vcf, ".vcf.gz") + ".tsv"
+        File lofreq_vcf_annotate_pd = basename(lofreq_vcf, ".vcf.gz") + ".tsv"
+        File vardict_vcf_annotate_pd = basename(vardict_vcf, ".vcf.gz") + ".tsv"
         File model_output = "output_~{tumor_sample_name}.tsv.gz"
         File mutect_complex = "mutect_complex_~{tumor_sample_name}.tsv.gz"
         File pindel_complex = "pindel_complex_~{tumor_sample_name}.tsv.gz"

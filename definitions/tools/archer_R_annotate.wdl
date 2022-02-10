@@ -13,6 +13,8 @@ task archerRAnnotate {
         File pd_annotation_file
         File pan_myeloid
         File cosmic_dir_zip
+        String? pon_pvalue = "2.114164905e-6"
+
     }
 
     Float file_size = size([vcf, bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file, pan_myeloid], "GB")
@@ -44,7 +46,7 @@ task archerRAnnotate {
 
         unzip -qq ~{cosmic_dir_zip}
 
-        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{vcf} --out ${name}.tsv --caller ~{caller} \
+        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{vcf} --out ${name} --caller ~{caller} \
         --bolton_bick_vars ~{bolton_bick_vars} \
         --mut2_bick ~{mut2_bick} \
         --mut2_kelly ~{mut2_kelly} \
@@ -53,7 +55,8 @@ task archerRAnnotate {
         --oncoKB_curated ~{oncoKB_curated} \
         --pd_annotation_file ~{pd_annotation_file} \
         --pan_myeloid ~{pan_myeloid} \
-        --cosmic_dir ~{cosmic_dir}
+        --cosmic_dir ~{cosmic_dir} \
+        --p_value ~{pon_pvalue}
     >>>
 
     output {

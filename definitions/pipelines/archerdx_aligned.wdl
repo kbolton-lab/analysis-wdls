@@ -485,16 +485,6 @@ workflow archerdx {
             cosmic_dir_zip = cosmic_dir_zip
     }
 
-    call xm.XGBModel as model {
-        input:
-            lofreq_tsv = annotateRLofreq.vcf_annotate_pd,
-            mutect_tsv = annotateRMutect.vcf_annotate_pd,
-            vardict_tsv  = annotateRVardict.vcf_annotate_pd,
-            pindel_full_vcf = merge_pindel_full.merged_vcf,
-            pon = merge_pon.merged_vcf,
-            tumor_sample_name = tumor_sample_name
-    }
-
     output {
         # Alignments
         #File aligned_bam = alignment_workflow.aligned_bam
@@ -538,11 +528,5 @@ workflow archerdx {
         File mutect_annotate_pd = annotateRMutect.vcf_annotate_pd
         File lofreq_annotate_pd = annotateRLofreq.vcf_annotate_pd
         File vardict_annotate_pd = annotateRVardict.vcf_annotate_pd
-
-        # Model
-        File model_output = model.model_output
-        File mutect_complex = model.mutect_complex
-        File pindel_complex = model.pindel_complex
-        File lofreq_complex = model.lofreq_complex
     }
 }
