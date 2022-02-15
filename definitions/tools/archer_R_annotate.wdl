@@ -12,6 +12,7 @@ task archerRAnnotate {
         File oncoKB_curated
         File pd_annotation_file
         File pan_myeloid
+        File truncating
         File cosmic_dir_zip
         String? pon_pvalue = "2.114164905e-6"
 
@@ -56,6 +57,7 @@ task archerRAnnotate {
         --pd_annotation_file ~{pd_annotation_file} \
         --pan_myeloid ~{pan_myeloid} \
         --cosmic_dir ~{cosmic_dir} \
+        --truncating ~{truncating} \
         --p_value ~{pon_pvalue}
     >>>
 

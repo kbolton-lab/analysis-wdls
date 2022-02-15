@@ -120,6 +120,7 @@ workflow myeloseq {
         File oncoKB_curated
         File pd_annotation_file
         File pan_myeloid
+        File truncating
         File cosmic_dir_zip
 
         # VEP
@@ -790,6 +791,7 @@ workflow myeloseq {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
+            truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
 
@@ -805,6 +807,7 @@ workflow myeloseq {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
+            truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
 
@@ -820,6 +823,7 @@ workflow myeloseq {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
+            truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
 
@@ -2624,6 +2628,7 @@ task archerRAnnotate {
         File oncoKB_curated
         File pd_annotation_file
         File pan_myeloid
+        File truncating
         File cosmic_dir_zip
     }
 
@@ -2665,6 +2670,7 @@ task archerRAnnotate {
         --oncoKB_curated ~{oncoKB_curated} \
         --pd_annotation_file ~{pd_annotation_file} \
         --pan_myeloid ~{pan_myeloid} \
+        --truncating ~{truncating} \
         --cosmic_dir ~{cosmic_dir}
     >>>
 
@@ -2699,7 +2705,8 @@ task XGBModel {
     }
 
     command <<<
-        /usr/local/julia/bin/julia /opt/bin/main.jl ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon}
+        /opt/bin/xgbappcompiled/bin/xgbapp ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon} ""
+        echo "Model Finished..."
     >>>
 
     output {

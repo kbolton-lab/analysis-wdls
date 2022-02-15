@@ -124,6 +124,7 @@ workflow archerdx {
         File oncoKB_curated
         File pd_annotation_file
         File pan_myeloid
+        File truncating
         File cosmic_dir_zip
 
         # VEP
@@ -880,11 +881,19 @@ workflow archerdx {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
+            truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip,
-            pon_pvalue = pon_pvalue,
-            pindel_full_vcf = merge_pindel_full.merged_vcf,
-            pon = merge_pon.merged_vcf,
-            tumor_sample_name = tumor_sample_name
+            pon_pvalue = pon_pvalue
+    }
+
+    call xgb_model as model {
+        input:
+        mutect_tsv = annotatePD.mutect_vcf_annotate_pd,
+        lofreq_tsv = annotatePD.lofreq_vcf_annotate_pd,
+        vardict_tsv = annotatePD.vardict_vcf_annotate_pd,
+        pindel_full_vcf = merge_pindel_full.merged_vcf,
+        pon = merge_pon.merged_vcf,
+        tumor_sample_name = tumor_sample_name
     }
 
     output {
@@ -937,10 +946,10 @@ workflow archerdx {
         File vardict_annotate_pd = annotatePD.vardict_vcf_annotate_pd
 
         # Model
-        File model_output = annotatePD.model_output
-        File mutect_complex = annotatePD.mutect_complex
-        File pindel_complex = annotatePD.pindel_complex
-        File lofreq_complex = annotatePD.lofreq_complex
+        File model_output = model.model_output
+        File mutect_complex = model.mutect_complex
+        File pindel_complex = model.pindel_complex
+        File lofreq_complex = model.lofreq_complex
     }
 }
 
@@ -955,7 +964,7 @@ task filterUmiLength {
     Int preemptible = 1
     Int maxRetries = 0
     Float data_size = size([fastq1, fastq2], "GB")
-    Int space_needed_gb = 10 + round(2*data_size)
+    Int space_needed_gb = 20 + round(3*data_size)
 
     runtime {
         docker: "ubuntu:xenial"
@@ -2600,6 +2609,7 @@ task annotateVcf {
         zcat ~{vep} | grep '##' | tail -n +3 > vep.header;
 
         printf "##INFO=<ID=FP_filter,Number=.,Type=String,Description=\"Result from FP Filter\">" >> fp_filter.header;
+        sed -i 's/;/,/g' fp_filter.results
 
         bgzip -f fp_filter.results
         tabix -f -s1 -b2 -e2 fp_filter.results.gz
@@ -2801,26 +2811,23 @@ task archerRAnnotate {
         File oncoKB_curated
         File pd_annotation_file
         File pan_myeloid
+        File truncating
         File cosmic_dir_zip
         String? pon_pvalue = "2.114164905e-6"
-        File pindel_full_vcf
-        File pon
-        String tumor_sample_name
-
     }
 
-    Float caller_size = size([mutect_vcf, lofreq_vcf, vardict_vcf, pindel_full_vcf, pon], "GB")
-    Float file_size = size([bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file, pan_myeloid], "GB")
+    Float caller_size = size([mutect_vcf, lofreq_vcf, vardict_vcf], "GB")
+    Float file_size = size([bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file, truncating, pan_myeloid], "GB")
     Float cosmic_size = 3*size(cosmic_dir_zip, "GB")
-    Int space_needed_gb = 10 + round(caller_size + file_size + cosmic_size)
-    Int cores = 1
+    Int space_needed_gb = 20 + round(caller_size + file_size + cosmic_size)
+    Int cores = 2
     Int preemptible = 1
     Int maxRetries = 0
 
     runtime {
       cpu: cores
       docker: "kboltonlab/r_docker_ichan:latest"
-      memory: "6GB"
+      memory: "12GB"
       disks: "local-disk ~{space_needed_gb} SSD"
       preemptible: preemptible
       maxRetries: maxRetries
@@ -2843,7 +2850,9 @@ task archerRAnnotate {
         --pd_annotation_file ~{pd_annotation_file} \
         --pan_myeloid ~{pan_myeloid} \
         --cosmic_dir ~{cosmic_dir} \
+        --truncating ~{truncating} \
         --p_value ~{pon_pvalue}
+        echo "Mutect AnnotatePD Finished..."
 
         LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{lofreq_vcf} --out $(basename ~{lofreq_vcf} .vcf.gz) --caller lofreq \
         --bolton_bick_vars ~{bolton_bick_vars} \
@@ -2855,7 +2864,9 @@ task archerRAnnotate {
         --pd_annotation_file ~{pd_annotation_file} \
         --pan_myeloid ~{pan_myeloid} \
         --cosmic_dir ~{cosmic_dir} \
+        --truncating ~{truncating} \
         --p_value ~{pon_pvalue}
+        echo "Lofreq AnnotatePD Finished..."
 
         LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{vardict_vcf} --out $(basename ~{vardict_vcf} .vcf.gz) --caller vardict \
         --bolton_bick_vars ~{bolton_bick_vars} \
@@ -2867,18 +2878,53 @@ task archerRAnnotate {
         --pd_annotation_file ~{pd_annotation_file} \
         --pan_myeloid ~{pan_myeloid} \
         --cosmic_dir ~{cosmic_dir} \
+        --truncating ~{truncating} \
         --p_value ~{pon_pvalue}
-
-        /opt/bin/xgbappcompiled/bin/xgbapp $(basename ~{lofreq_vcf} .vcf.gz).tsv $(basename ~{mutect_vcf} .vcf.gz).tsv $(basename ~{vardict_vcf} .vcf.gz).tsv ~{pindel_full_vcf} ~{pon} ""
+        echo "Vardict AnnotatePD Finished..."
     >>>
 
     output {
         File mutect_vcf_annotate_pd = basename(mutect_vcf, ".vcf.gz") + ".tsv"
         File lofreq_vcf_annotate_pd = basename(lofreq_vcf, ".vcf.gz") + ".tsv"
         File vardict_vcf_annotate_pd = basename(vardict_vcf, ".vcf.gz") + ".tsv"
+    }
+}
+
+task xgb_model {
+    input {
+        File mutect_tsv
+        File lofreq_tsv
+        File vardict_tsv
+        File pindel_full_vcf
+        File pon
+        String tumor_sample_name
+    }
+
+    Float caller_size = size([mutect_tsv, lofreq_tsv, vardict_tsv, pindel_full_vcf, pon], "GB")
+    Int space_needed_gb = 10 + round(caller_size)
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+      cpu: cores
+      docker: "kboltonlab/predict_xgb:latest"
+      memory: "6GB"
+      disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
+    }
+
+    command <<<
+        /opt/bin/xgbappcompiled/bin/xgbapp ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon} ""
+        echo "Model Finished..."
+    >>>
+
+
+    output {
         File model_output = "output_~{tumor_sample_name}.tsv.gz"
-        File mutect_complex = "mutect_complex_~{tumor_sample_name}.tsv.gz"
-        File pindel_complex = "pindel_complex_~{tumor_sample_name}.tsv.gz"
-        File lofreq_complex = "lofreq_complex_~{tumor_sample_name}.tsv.gz"
+        File mutect_complex = "output_mutect_complex_~{tumor_sample_name}.tsv.gz"
+        File pindel_complex = "output_pindel_complex_~{tumor_sample_name}.tsv.gz"
+        File lofreq_complex = "output_lofreq_complex_~{tumor_sample_name}.tsv.gz"
     }
 }

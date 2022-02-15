@@ -1,16 +1,5 @@
 version 1.0
 
-struct Sequence {
-  File? bam
-  File? fastq1
-  File? fastq2
-}
-# assume either bam or fastqs defined
-struct SequenceData {
-  Sequence sequence
-  String readgroup
-}
-
 struct TrimmingOptions {
   File adapters
   Int min_overlap
@@ -54,8 +43,12 @@ workflow archerdx {
         Int scatter_count = 20
 
         # Sequence and BAM Information
-        File bam
-        File bam_bai
+        File fastq_one
+        File fastq_two
+        File? bam_file
+        File? bam_file_bai
+        Boolean? aligned = false
+        Array[String] read_structure
         String? tumor_name = "tumor"
         String tumor_sample_name
         File target_intervals
@@ -70,6 +63,15 @@ workflow archerdx {
         File reference_bwt
         File reference_pac
         File reference_sa
+
+        # FASTQ Preprocessing
+        Boolean? umi_paired = true
+        Int umi_length = 8
+        Array[Int] min_reads = [1]
+        Float? max_read_error_rate = 0.05
+        Float? max_base_error_rate = 0.1
+        Int min_base_quality = 1
+        Float max_no_call_fraction = 0.5
 
         # BQSR
         Array[File] bqsr_known_sites
@@ -96,10 +98,10 @@ workflow archerdx {
         String? pon_pvalue = "2.114164905e-6"
 
         # Pindel
-        #Int pindel_insert_size = 400
-        #String? ref_name = "GRCh38DH"
-        #String? ref_date = "20161216"
-        #Int? pindel_min_supporting_reads = 3
+        Int pindel_insert_size = 400
+        String? ref_name = "GRCh38DH"
+        String? ref_date = "20161216"
+        Int? pindel_min_supporting_reads = 3
 
         String bcbio_filter_string = "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 6500) || (INFO/QUAL < 27)))"
 
@@ -110,21 +112,20 @@ workflow archerdx {
         File lofreq_pon2_file_tbi
         File vardict_pon2_file
         File vardict_pon2_file_tbi
-        #File pindel_pon2_file
-        #File pindel_pon2_file_tbi
+        File pindel_pon2_file
+        File pindel_pon2_file_tbi
 
-        # TODO: R Stuff
-        # File impact_annotation
-        # File topmed_annotation
-        # File cosmic_annotation
-        # File tsg_annotation
-        # File oncoKB_annotation
-        # File pd_table_annotation
-        # File panmyeloid_annotation
-        # File blacklist_annotation
-        # File segemental_duplications_annotation
-        # File simple_repeats_annotation
-        # File repeat_masker_annotation
+        # R Stuff
+        File bolton_bick_vars
+        File mut2_bick
+        File mut2_kelly
+        File matches2
+        File TSG_file
+        File oncoKB_curated
+        File pd_annotation_file
+        File pan_myeloid
+        File truncating
+        File cosmic_dir_zip
 
         # VEP
         File vep_cache_dir_zip
@@ -148,14 +149,103 @@ workflow archerdx {
         String filter_flag = "include"
     }
 
+	if (!aligned) {
+      call filterUmiLength as filterUMI {
+          input:
+          fastq1 = fastq_one,
+          fastq2 = fastq_two,
+          umi_length = umi_length
+      }
+
+      call bbmapRepair as repair {
+          input:
+          fastq1 = filterUMI.fastq1_filtered,
+          fastq2 = filterUMI.fastq2_filtered
+      }
+
+      call fastqToBam as fastq_to_bam {
+          input:
+          fastq1 = repair.fastq1_repair,
+          fastq2 = repair.fastq2_repair,
+          sample_name = tumor_sample_name,
+          library_name = "Library",
+          platform_unit = "Illumina",
+          platform = "ArcherDX"
+      }
+
+      call extractUmis as extract_umis {
+          input:
+          bam = fastq_to_bam.bam,
+          read_structure = read_structure,
+          umi_paired = umi_paired
+      }
+
+      call markIlluminaAdapters as mark_illumina_adapters {
+          input:
+          bam = extract_umis.umi_extracted_bam
+      }
+
+      call umiAlign as align {
+          input:
+          bam = mark_illumina_adapters.marked_bam,
+          reference = reference,
+          reference_fai = reference_fai,
+          reference_dict = reference_dict,
+          reference_amb = reference_amb,
+          reference_ann = reference_ann,
+          reference_bwt = reference_bwt,
+          reference_pac = reference_pac,
+          reference_sa = reference_sa
+      }
+
+      call groupReadsAndConsensus as group_reads_by_umi_and_call_molecular_consensus {
+          input:
+          bam = align.aligned_bam,
+          umi_paired = umi_paired,
+      }
+
+      call realign as align_consensus {
+          input:
+          bam = group_reads_by_umi_and_call_molecular_consensus.consensus_bam,
+          reference = reference,
+          reference_fai = reference_fai,
+          reference_dict = reference_dict,
+          reference_amb = reference_amb,
+          reference_ann = reference_ann,
+          reference_bwt = reference_bwt,
+          reference_pac = reference_pac,
+          reference_sa = reference_sa
+      }
+
+      call filterClipAndCollectMetrics as filter_clip_collect_metrics {
+          input:
+          bam = align_consensus.consensus_aligned_bam,
+          reference = reference,
+          reference_fai = reference_fai,
+          reference_dict = reference_dict,
+          min_reads = min_reads,
+          max_read_error_rate = max_read_error_rate,
+          max_base_error_rate = max_base_error_rate,
+          min_base_quality = min_base_quality,
+          max_no_call_fraction = max_no_call_fraction,
+          target_intervals = target_intervals,
+          description = tumor_sample_name,
+          umi_paired = umi_paired
+      }
+
+      call indexBam as index_align_bam {
+          input:
+          bam = filter_clip_collect_metrics.clipped_bam
+      }
+	}
 
     call bqsrApply as bqsr {
         input:
         reference = reference,
         reference_fai = reference_fai,
         reference_dict = reference_dict,
-        bam = bam,
-        bam_bai = bam_bai,
+        bam = select_first([index_align_bam.indexed_bam, bam_file]),
+        bam_bai = select_first([index_align_bam.indexed_bam_bai, bam_file_bai]),
         intervals = bqsr_intervals,
         known_sites = bqsr_known_sites,
         known_sites_tbi = bqsr_known_sites_tbi
@@ -307,18 +397,8 @@ workflow archerdx {
           vcf=mutectNormalize.normalized_vcf,
           vcf_tbi=mutectNormalize.normalized_vcf_tbi
         }
-        #call bcftoolsIsecComplement as mutect_isec_complement_gnomAD {
-        #    input:
-        #    vcf = mutectDecomposeVariants.decomposed_vcf,
-        #    vcf_tbi = mutectDecomposeVariants.decomposed_vcf_tbi,
-        #    exclude_vcf = normalized_gnomad_exclude,
-        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        #    output_vcf_name = "mutect." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-        #    output_type = "z"
-        #}
         call pon2Percent as mutect_pon2 {
             input:
-            #vcf = mutect_isec_complement_gnomAD.complement_vcf,
             vcf = mutectDecomposeVariants.decomposed_vcf,
             vcf2PON = mutect_pon2_file,
             vcf2PON_tbi = mutect_pon2_file_tbi,
@@ -365,18 +445,8 @@ workflow archerdx {
           vcf=vardictNormalize.normalized_vcf,
           vcf_tbi=vardictNormalize.normalized_vcf_tbi
         }
-        #call bcftoolsIsecComplement as vardict_isec_complement_gnomAD {
-        #    input:
-        #    vcf = vardictDecomposeVariants.decomposed_vcf,
-        #    vcf_tbi = vardictDecomposeVariants.decomposed_vcf_tbi,
-        #    exclude_vcf = normalized_gnomad_exclude,
-        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        #    output_vcf_name = "vardict." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-        #    output_type = "z"
-        #}
         call pon2Percent as vardict_pon2 {
             input:
-            #vcf = vardict_isec_complement_gnomAD.complement_vcf,
             vcf = vardictDecomposeVariants.decomposed_vcf,
             vcf2PON = vardict_pon2_file,
             vcf2PON_tbi = vardict_pon2_file_tbi,
@@ -417,18 +487,8 @@ workflow archerdx {
           vcf=lofreqNormalize.normalized_vcf,
           vcf_tbi=lofreqNormalize.normalized_vcf_tbi
         }
-        #call bcftoolsIsecComplement as lofreq_isec_complement_gnomAD {
-        #    input:
-        #    vcf = lofreqDecomposeVariants.decomposed_vcf,
-        #    vcf_tbi = lofreqDecomposeVariants.decomposed_vcf_tbi,
-        #    exclude_vcf = normalized_gnomad_exclude,
-        #    exclude_vcf_tbi = normalized_gnomad_exclude_tbi,
-        #    output_vcf_name = "lofreq." + tumor_sample_name + ".gnomAD_AF_filter.vcf",
-        #    output_type = "z"
-        #}
         call pon2Percent as lofreq_pon2 {
             input:
-            #vcf = lofreq_isec_complement_gnomAD.complement_vcf,
             vcf = lofreqDecomposeVariants.decomposed_vcf,
             vcf2PON = lofreq_pon2_file,
             vcf2PON_tbi = lofreq_pon2_file_tbi,
@@ -436,7 +496,59 @@ workflow archerdx {
             sample_name = tumor_sample_name
         }
 
-        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf]){
+        # Pindel
+        call pindelTumorOnly as pindelTask {
+            input:
+            reference=reference,
+            reference_fai=reference_fai,
+            reference_dict=reference_dict,
+            tumor_bam = index_bam.indexed_bam,
+            tumor_bam_bai = index_bam.indexed_bam_bai,
+            region_file=chr_bed,
+            insert_size=pindel_insert_size,
+            tumor_sample_name=tumor_sample_name
+        }
+        call catOut as pindelCat {
+          input: pindel_outs=[pindelTask.deletions, pindelTask.insertions, pindelTask.tandems, pindelTask.long_insertions, pindelTask.inversions]
+        }
+        call pindelToVcf as pindel2vcf {
+            input:
+            reference=reference,
+            reference_fai=reference_fai,
+            reference_dict=reference_dict,
+            pindel_output_summary=pindelCat.pindel_out,
+            ref_name = ref_name,
+            ref_date = ref_date,
+            min_supporting_reads = pindel_min_supporting_reads
+        }
+        call removeEndTags {
+          input: vcf=pindel2vcf.pindel_vcf
+        }
+        call vcfSanitize as pindelSanitizeVcf {
+          input: vcf=removeEndTags.processed_vcf
+        }
+        call bcftoolsNorm as pindelNormalize {
+            input:
+            reference=reference,
+            reference_fai=reference_fai,
+            vcf=pindelSanitizeVcf.sanitized_vcf,
+            vcf_tbi=pindelSanitizeVcf.sanitized_vcf_tbi
+        }
+        call vtDecompose as pindelDecomposeVariants {
+          input:
+          vcf=pindelNormalize.normalized_vcf,
+          vcf_tbi=pindelNormalize.normalized_vcf_tbi
+        }
+        call pon2Percent as pindel_pon2 {
+            input:
+            vcf = pindelDecomposeVariants.decomposed_vcf,
+            vcf2PON = pindel_pon2_file,
+            vcf2PON_tbi = pindel_pon2_file_tbi,
+            caller = "pindel",
+            sample_name = tumor_sample_name
+        }
+
+        scatter (caller_vcf in [mutect_pon2.annotated_vcf, vardict_pon2.annotated_vcf, lofreq_pon2.annotated_vcf, pindel_pon2.annotated_vcf]){
             call createFakeVcf as fake_vcf {
                 input:
                 vcf = caller_vcf,
@@ -592,6 +704,31 @@ workflow archerdx {
             caller_prefix = "lofreq",
             sample_name = tumor_sample_name
         }
+
+        call normalFisher as pindel_call_R_fisher {
+            input:
+            vcf = pindel_pon2.annotated_vcf,
+            pon = pileup_merge.merged_vcf,
+            pon_tbi = pileup_merge.merged_vcf_tbi,
+            p_value = pon_pvalue,
+            caller = "pindel"
+        }
+
+        call indexVcf as pindel_index_pon_filtered_vcf {
+            input: vcf = pindel_call_R_fisher.pon_filtered_vcf
+        }
+
+        call annotateVcf as pindel_annotate_vcf {
+            input:
+            vcf = pindel_index_pon_filtered_vcf.indexed_vcf,
+            vcf_tbi = pindel_index_pon_filtered_vcf.indexed_vcf_tbi,
+            fp_filter = firstFilter.filtered_vcf,
+            fp_filter_tbi = firstFilter.filtered_vcf_tbi,
+            vep = vep.annotated_vcf,
+            vep_tbi = vep.annotated_vcf_tbi,
+            caller_prefix = "pindel",
+            sample_name = tumor_sample_name
+        }
     }
 
     call mergeVcf as merge_mutect_full {
@@ -651,6 +788,25 @@ workflow archerdx {
             merged_vcf_basename = "lofreq." + tumor_sample_name + ".final.annotated"
     }
 
+    call mergeVcf as merge_pindel_full {
+        input:
+            vcfs = pindelDecomposeVariants.decomposed_vcf,
+            vcf_tbis = pindelDecomposeVariants.decomposed_vcf_tbi,
+            merged_vcf_basename = "pindel_full." + tumor_sample_name
+    }
+    call mergeVcf as merge_pindel_pon {
+        input:
+            vcfs = pindel_annotate_vcf.pon_annotated_vcf,
+            vcf_tbis = pindel_annotate_vcf.pon_annotated_vcf_tbi,
+            merged_vcf_basename = "pindel." + tumor_sample_name + ".pileup.fisherPON"
+    }
+    call mergeVcf as merge_pindel_final {
+        input:
+            vcfs = pindel_annotate_vcf.final_annotated_vcf,
+            vcf_tbis = pindel_annotate_vcf.final_annotated_vcf_tbi,
+            merged_vcf_basename = "pindel." + tumor_sample_name + ".final.annotated"
+    }
+
     call mergeVcf as merge_pon {
         input:
             vcfs = pileup_merge.merged_vcf,
@@ -672,9 +828,37 @@ workflow archerdx {
             merged_vcf_basename = tumor_sample_name + ".vep"
     }
 
+    call archerRAnnotate as annotatePD {
+        input:
+            mutect_vcf = merge_mutect_final.merged_vcf,
+            lofreq_vcf = merge_lofreq_final.merged_vcf,
+            vardict_vcf = merge_vardict_final.merged_vcf,
+            bolton_bick_vars = bolton_bick_vars,
+            mut2_bick = mut2_bick,
+            mut2_kelly = mut2_kelly,
+            matches2 = matches2,
+            TSG_file = TSG_file,
+            oncoKB_curated = oncoKB_curated,
+            pd_annotation_file = pd_annotation_file,
+            pan_myeloid = pan_myeloid,
+            truncating = truncating,
+            cosmic_dir_zip = cosmic_dir_zip,
+            pon_pvalue = pon_pvalue
+    }
+
+    call xgb_model as model {
+        input:
+        mutect_tsv = annotatePD.mutect_vcf_annotate_pd,
+        lofreq_tsv = annotatePD.lofreq_vcf_annotate_pd,
+        vardict_tsv = annotatePD.vardict_vcf_annotate_pd,
+        pindel_full_vcf = merge_pindel_full.merged_vcf,
+        pon = merge_pon.merged_vcf,
+        tumor_sample_name = tumor_sample_name
+    }
+
     output {
         # Alignments
-        #File aligned_bam = alignment_workflow.aligned_bam
+        File? aligned_bam = index_align_bam.indexed_bam
         File bqsr_bam = index_bam.indexed_bam
 
         # Tumor QC
@@ -705,15 +889,360 @@ workflow archerdx {
         File vardict_pon_annotated_vcf = merge_vardict_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
         File vardict_vep_annotated_vcf = merge_vardict_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
 
+        # Pindel
+        File pindel_full = merge_pindel_full.merged_vcf                               # Raw Vardict Ouput
+        File pindel_pon_annotated_vcf = merge_pindel_pon.merged_vcf                   # gnomAD Filtered + PoN Filtered + PoN2 Annotated
+        File pindel_vep_annotated_vcf = merge_pindel_final.merged_vcf                 # gnomAD Filtered + PoN Filtered + PoN2 Annotated w/ VEP Annotation
+
         File pon_total_counts = merge_pon.merged_vcf                                    # PoN Pileup Results
         File fpfilter_results = merge_fp_filter.merged_vcf
         File vep_results = merge_vep.merged_vcf
 
         #File gnomAD_exclude = get_gnomad_exclude.normalized_gnomad_exclude
 
-        # TODO: Maybe Implement R Things
-        # File final_tsv = final_annotation.final_tsv
-        # File column_check = final_annotation.column_check
+        # R Things
+        File mutect_annotate_pd = annotatePD.mutect_vcf_annotate_pd
+        File lofreq_annotate_pd = annotatePD.lofreq_vcf_annotate_pd
+        File vardict_annotate_pd = annotatePD.vardict_vcf_annotate_pd
+
+        # Model
+        File model_output = model.model_output
+        File mutect_complex = model.mutect_complex
+        File pindel_complex = model.pindel_complex
+        File lofreq_complex = model.lofreq_complex
+    }
+}
+
+task filterUmiLength {
+    input {
+        File? fastq1
+        File? fastq2
+        Int umi_length
+    }
+
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+    Float data_size = size([fastq1, fastq2], "GB")
+    Int space_needed_gb = 10 + round(5*data_size)
+
+    runtime {
+        docker: "ubuntu:xenial"
+        memory: "6GB"
+        cpu: cores
+        disks: "local-disk ~{space_needed_gb} SSD"
+        bootDiskSizeGb: space_needed_gb
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        set -o pipefail
+        set -o errexit
+        set -o nounset
+
+        FASTQ_ONE="~{fastq1}"
+        FASTQ_TWO="~{fastq2}"
+        UMI_LENGTH="~{umi_length}"
+
+        zcat $FASTQ_ONE | awk -v regex="AACCGCCAGGAGT" -v umi_length="$UMI_LENGTH" 'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; split(seq,a,regex); if (length(a[1]) == umi_length) {print header, seq, qheader, qseq}}' > R1_filtered.fastq
+        gzip R1_filtered.fastq
+        cp $FASTQ_TWO R2_filtered.fastq.gz
+    >>>
+
+    output {
+        File fastq1_filtered = "R1_filtered.fastq.gz"
+        File fastq2_filtered = "R2_filtered.fastq.gz"
+    }
+}
+
+task bbmapRepair {
+    input {
+        File fastq1
+        File fastq2
+    }
+
+    Int cores = 1
+    Float data_size = size([fastq1, fastq2], "GB")
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+        docker: "quay.io/biocontainers/bbmap:38.92--he522d1c_0"
+        memory: "12GB"
+        cpu: cores
+        bootDiskSizeGb: 10 + round(5*data_size)
+        disks: "local-disk ~{10 + round(5*data_size)} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        repair.sh -Xmx10g repair=t overwrite=true interleaved=false outs=singletons.fq out1=R1.fixed.fastq.gz out2=R2.fixed.fastq.gz in1=~{fastq1} in2=~{fastq2}
+    >>>
+
+    output {
+        Array[File] fastqs = ["R1.fixed.fastq.gz", "R2.fixed.fastq.gz"]
+        File fastq1_repair = "R1.fixed.fastq.gz"
+        File fastq2_repair = "R2.fixed.fastq.gz"
+    }
+}
+
+task extractUmis {
+    input {
+        File bam
+        Array[String] read_structure
+        Boolean? umi_paired = true
+    }
+
+    Int cores = 1
+    Int space_needed_gb = 10 + round(2*size(bam, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+        docker: "quay.io/biocontainers/fgbio:1.3.0--0"
+        memory: "6GB"
+        cpu: cores
+        disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        set -eo pipefail
+
+        PAIRED=~{umi_paired}
+        BAM="~{bam}"
+        READ_STRUCUTRE="~{sep=" " read_structure}"
+
+        if [ "$PAIRED" == true ]; then
+            /usr/local/bin/fgbio ExtractUmisFromBam --molecular-index-tags ZA ZB --single-tag RX --input $BAM --read-structure $READ_STRUCUTRE --output umi_extracted.bam
+        else
+            /usr/local/bin/fgbio ExtractUmisFromBam --molecular-index-tags ZA --single-tag RX --input $BAM --read-structure $READ_STRUCUTRE --output umi_extracted.bam
+        fi
+    >>>
+
+    output {
+        File umi_extracted_bam = "umi_extracted.bam"
+    }
+}
+
+task markIlluminaAdapters {
+    input {
+        File bam
+    }
+
+    Int cores = 1
+    Int space_needed_gb = 10 + round(2*size(bam, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+        docker: "mgibio/dna-alignment:1.0.0"
+        memory: "6GB"
+        cpu: cores
+        disks: "local-disk ~{space_needed_gb} SSD"
+        bootDiskSizeGb: space_needed_gb
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        /usr/bin/java -Xmx4g -jar /opt/picard/picard.jar MarkIlluminaAdapters INPUT=~{bam} OUTPUT=marked.bam METRICS=adapter_metrics.txt
+    >>>
+
+    output {
+        File marked_bam = "marked.bam"
+        File metrics = "adapter_metrics.txt"
+    }
+}
+
+task umiAlign {
+    input {
+        File bam
+        File reference
+        File reference_fai
+        File reference_dict
+        File reference_amb
+        File reference_ann
+        File reference_bwt
+        File reference_pac
+        File reference_sa
+    }
+
+    Int cores = 8
+    Int preemptible = 1
+    Int maxRetries = 0
+    Float data_size = size(bam, "GB")
+    Float reference_size = size([reference, reference_amb, reference_ann, reference_bwt, reference_pac, reference_sa], "GB")
+
+    runtime {
+      docker: "mgibio/dna-alignment:1.0.0"
+      memory: "48GB"
+      cpu: cores
+      # 1 + just for a buffer
+      # data_size*10 because bam uncompresses and streams to /dev/stdout and /dev/stdin, could have a couple flying at once
+      bootDiskSizeGb: 10 + round(10*data_size + reference_size)
+      disks: "local-disk ~{10 + round(10*data_size + reference_size)} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
+    }
+
+    command <<<
+        /bin/bash /usr/bin/umi_alignment.sh ~{bam} ~{reference} ~{cores}
+    >>>
+
+    output {
+        File aligned_bam = "aligned.bam"
+        File aligned_bam_bai = "aligned.bai"
+    }
+}
+
+task groupReadsAndConsensus {
+    input {
+        File bam
+        Boolean umi_paired = true
+    }
+
+    Int cores = 1
+    Int space_needed_gb = 10 + round(3*size(bam, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+        docker: "quay.io/biocontainers/fgbio:1.3.0--0"
+        memory: "6GB"
+        cpu: cores
+        disks: "local-disk ~{space_needed_gb} SSD"
+        bootDiskSizeGb: space_needed_gb
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        set -eo pipefail
+
+        PAIRED=~{umi_paired}
+        BAM=~{bam}
+
+        if [ "$PAIRED" == true ]; then
+            /usr/local/bin/fgbio GroupReadsByUmi --strategy paired --assign-tag MI --raw-tag RX --min-map-q 1 --edits 1 --input $BAM --output umi_grouped.bam
+        else
+            /usr/local/bin/fgbio GroupReadsByUmi --strategy adjacency --assign-tag MI --raw-tag RX --min-map-q 1 --edits 1 --input $BAM --output umi_grouped.bam
+        fi
+        /usr/local/bin/fgbio CallMolecularConsensusReads --input umi_grouped.bam --error-rate-pre-umi 45 --error-rate-post-umi 30 --min-input-base-quality 30 --min-reads 1 --output consensus_unaligned.bam
+    >>>
+
+    output {
+        File consensus_bam = "consensus_unaligned.bam"
+    }
+}
+
+task realign {
+    input {
+        File bam
+        File reference
+        File reference_fai
+        File reference_dict
+        File reference_amb
+        File reference_ann
+        File reference_bwt
+        File reference_pac
+        File reference_sa
+    }
+
+    Int cores = 8
+    Int preemptible = 1
+    Int maxRetries = 0
+    Float data_size = size(bam, "GB")
+    Float reference_size = size([reference, reference_amb, reference_ann, reference_bwt, reference_pac, reference_sa], "GB")
+
+    runtime {
+        docker: "mgibio/dna-alignment:1.0.0"
+        memory: "48GB"
+        cpu: cores
+        bootDiskSizeGb: 10 + round(10*data_size + reference_size)
+        disks: "local-disk ~{10 + round(10*data_size + reference_size)} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        /bin/bash /usr/bin/umi_realignment.sh ~{bam} ~{reference} ~{cores}
+    >>>
+
+    output {
+        File consensus_aligned_bam = "realigned.bam"
+        File consensus_aligned_bam_bai = "realigned.bai"
+    }
+}
+
+task filterClipAndCollectMetrics {
+    input {
+        File bam
+        File reference
+        File reference_fai
+        File reference_dict
+        Array[Int] min_reads = [1]
+        Float? max_read_error_rate = 0.05
+        Float? max_base_error_rate = 0.1
+        Int min_base_quality = 1
+        Float max_no_call_fraction = 0.5
+        File? target_intervals
+        String description
+        Boolean umi_paired = true
+    }
+
+    Int cores = 1
+    Float data_size = size(bam, "GB")
+    Float reference_size = size([reference, reference_fai, reference_dict], "GB")
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+        docker: "quay.io/biocontainers/fgbio:1.3.0--0"
+        memory: "6GB"
+        cpu: cores
+        bootDiskSizeGb: 10 + round(3*data_size + reference_size)
+        disks: "local-disk ~{10 + round(3*data_size + reference_size)} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        set -eo pipefail
+
+        /usr/local/bin/fgbio FilterConsensusReads --input ~{bam} --output consensus_filtered.bam --ref ~{reference} --min-reads ~{sep=" " min_reads} --max-read-error-rate ~{max_read_error_rate} --max-base-error-rate ~{max_base_error_rate} --min-base-quality ~{min_base_quality} --max-no-call-fraction ~{max_no_call_fraction}
+        /usr/local/bin/fgbio ClipBam --input consensus_filtered.bam --ref ~{reference} --clipping-mode Hard --clip-overlapping-reads true --output clipped.bam
+
+        PAIRED=~{umi_paired}
+        DESCRIPTION=~{description}
+        INTERVALS=~{target_intervals}
+
+        if [ "$PAIRED" == true ]; then
+            if [[ -z "$DESCRIPTION" ]]; then
+                if [[ -z "$INTERVALS" ]]; then
+                    /usr/local/bin/fgbio CollectDuplexSeqMetrics --input clipped.bam --output duplex_seq.metrics
+                else
+                    /usr/local/bin/fgbio CollectDuplexSeqMetrics --input clipped.bam --output duplex_seq.metrics --intervals ${INTERVALS}
+                fi
+            else
+                if [[ -z "$INTERVALS" ]]; then
+                    /usr/local/bin/fgbio CollectDuplexSeqMetrics --input clipped.bam --description ${DESCRIPTION} --output duplex_seq.metrics
+                else
+                    /usr/local/bin/fgbio CollectDuplexSeqMetrics --input clipped.bam --description ${DESCRIPTION} --output duplex_seq.metrics --intervals ${INTERVALS}
+                fi
+            fi
+        else
+            echo "Sample not UMI Paired" > duplex_seq.metrics.txt
+        fi
+    >>>
+
+    output {
+        File clipped_bam = "clipped.bam"
+        File clipped_bam_bai = "clipped.bai"
+        Array[File] duplex_seq_metrics = glob("duplex_seq.metrics.*")
     }
 }
 
@@ -1164,41 +1693,6 @@ task vtDecompose {
     File decomposed_vcf = "decomposed.vcf.gz"
     File decomposed_vcf_tbi = "decomposed.vcf.gz.tbi"
   }
-}
-
-task bcftoolsIsecComplement {
-    input {
-        File vcf
-        File vcf_tbi
-        File exclude_vcf
-        File exclude_vcf_tbi
-        String output_type = "z"
-        String? output_vcf_name = "bcftools_isec.vcf"
-    }
-
-    Int space_needed_gb = 10 + 2*round(size([vcf, vcf_tbi, exclude_vcf, exclude_vcf_tbi], "GB"))
-    Int cores = 1
-    Int preemptible = 1
-    Int maxRetries = 0
-    runtime {
-      cpu: cores
-      docker: "kboltonlab/bst:latest"
-      memory: "6GB"
-      bootDiskSizeGb: space_needed_gb
-      disks: "local-disk ~{space_needed_gb} SSD"
-      preemptible: preemptible
-      maxRetries: maxRetries
-    }
-
-    command <<<
-        /usr/local/bin/bcftools isec -C -w1 ~{vcf} ~{exclude_vcf} --output-type ~{output_type} --output ~{output_vcf_name}.gz && /usr/local/bin/tabix ~{output_vcf_name}.gz
-
-    >>>
-
-    output {
-        File complement_vcf = "~{output_vcf_name}.gz"
-        File complement_vcf_tbi = "~{output_vcf_name}.gz.tbi"
-    }
 }
 
 task vardictTumorOnly {
@@ -1991,10 +2485,10 @@ task normalFisher {
             bgzip -f $name.fisher.output
             tabix -f -s1 -b2 -e2 $name.fisher.output.gz
             bcftools annotate -a $name.fisher.output.gz -h fisher.header -c CHROM,POS,REF,ALT,-,-,-,-,PON_FISHER $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
-            bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+            bcftools filter -i "INFO/PON_FISHER<=~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
         else
             bcftools annotate -h fisher.header $name.sample.pileup.vcf.gz -Oz -o $name.pileup.fisherPON.vcf.gz && tabix $name.pileup.fisherPON.vcf.gz
-            bcftools filter -i "INFO/PON_FISHER<~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
+            bcftools filter -i "INFO/PON_FISHER<=~{p_value}" $name.pileup.fisherPON.vcf.gz -Oz -o $name.filtered.pileup.fisherPON.vcf.gz && tabix $name.filtered.pileup.fisherPON.vcf.gz
         fi
     >>>
 
@@ -2034,10 +2528,18 @@ task annotateVcf {
     }
 
     command <<<
-        zcat ~{fp_filter} | grep '##' | tail -n +4  > fp_filter.header;
+        #zcat ~{fp_filter} | grep '##' | tail -n +4  > fp_filter.header;
+        zcat ~{fp_filter} | grep '##FILTER' > fp_filter.header;
+        zcat ~{fp_filter} | grep -v '#' > fp_filter.results;
         zcat ~{vep} | grep '##' | tail -n +3 > vep.header;
 
-        bcftools annotate -a ~{fp_filter} -h fp_filter.header -c =FILTER ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
+        printf "##INFO=<ID=FP_filter,Number=.,Type=String,Description=\"Result from FP Filter\">" >> fp_filter.header;
+        sed -i 's/;/,/g' fp_filter.results
+
+        bgzip -f fp_filter.results
+        tabix -f -s1 -b2 -e2 fp_filter.results.gz
+
+        bcftools annotate -a fp_filter.results.gz -h fp_filter.header -c CHROM,POS,ID,REF,ALT,-,FP_filter ~{vcf} -Oz -o ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
         tabix ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz
         bcftools annotate -a ~{vep} -h vep.header -c CSQ ~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz -Oz -o ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
         tabix ~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz
@@ -2048,5 +2550,306 @@ task annotateVcf {
         File final_annotated_vcf_tbi = "~{caller_prefix}.~{sample_name}.final.annotated.vcf.gz.tbi"
         File pon_annotated_vcf = "~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz"
         File pon_annotated_vcf_tbi = "~{caller_prefix}.~{sample_name}.fp_filter.annotated.vcf.gz.tbi"
+    }
+}
+
+task fastqToBam {
+    input {
+        File fastq1
+        File fastq2
+        String sample_name
+        String library_name
+        String platform_unit
+        String platform
+    }
+
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+    Int space_needed_gb = 10 + round(2*size([fastq1, fastq2], "GB"))
+
+    runtime {
+        docker: "mgibio/dna-alignment:1.0.0"
+        memory: "6GB"
+        cpu: cores
+        disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        /usr/bin/java -Xmx4g -jar /opt/picard/picard.jar FastqToSam FASTQ=~{fastq1} FASTQ2=~{fastq2} SAMPLE_NAME=~{sample_name} LIBRARY_NAME=~{library_name} PLATFORM_UNIT=~{platform_unit} PLATFORM=~{platform} OUTPUT=unaligned.bam
+    >>>
+
+    output {
+        File bam = "unaligned.bam"
+    }
+}
+
+# Pindel Stuff
+task pindelTumorOnly {
+    input {
+        File reference
+        File reference_fai
+        File reference_dict
+        File tumor_bam
+        File tumor_bam_bai
+        File region_file
+        String tumor_sample_name
+        String? chromosome
+        Int insert_size = 400
+    }
+
+    Int cores = 4
+    Int preemptible = 1
+    Int maxRetries = 5
+    Int space_needed_gb = 10 + round(size([reference, reference_fai, reference_dict, tumor_bam, tumor_bam_bai, region_file], "GB"))
+    runtime {
+        bootDiskSizeGb: 100
+        cpu: cores
+        disks: "local-disk ~{space_needed_gb} SSD"
+        docker: "mgibio/cle:v1.4.2"
+        memory: "24GB"
+        preemptible: preemptible
+        maxRetries: maxRetries
+    }
+
+    command <<<
+        echo -e "~{tumor_bam}\t~{insert_size}\t~{tumor_sample_name}" >> pindel.config
+
+        /usr/bin/pindel -i pindel.config -w 30 -T ~{cores} -o all -f ~{reference} \
+        ~{if defined(chromosome) then "-c ~{chromosome}" else ""} \
+        ~{if defined(region_file) then "-j ~{region_file}" else ""}
+    >>>
+
+  # TODO: how much space to allocate?
+    output {
+        File deletions = "all_D"
+        File insertions = "all_SI"
+        File tandems = "all_TD"
+        File long_insertions = "all_LI"
+        File inversions = "all_INV"
+    }
+}
+
+task catOut {
+  input {
+    Array[File] pindel_outs
+  }
+
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+  Int space_needed_gb = 10 + round(size(pindel_outs, "GB")*2)
+  runtime {
+    memory: "6GB"
+    docker: "ubuntu:xenial"
+    disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
+  }
+
+  command <<<
+    /bin/cat ~{sep=" " pindel_outs} | /bin/grep "ChrID" /dev/stdin > pindel.head
+  >>>
+
+  output {
+    File pindel_out = "pindel.head"
+  }
+}
+
+task pindelToVcf {
+    input {
+        File pindel_output_summary
+        File reference
+        File reference_fai
+        File reference_dict
+        String? ref_name = "GRCh38DH"
+        String? ref_date = "20161216"
+        Int? min_supporting_reads = 3
+        String? output_name = "pindel.vcf"
+    }
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+    Int space_needed_gb = 10 + round(size([reference, reference_fai, reference_dict, pindel_output_summary], "GB"))
+    runtime {
+      memory: "6GB"
+      docker: "mgibio/cle:v1.3.1"
+      disks: "local-disk ~{space_needed_gb} SSD"
+      cpu: cores
+      preemptible: preemptible
+      maxRetries: maxRetries
+    }
+
+    command <<<
+        /usr/bin/pindel2vcf -G -p ~{pindel_output_summary} -r ~{reference} -R ~{ref_name} -e ~{min_supporting_reads} -d ~{ref_date} -v ~{output_name}
+    >>>
+
+    output {
+        File pindel_vcf = "~{output_name}"
+    }
+}
+
+task removeEndTags {
+  input {
+    File vcf
+  }
+  Int cores = 1
+  Int preemptible = 1
+  Int maxRetries = 0
+  Int space_needed_gb = 10 + round(size(vcf, "GB")*2)
+  runtime {
+    memory: "6GB"
+    docker: "kboltonlab/bst:latest"
+    disks: "local-disk ~{space_needed_gb} SSD"
+    cpu: cores
+    preemptible: preemptible
+    maxRetries: maxRetries
+  }
+
+  String outfile = "pindel.noend.vcf.gz"
+  command <<<
+      /usr/local/bin/bgzip -c ~{vcf} > pindel.vcf.gz
+      /usr/local/bin/tabix -p vcf pindel.vcf.gz
+      /usr/local/bin/bcftools annotate -x INFO/END -Oz -o ~{outfile} pindel.vcf.gz
+      /usr/local/bin/tabix -p vcf ~{outfile}
+  >>>
+
+  output {
+    File processed_vcf = outfile
+    File processed_vcf_tbi = "~{outfile}.tbi"
+  }
+}
+
+task archerRAnnotate {
+    input {
+        File mutect_vcf
+        File lofreq_vcf
+        File vardict_vcf
+        File bolton_bick_vars
+        File mut2_bick
+        File mut2_kelly
+        File matches2
+        File TSG_file
+        File oncoKB_curated
+        File pd_annotation_file
+        File pan_myeloid
+        File truncating
+        File cosmic_dir_zip
+        String? pon_pvalue = "2.114164905e-6"
+    }
+
+    Float caller_size = size([mutect_vcf, lofreq_vcf, vardict_vcf], "GB")
+    Float file_size = size([bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file, truncating, pan_myeloid], "GB")
+    Float cosmic_size = 3*size(cosmic_dir_zip, "GB")
+    Int space_needed_gb = 20 + round(caller_size + file_size + cosmic_size)
+    Int cores = 2
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+      cpu: cores
+      docker: "kboltonlab/r_docker_ichan:latest"
+      memory: "12GB"
+      disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
+    }
+
+    String cosmic_dir = basename(cosmic_dir_zip, ".zip")
+
+    command <<<
+        set -eou pipefail
+
+        unzip -qq ~{cosmic_dir_zip}
+
+        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{mutect_vcf} --out $(basename ~{mutect_vcf} .vcf.gz) --caller mutect \
+        --bolton_bick_vars ~{bolton_bick_vars} \
+        --mut2_bick ~{mut2_bick} \
+        --mut2_kelly ~{mut2_kelly} \
+        --matches2 ~{matches2} \
+        --TSG_file ~{TSG_file} \
+        --oncoKB_curated ~{oncoKB_curated} \
+        --pd_annotation_file ~{pd_annotation_file} \
+        --pan_myeloid ~{pan_myeloid} \
+        --cosmic_dir ~{cosmic_dir} \
+        --truncating ~{truncating} \
+        --p_value ~{pon_pvalue}
+        echo "Mutect AnnotatePD Finished..."
+
+        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{lofreq_vcf} --out $(basename ~{lofreq_vcf} .vcf.gz) --caller lofreq \
+        --bolton_bick_vars ~{bolton_bick_vars} \
+        --mut2_bick ~{mut2_bick} \
+        --mut2_kelly ~{mut2_kelly} \
+        --matches2 ~{matches2} \
+        --TSG_file ~{TSG_file} \
+        --oncoKB_curated ~{oncoKB_curated} \
+        --pd_annotation_file ~{pd_annotation_file} \
+        --pan_myeloid ~{pan_myeloid} \
+        --cosmic_dir ~{cosmic_dir} \
+        --truncating ~{truncating} \
+        --p_value ~{pon_pvalue}
+        echo "Lofreq AnnotatePD Finished..."
+
+        LC_ALL=C.UTF-8 Rscript --vanilla /opt/bin/ArcherAnnotationScript.R --input ~{vardict_vcf} --out $(basename ~{vardict_vcf} .vcf.gz) --caller vardict \
+        --bolton_bick_vars ~{bolton_bick_vars} \
+        --mut2_bick ~{mut2_bick} \
+        --mut2_kelly ~{mut2_kelly} \
+        --matches2 ~{matches2} \
+        --TSG_file ~{TSG_file} \
+        --oncoKB_curated ~{oncoKB_curated} \
+        --pd_annotation_file ~{pd_annotation_file} \
+        --pan_myeloid ~{pan_myeloid} \
+        --cosmic_dir ~{cosmic_dir} \
+        --truncating ~{truncating} \
+        --p_value ~{pon_pvalue}
+        echo "Vardict AnnotatePD Finished..."
+    >>>
+
+    output {
+        File mutect_vcf_annotate_pd = basename(mutect_vcf, ".vcf.gz") + ".tsv"
+        File lofreq_vcf_annotate_pd = basename(lofreq_vcf, ".vcf.gz") + ".tsv"
+        File vardict_vcf_annotate_pd = basename(vardict_vcf, ".vcf.gz") + ".tsv"
+    }
+}
+
+task xgb_model {
+    input {
+        File mutect_tsv
+        File lofreq_tsv
+        File vardict_tsv
+        File pindel_full_vcf
+        File pon
+        String tumor_sample_name
+    }
+
+    Float caller_size = size([mutect_tsv, lofreq_tsv, vardict_tsv, pindel_full_vcf, pon], "GB")
+    Int space_needed_gb = 10 + round(caller_size)
+    Int cores = 1
+    Int preemptible = 1
+    Int maxRetries = 0
+
+    runtime {
+      cpu: cores
+      docker: "kboltonlab/predict_xgb:latest"
+      memory: "6GB"
+      disks: "local-disk ~{space_needed_gb} SSD"
+      preemptible: preemptible
+      maxRetries: maxRetries
+    }
+
+    command <<<
+        /opt/bin/xgbappcompiled/bin/xgbapp ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon} ""
+        echo "Model Finished..."
+    >>>
+
+
+    output {
+        File model_output = "output_~{tumor_sample_name}.tsv.gz"
+        File mutect_complex = "output_mutect_complex_~{tumor_sample_name}.tsv.gz"
+        File pindel_complex = "output_pindel_complex_~{tumor_sample_name}.tsv.gz"
+        File lofreq_complex = "output_lofreq_complex_~{tumor_sample_name}.tsv.gz"
     }
 }

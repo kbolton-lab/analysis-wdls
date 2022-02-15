@@ -26,7 +26,8 @@ task XGBModel {
     }
 
     command <<<
-        /usr/local/julia/bin/julia /opt/bin/main.jl ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon}
+        /opt/bin/xgbappcompiled/bin/xgbapp ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon} ""
+        echo "Model Finished..."
     >>>
 
     output {

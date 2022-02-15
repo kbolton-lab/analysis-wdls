@@ -98,6 +98,7 @@ workflow archerdx {
         File oncoKB_curated
         File pd_annotation_file
         File pan_myeloid
+        File truncating
         File cosmic_dir_zip
 
         # VEP
@@ -452,6 +453,7 @@ workflow archerdx {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
+            truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
 
@@ -467,6 +469,7 @@ workflow archerdx {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
+            truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
 
@@ -482,6 +485,7 @@ workflow archerdx {
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             pan_myeloid = pan_myeloid,
+            truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
 
