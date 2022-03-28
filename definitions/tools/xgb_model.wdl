@@ -18,7 +18,7 @@ task XGBModel {
 
     runtime {
       cpu: cores
-      docker: "kboltonlab/predict_xgb:latest"
+      docker: "kboltonlab/xgb:latest"
       memory: "6GB"
       disks: "local-disk ~{space_needed_gb} SSD"
       preemptible: preemptible

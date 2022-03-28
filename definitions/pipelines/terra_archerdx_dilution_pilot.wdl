@@ -519,7 +519,8 @@ workflow archerdx {
             pindel_output_summary=pindelCat.pindel_out,
             ref_name = ref_name,
             ref_date = ref_date,
-            min_supporting_reads = pindel_min_supporting_reads
+            min_supporting_reads = pindel_min_supporting_reads,
+            tumor_sample_name = tumor_sample_name
         }
         call removeEndTags {
           input: vcf=pindel2vcf.pindel_vcf
@@ -2685,6 +2686,13 @@ task pindelToVcf {
 
     command <<<
         /usr/bin/pindel2vcf -G -p ~{pindel_output_summary} -r ~{reference} -R ~{ref_name} -e ~{min_supporting_reads} -d ~{ref_date} -v ~{output_name}
+        # If pindel returns empty pindel.head file, need to account for empty file.
+        is_empty=$(grep "~{tumor_sample_name}" ~{output_name})
+        if [[ ${is_empty} == "" ]]; then
+            grep "##" ~{output_name} > temp.vcf
+            echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t~{tumor_sample_name}" >> temp.vcf
+            mv temp.vcf ~{output_name}
+        fi
     >>>
 
     output {

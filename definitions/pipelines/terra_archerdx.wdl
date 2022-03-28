@@ -1,15 +1,12 @@
 version 1.0
 
-struct TrimmingOptions {
-  File adapters
-  Int min_overlap
-}
-
+# A file with a label. E.g. A bed file that requires a specific label to identify it.
 struct LabelledFile {
   File file
   String label
 }
 
+# WDL handles paired Array inconsistently
 struct bam_and_bai {
     File bam
     File bai
@@ -91,7 +88,7 @@ workflow archerdx {
 
         # Variant Calling
         Boolean? arrayMode = true       # Decide if you would rather use the File (--bam_fof) or the Array (--bam) does the same thing, just input type is different
-        File pon_normal_bams_file       # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
+        File? pon_normal_bams_file       # on GCP, it's not possible to do File because the file paths are unaccessable for each VM instance, so you have to do ArrayMode
         Array[bam_and_bai] pon_bams     # This is just an array of Files... if you have the bam_fof it's easier just to use above and set this to empty array []
         Boolean tumor_only = true
         Float? af_threshold = 0.0001
@@ -549,7 +546,8 @@ workflow archerdx {
             pindel_output_summary=pindelCat.pindel_out,
             ref_name = ref_name,
             ref_date = ref_date,
-            min_supporting_reads = pindel_min_supporting_reads
+            min_supporting_reads = pindel_min_supporting_reads,
+            tumor_sample_name = tumor_sample_name
         }
         call removeEndTags {
           input: vcf=pindel2vcf.pindel_vcf
@@ -955,8 +953,8 @@ workflow archerdx {
 
 task filterUmiLength {
     input {
-        File? fastq1
-        File? fastq2
+        File fastq1
+        File fastq2
         Int umi_length
     }
 
@@ -2744,6 +2742,7 @@ task pindelToVcf {
         String? ref_date = "20161216"
         Int? min_supporting_reads = 3
         String? output_name = "pindel.vcf"
+        String tumor_sample_name
     }
     Int cores = 1
     Int preemptible = 1
@@ -2760,6 +2759,13 @@ task pindelToVcf {
 
     command <<<
         /usr/bin/pindel2vcf -G -p ~{pindel_output_summary} -r ~{reference} -R ~{ref_name} -e ~{min_supporting_reads} -d ~{ref_date} -v ~{output_name}
+        # If pindel returns empty pindel.head file, need to account for empty file.
+        is_empty=$(grep "~{tumor_sample_name}" ~{output_name})
+        if [[ ${is_empty} == "" ]]; then
+            grep "##" ~{output_name} > temp.vcf
+            echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t~{tumor_sample_name}" >> temp.vcf
+            mv temp.vcf ~{output_name}
+        fi
     >>>
 
     output {
@@ -2908,7 +2914,7 @@ task xgb_model {
 
     runtime {
       cpu: cores
-      docker: "kboltonlab/predict_xgb:latest"
+      docker: "kboltonlab/xgb:latest"
       memory: "6GB"
       disks: "local-disk ~{space_needed_gb} SSD"
       preemptible: preemptible
