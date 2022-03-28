@@ -39,7 +39,7 @@ workflow wf {
         File bam_bai
     }
 
-    call umiAlign {
+    call fastQC {
         input:
         bam = bam,
         bam_bai = bam_bai
