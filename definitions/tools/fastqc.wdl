@@ -1,3 +1,5 @@
+version 1.0
+
 task fastQC {
     input {
         File bam
@@ -28,5 +30,18 @@ task fastQC {
 
     output {
         File fastqc = "~{bamroot}_fastqc.html"
+    }
+}
+
+workflow wf {
+    input {
+        File bam
+        File bam_bai
+    }
+
+    call umiAlign {
+        input:
+        bam = bam,
+        bam_bai = bam_bai
     }
 }
