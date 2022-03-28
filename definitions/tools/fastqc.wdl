@@ -44,4 +44,8 @@ workflow wf {
         bam = bam,
         bam_bai = bam_bai
     }
+
+    output {
+        File fastqc = fastQC.fastqc
+    }
 }
