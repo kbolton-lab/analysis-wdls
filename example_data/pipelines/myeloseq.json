@@ -74,6 +74,12 @@
   "myeloseq.bcbio_filter_string": "((FMT/AF * FMT/DP < 6) && ((INFO/MQ < 55.0 && INFO/NM > 1.0) || (INFO/MQ < 60.0 && INFO/NM > 3.0) || (FMT/DP < 1600) || (INFO/QUAL < 27)))",
   "myeloseq.pon_normal_bams_file": "/storage1/fs1/bolton/Active/projects/Archer/Normals/pon.sample.bam.cloud.txt",
   "myeloseq.reference_amb": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.amb",
+  "myeloseq.vep_plugin_spliceAI_files":{
+      "spliceAI_snv":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.snv.hg38.vcf.gz",
+      "spliceAI_snv_tbi":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.snv.hg38.vcf.gz.tbi",
+      "spliceAI_indel":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.indel.hg38.vcf.gz",
+      "spliceAI_indel_tbi":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.indel.hg38.vcf.gz.tbi"
+  },
   "myeloseq.vep_custom_annotations": [{
       "force_report_coordinates" : true,
       "method" : "exact",

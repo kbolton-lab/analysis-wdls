@@ -47,3 +47,10 @@ struct VepCustomAnnotation {
   String method  # enum, ['exact', 'overlap']
   Info annotation
 }
+
+struct VepSpliceAIPlugin {
+    File spliceAI_snv
+    File spliceAI_snv_tbi
+    File spliceAI_indel
+    File spliceAI_indel_tbi
+}

@@ -37,6 +37,14 @@ struct VepCustomAnnotation {
   Info annotation
 }
 
+struct VepSpliceAIPlugin {
+    File spliceAI_snv
+    File spliceAI_snv_tbi
+    File spliceAI_indel
+    File spliceAI_indel_tbi
+}
+
+
 workflow archerdx {
     input {
         # Pipeline
@@ -133,6 +141,7 @@ workflow archerdx {
         String vep_ensembl_version
         String vep_ensembl_species
         Array[String] vep_plugins = ["Frameshift", "Wildtype"]
+        VepSpliceAIPlugin? vep_plugin_spliceAI_files
         File? synonyms_file
         Boolean? annotate_coding_only = true
         Array[VepCustomAnnotation] vep_custom_annotations
@@ -618,6 +627,7 @@ workflow archerdx {
               reference_fai=reference_fai,
               reference_dict=reference_dict,
               plugins=vep_plugins,
+              spliceAI_files = vep_plugin_spliceAI_files,
               ensembl_assembly=vep_ensembl_assembly,
               ensembl_version= vep_ensembl_version,
               ensembl_species=vep_ensembl_species,
@@ -1966,6 +1976,7 @@ task vep {
     String ensembl_version
     String ensembl_species
     Array[String] plugins
+    VepSpliceAIPlugin? spliceAI_files
     Boolean coding_only = false
     Array[VepCustomAnnotation] custom_annotations = []
     Array[String]? custom_annotation_string = [""]
@@ -2026,6 +2037,7 @@ task vep {
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
+    ~{if defined(spliceAI_files) then "--plugin SpliceAI,snv=~{spliceAI_files.spliceAI_snv},indel=~{spliceAI_files.spliceAI_indel}" else ""} \
     ~{if everything then "--everything" else ""} \
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
@@ -2670,6 +2682,7 @@ task pindelToVcf {
         String? ref_date = "20161216"
         Int? min_supporting_reads = 3
         String? output_name = "pindel.vcf"
+        String tumor_sample_name
     }
     Int cores = 1
     Int preemptible = 1
@@ -2841,7 +2854,7 @@ task xgb_model {
 
     runtime {
       cpu: cores
-      docker: "kboltonlab/predict_xgb:latest"
+      docker: "kboltonlab/xgb:latest"
       memory: "6GB"
       disks: "local-disk ~{space_needed_gb} SSD"
       preemptible: preemptible

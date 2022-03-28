@@ -62,6 +62,12 @@
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20211-26b393cc7ab04120ac68cc2cbd4a15df/indels.hq.vcf.gz",
       "/storage1/fs1/bga/Active/gmsroot/gc2560/core/build_merged_alignments/detect-variants--linus2112.gsc.wustl.edu-jwalker-20267-00cb8ff552914c17ad66d86031e10d30/indels.hq.vcf.gz"
   ],
+  "archerdx.vep_plugin_spliceAI_files":{
+      "spliceAI_snv":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.snv.hg38.vcf.gz",
+      "spliceAI_snv_tbi":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.snv.hg38.vcf.gz.tbi",
+      "spliceAI_indel":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.indel.hg38.vcf.gz",
+      "spliceAI_indel_tbi":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.indel.hg38.vcf.gz.tbi"
+  },
   "archerdx.vep_custom_annotations": [{
       "force_report_coordinates" : true,
       "method" : "exact",
