@@ -13,7 +13,7 @@ task vepTask {
         String ensembl_version
         String ensembl_species
         Array[String] plugins
-        VepSpliceAIPlugin? spliceAI_files
+        VepSpliceAIPlugin spliceAI_files
         Boolean coding_only = false
         Array[VepCustomAnnotation] custom_annotations = []
         Boolean everything = true
@@ -39,7 +39,7 @@ task vepTask {
     String annotated_path = basename(basename(vcf, ".gz"), ".vcf") + "_annotated.vcf"
     String cache_dir = basename(cache_dir_zip, ".zip")
     Int annotation_len = length(custom_annotations)
-    
+
   command <<<
     if [[ ~{annotation_len} -ge 1 ]]; then
       custom_annotation=$(/usr/bin/python3 /opt/bin/jsonToVepString.py ~{write_json(custom_annotations)})
@@ -96,7 +96,7 @@ workflow wf {
     File reference_fai
     File reference_dict
     Array[String] plugins
-    VepSpliceAIPlugin? spliceAI_files
+    VepSpliceAIPlugin spliceAI_files
     String ensembl_assembly
     String ensembl_version
     String ensembl_species
