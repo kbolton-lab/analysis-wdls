@@ -13,7 +13,7 @@ task vepTask {
         String ensembl_version
         String ensembl_species
         Array[String] plugins
-        VepSpliceAIPlugin? spliceAI_files
+        VepSpliceAIPlugin spliceAI_files = None
         Boolean coding_only = false
         Array[VepCustomAnnotation] custom_annotations = []
         Boolean everything = true
@@ -70,7 +70,7 @@ task vepTask {
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
-    ~{if defined(spliceAI_files) then "--plugin SpliceAI,snv=~{if defined(spliceAI_files.spliceAI_snv) then spliceAI_files.spliceAI_snv else ""},indel=~{if defined(spliceAI_files.spliceAI_indel) then spliceAI_files.spliceAI_indel else ""}" else ""} \
+    ~{if spliceAI_files != None then "--plugin SpliceAI,snv=~{spliceAI_files.spliceAI_snv},indel=~{spliceAI_files.spliceAI_indel}" else ""} \
     ~{if everything then "--everything" else ""} \
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
@@ -96,7 +96,7 @@ workflow wf {
     File reference_fai
     File reference_dict
     Array[String] plugins
-    VepSpliceAIPlugin? spliceAI_files
+    VepSpliceAIPlugin spliceAI_files
     String ensembl_assembly
     String ensembl_version
     String ensembl_species
