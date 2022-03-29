@@ -73,7 +73,7 @@ task vepTask {
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
-    ~{if defined(spliceAI_files) then "--plugin SpliceAI,snv=~{spliceai_snv},indel=~{spliceai_indel}" else ""} \
+    ~{if defined(spliceai_snv) then "--plugin SpliceAI,snv=~{spliceai_snv},indel=~{spliceai_indel}" else ""} \
     ~{if everything then "--everything" else ""} \
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
