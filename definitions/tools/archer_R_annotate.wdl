@@ -17,7 +17,7 @@ task archerRAnnotate {
 
     }
 
-    Float file_size = size([vcf, bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file, pan_myeloid], "GB")
+    Float file_size = size([vcf, bolton_bick_vars, mut2_bick, mut2_kelly, matches2, TSG_file, oncoKB_curated, pd_annotation_file], "GB")
     Float cosmic_size = 3*size(cosmic_dir_zip, "GB")
     Int space_needed_gb = 10 + round(file_size + cosmic_size)
     Int cores = 8
@@ -54,7 +54,6 @@ task archerRAnnotate {
         --TSG_file ~{TSG_file} \
         --oncoKB_curated ~{oncoKB_curated} \
         --pd_annotation_file ~{pd_annotation_file} \
-        --pan_myeloid ~{pan_myeloid} \
         --cosmic_dir ~{cosmic_dir} \
         --truncating ~{truncating} \
         --p_value ~{pon_pvalue}
@@ -91,7 +90,6 @@ workflow wf {
             TSG_file = TSG_file,
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
-            pan_myeloid = pan_myeloid,
             truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
