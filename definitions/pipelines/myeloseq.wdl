@@ -122,6 +122,7 @@ workflow myeloseq {
         Array[String]? variants_to_table_genotype_fields = ["GT","AD"]
         Array[String]? vep_to_table_fields = ["HGVSc","HGVSp"]
         String vep_pick = "pick"
+        Boolean everything = true
 
         # gnomAD
         Float filter_gnomADe_maximum_population_allele_frequency = 0.005
@@ -328,7 +329,7 @@ workflow myeloseq {
             arrayMode = arrayMode
         }
 
-        call vep.vep as vep {
+        call vep.vepTask as vep {
             input:
             vcf = mergeCallers.merged_vcf,
             cache_dir_zip = vep_cache_dir_zip,
