@@ -13,7 +13,7 @@ task vepTask {
         String ensembl_version
         String ensembl_species
         Array[String] plugins
-        VepSpliceAIPlugin spliceAI_files = None
+        VepSpliceAIPlugin spliceAI_files = {}
         Boolean coding_only = false
         Array[VepCustomAnnotation] custom_annotations = []
         Boolean everything = true
@@ -24,7 +24,7 @@ task vepTask {
     }
 
     Float cache_size = 3*size(cache_dir_zip, "GB")  # doubled to unzip
-    Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
+    Float vcf_size = 2*size([vcf, spliceAI_files.spliceAI_snv, spliceAI_files.spliceAI_indel], "GB")  # doubled for output vcf
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
     Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
 
@@ -70,7 +70,7 @@ task vepTask {
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
-    ~{if (spliceAI_files != None) then "--plugin SpliceAI,snv=~{spliceAI_files.spliceAI_snv},indel=~{spliceAI_files.spliceAI_indel}" else ""} \
+    ~{if defined(spliceAI_files.spliceAI_snv) && defined(spliceAI_files.spliceAI_indel) then "--plugin SpliceAI,snv=~{spliceAI_files.spliceAI_snv},indel=~{spliceAI_files.spliceAI_indel}" else ""} \
     ~{if everything then "--everything" else ""} \
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
@@ -96,7 +96,7 @@ workflow wf {
     File reference_fai
     File reference_dict
     Array[String] plugins
-    VepSpliceAIPlugin spliceAI_files
+    VepSpliceAIPlugin spliceAI_files = {}
     String ensembl_assembly
     String ensembl_version
     String ensembl_species
