@@ -909,6 +909,7 @@ workflow archerdx {
 
         # Model
         File model_output = model.model_output
+        File model_raw_output = model.model_raw_output
         File mutect_complex = model.mutect_complex
         File pindel_complex = model.pindel_complex
         File lofreq_complex = model.lofreq_complex
@@ -2847,6 +2848,7 @@ task xgb_model {
 
     output {
         File model_output = "output_~{tumor_sample_name}.tsv.gz"
+        File model_raw_output = "output_~{tumor_sample_name}.raw.tsv.gz"
         File mutect_complex = "output_mutect_complex_~{tumor_sample_name}.tsv.gz"
         File pindel_complex = "output_pindel_complex_~{tumor_sample_name}.tsv.gz"
         File lofreq_complex = "output_lofreq_complex_~{tumor_sample_name}.tsv.gz"
