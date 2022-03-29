@@ -47,8 +47,8 @@ struct VepCustomAnnotation {
 # The SpliceAI Plugin requires two files be provided, so rather than having 4 files passed individually
 # it makes things cleaner to have a single structure hold all four.
 struct VepSpliceAIPlugin {
-    String spliceAI_snv
-    String spliceAI_snv_tbi
-    String spliceAI_indel
-    String spliceAI_indel_tbi
+    File spliceAI_snv
+    File spliceAI_snv_tbi
+    File spliceAI_indel
+    File spliceAI_indel_tbi
 }

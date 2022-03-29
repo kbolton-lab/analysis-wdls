@@ -40,8 +40,7 @@ task vepTask {
     String cache_dir = basename(cache_dir_zip, ".zip")
     Int annotation_len = length(custom_annotations)
 
-    String spliceai_snv = spliceAI_files.spliceAI_snv
-    String spliceai_indel = spliceAI_files.spliceAI_indel
+    File test = spliceAI_files.spliceAI_snv
 
   command <<<
     if [[ ~{annotation_len} -ge 1 ]]; then
@@ -73,7 +72,7 @@ task vepTask {
     --dir ~{cache_dir} \
     --fasta ~{reference} \
     ~{sep=" " prefix("--plugin ", plugins)}  \
-    ~{if defined(spliceAI_files) then "--plugin SpliceAI,snv=~{spliceai_snv},indel=~{spliceai_indel}" else ""} \
+    ~{if defined(spliceAI_files) then "--plugin SpliceAI,snv=~{test}" else ""} \
     ~{if everything then "--everything" else ""} \
     --assembly ~{ensembl_assembly} \
     --cache_version ~{ensembl_version} \
