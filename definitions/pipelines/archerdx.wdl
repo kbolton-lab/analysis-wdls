@@ -106,7 +106,6 @@ workflow archerdx {
         File TSG_file
         File oncoKB_curated
         File pd_annotation_file
-        File pan_myeloid
         File truncating
         File cosmic_dir_zip
 
@@ -505,7 +504,6 @@ workflow archerdx {
             TSG_file = TSG_file,
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
-            pan_myeloid = pan_myeloid,
             truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
@@ -521,7 +519,6 @@ workflow archerdx {
             TSG_file = TSG_file,
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
-            pan_myeloid = pan_myeloid,
             truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }
@@ -537,7 +534,6 @@ workflow archerdx {
             TSG_file = TSG_file,
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
-            pan_myeloid = pan_myeloid,
             truncating = truncating,
             cosmic_dir_zip = cosmic_dir_zip
     }

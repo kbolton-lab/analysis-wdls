@@ -1,6 +1,5 @@
 {
     "wf.vcf": "/storage1/fs1/bolton/Active/projects/IChanTest/TestWDL/vardict.Sample.final.annotated.vcf.gz",
-    "wf.pan_myeloid":"<Not_Needed>",
     "wf.pd_annotation_file": "/storage1/fs1/bolton/Active/projects/annotation_files/pd_table_kbreview_bick_trunc3.txt",
     "wf.bolton_bick_vars": "/storage1/fs1/bolton/Active/projects/annotation_files/bick.bolton.vars3.txt",
     "wf.mut2_bick": "/storage1/fs1/bolton/Active/projects/annotation_files/topmed.n2.mutation.1.c.p.txt",

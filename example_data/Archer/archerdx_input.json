@@ -160,7 +160,6 @@
   "archerdx.TSG_file": "/storage1/fs1/bolton/Active/projects/annotation_files/gene_census_TSG.txt",
   "archerdx.oncoKB_curated": "/storage1/fs1/bolton/Active/projects/annotation_files/all_curated_genes_v2.0.tsv",
   "archerdx.pd_annotation_file": "/storage1/fs1/bolton/Active/projects/annotation_files/pd_table_kbreview_bick_trunc3.txt",
-  "archerdx.pan_myeloid": "/storage1/fs1/bolton/Active/projects/annotation_files/panmyeloid_variant_counts.vep.annotated.vcf.tsv",
   "archerdx.truncating": "/storage1/fs1/bolton/Active/projects/annotation_files/BB.truncating.more.than.1.tsv",
   "archerdx.cosmic_dir_zip": "/storage1/fs1/bolton/Active/projects/annotation_files/cosmic/cosmic_zip.zip"
 }

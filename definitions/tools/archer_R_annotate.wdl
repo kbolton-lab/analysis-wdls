@@ -11,7 +11,6 @@ task archerRAnnotate {
         File TSG_file
         File oncoKB_curated
         File pd_annotation_file
-        File pan_myeloid
         File truncating
         File cosmic_dir_zip
         String? pon_pvalue = "2.114164905e-6"
@@ -77,7 +76,6 @@ workflow wf {
         File TSG_file
         File oncoKB_curated
         File pd_annotation_file
-        File pan_myeloid
         File truncating
         File cosmic_dir_zip
     }
