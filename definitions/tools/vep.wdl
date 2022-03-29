@@ -13,7 +13,7 @@ task vepTask {
         String ensembl_version
         String ensembl_species
         Array[String] plugins
-        VepSpliceAIPlugin? spliceAI_files
+        VepSpliceAIPlugin spliceAI_files
         Boolean coding_only = false
         Array[VepCustomAnnotation] custom_annotations = []
         Boolean everything = true
@@ -98,7 +98,7 @@ workflow wf {
     File reference_fai
     File reference_dict
     Array[String] plugins
-    VepSpliceAIPlugin? spliceAI_files
+    VepSpliceAIPlugin spliceAI_files
     String ensembl_assembly
     String ensembl_version
     String ensembl_species
