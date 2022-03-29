@@ -105,7 +105,7 @@ task generateCustomString {
     }
 }
 
-workflow vep {
+workflow wf {
   input {
     File vcf
     File cache_dir_zip
