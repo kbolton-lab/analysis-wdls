@@ -4,7 +4,7 @@
     "wf.pick": "pick",
     "wf.synonyms_file": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build50f99e75d14340ffb5b7d21b03887637/chromAlias.ensembl.txt",
     "wf.plugins": ["Frameshift", "Wildtype"],
-    "wf.vep_plugin_spliceAI_files":{
+    "wf.spliceAI_files":{
         "spliceAI_snv":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.snv.hg38.vcf.gz",
         "spliceAI_snv_tbi":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.snv.hg38.vcf.gz.tbi",
         "spliceAI_indel":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.indel.hg38.vcf.gz",
