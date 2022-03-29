@@ -10,55 +10,36 @@
         "spliceAI_indel":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.indel.hg38.vcf.gz",
         "spliceAI_indel_tbi":"/storage1/fs1/bolton/Active/data/hg38/vcf/spliceai_scores.raw.indel.hg38.vcf.gz.tbi"
     },
-    "wf.custom_annotations": [{
+    "wf.vep_custom_annotations": [{
         "force_report_coordinates" : true,
         "method" : "exact",
-        "annotation" : {
-            "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz",
-            "secondary_files" : [
-                "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz.tbi"
-            ],
-            "data_format" : "vcf",
-            "name" : "gnomADe",
-            "vcf_fields" : [
-                "AF",
-                "AF_AFR",
-                "AF_AMR",
-                "AF_ASJ",
-                "AF_EAS",
-                "AF_FIN",
-                "AF_NFE",
-                "AF_OTH",
-                "AF_SAS"
-            ],
-            "gnomad_filter" : true,
-            "check_existing" : true
-        }
-        },
-        {
-            "force_report_coordinates" : true,
-            "method" : "exact",
-            "annotation" : {
-                "file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz",
-                "secondary_files" : [
-                    "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz.tbi"
-                ],
-                "data_format" : "vcf",
-                "name" : "clinvar",
-                "vcf_fields" : [
-                    "CLINSIGN",
-                    "PHENOTYPE",
-                    "SCORE",
-                    "RCVACC",
-                    "TESTEDINGTR",
-                    "PHENOTYPELIST",
-                    "NUMSUBMIT",
-                    "GUIDELINES"
-                ],
-                "gnomad_filter" : true,
-                "check_existing" : true
-            }
-            }],
+        "custom_file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz",
+        "secondary_files" : ["/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/genome-db-ensembl-gnomad/2dd4b53431674786b760adad60a29273/fixed_b38_exome.vcf.gz.tbi"],
+        "data_format" : "vcf",
+        "name" : "gnomADe",
+        "vcf_fields" : [ "AF", "AF_AFR", "AF_AMR", "AF_ASJ", "AF_EAS", "AF_FIN", "AF_NFE", "AF_OTH", "AF_SAS"],
+        "check_existing" : true
+    },
+    {
+        "force_report_coordinates" : true,
+        "method" : "exact",
+        "custom_file" : "/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz",
+        "secondary_files" : ["/storage1/fs1/bga/Active/gmsroot/gc2560/core/custom_clinvar_vcf/v20181028/custom.vcf.gz.tbi"],
+        "data_format" : "vcf",
+        "name" : "clinvar",
+        "vcf_fields" : [ "CLINSIGN", "PHENOTYPE", "SCORE", "RCVACC", "TESTEDINGTR", "PHENOTYPELIST", "NUMSUBMIT", "GUIDELINES"],
+        "check_existing" : true
+    },
+    {
+        "force_report_coordinates" : true,
+        "method" : "exact",
+        "custom_file" : "/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.archer_panel.vcf.gz",
+        "secondary_files" : ["/storage1/fs1/bolton/Active/data/hg38/vcf/gnomad.genomes.r3.0.sites.full_trimmed_info.af_only.archer_panel.vcf.gz.tbi"],
+        "data_format" : "vcf",
+        "name" : "gnomADg",
+        "vcf_fields" : [ "AF", "AF_ami", "AF_oth", "AF_afr", "AF_sas", "AF_asj", "AF_fin", "AF_amr", "AF_nfe", "AF_eas"],
+        "check_existing" : true
+    }],
     "wf.reference_fai": "/storage1/fs1/bga/Active/gmsroot/gc2560/core/model_data/2887491634/build21f22873ebe0486c8e6f69c15435aa96/all_sequences.fa.fai",
     "wf.ensembl_species": "homo_sapiens",
     "wf.ensembl_version": "104",

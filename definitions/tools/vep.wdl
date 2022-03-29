@@ -3,54 +3,50 @@ version 1.0
 import "../types.wdl"
 
 task vepTask {
-  input {
-    File vcf
-    File cache_dir_zip
-    File reference
-    File reference_fai
-    File reference_dict
-    String ensembl_assembly
-    String ensembl_version
-    String ensembl_species
-    Array[String] plugins
-    VepSpliceAIPlugin? spliceAI_files
-    Boolean coding_only = false
-    Array[VepCustomAnnotation] custom_annotations = []
-    Array[String]? custom_annotation_string = [""]
-    Array[File]? custom_annotation_files = [""]
-    Array[Array[File]?]? custom_annotation_files_tbi = [[""]]
-    Boolean everything = true
-    # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
-    String pick = "flag_pick"
-    String additional_args = "--pick_order canonical,rank,mane,ccds,appris,tsl,biotype,length --merged --buffer_size 1000 --af_gnomad"
-    File? synonyms_file
-  }
+    input {
+        File vcf
+        File cache_dir_zip
+        File reference
+        File reference_fai
+        File reference_dict
+        String ensembl_assembly
+        String ensembl_version
+        String ensembl_species
+        Array[String] plugins
+        VepSpliceAIPlugin? spliceAI_files
+        Boolean coding_only = false
+        Array[VepCustomAnnotation] custom_annotations = []
+        Boolean everything = true
+        # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
+        String pick = "flag_pick"
+        String additional_args = "--pick_order canonical,rank,mane,ccds,appris,tsl,biotype,length --merged --buffer_size 1000 --af_gnomad"
+        File? synonyms_file
+    }
 
-  Float cache_size = 3*size(cache_dir_zip, "GB")  # doubled to unzip
-  Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
-  Float reference_size = size([reference, reference_fai, reference_dict], "GB")
-  Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
-  runtime {
-    memory: "64GB"
-    bootDiskSizeGb: 30
-    cpu: 4
-    docker: "mgibio/vep_helper-cwl:vep_101.0_v2"
-    disks: "local-disk ~{space_needed_gb} SSD"
-  }
+    Float cache_size = 3*size(cache_dir_zip, "GB")  # doubled to unzip
+    Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
+    Float reference_size = size([reference, reference_fai, reference_dict], "GB")
+    Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
 
-  String annotated_path = basename(basename(vcf, ".gz"), ".vcf") + "_annotated.vcf"
-  String cache_dir = basename(cache_dir_zip, ".zip")
+    runtime {
+        memory: "64GB"
+        bootDiskSizeGb: 30
+        cpu: 4
+        docker: "kboltonlab/ic_vep"
+        disks: "local-disk ~{space_needed_gb} SSD"
+    }
+
+    String annotated_path = basename(basename(vcf, ".gz"), ".vcf") + "_annotated.vcf"
+    String cache_dir = basename(cache_dir_zip, ".zip")
+    Int annotation_len = length(custom_annotations)
 
   command <<<
-    custom_string="~{sep=" " custom_annotation_string}"
-    if [[ -z "$custom_string" ]]; then
-        echo ${custom_string} >> custom_string_validation.txt
+    if [[ ~{annotation_len} -ge 1 ]]; then
+      custom_annotation=$(/usr/bin/python3 /opt/bin/jsonToVepString.py ~{write_json(custom_annotations)})
     else
-        for file_path in ~{sep=" " custom_annotation_files}; do
-            custom_string=$(awk -v srch="<CUSTOM_FILE>" -v repl="$file_path" '!x{x=sub(srch,repl)}{print $0}' <<< $custom_string)
-        done
-        echo ${custom_string} >> custom_string_validation.txt
+      custom_annotation=""
     fi
+    echo $custom_annotation
 
     #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
     unzip -qq ~{cache_dir_zip}
@@ -80,7 +76,7 @@ task vepTask {
     --cache_version ~{ensembl_version} \
     --species ~{ensembl_species} \
     ~{additional_args} \
-    ${custom_string}
+    ${custom_annotation}
 
     bgzip ~{annotated_path} && tabix ~{annotated_path}.gz
   >>>
@@ -90,19 +86,6 @@ task vepTask {
     File annotated_vcf_tbi = "~{annotated_path}.gz.tbi"
     File vep_summary = annotated_path + "_summary.html"
   }
-}
-
-task generateCustomString {
-    input { VepCustomAnnotation custom_annotation }
-    runtime { docker: "ubuntu:xenial" }
-    command <<<
-        /bin/echo '~{if custom_annotation.annotation.check_existing then "--check_existing" else ""} --custom <CUSTOM_FILE>,~{custom_annotation.annotation.name},~{custom_annotation.annotation.data_format},~{custom_annotation.method},~{if custom_annotation.force_report_coordinates then 1 else 0},~{sep="," custom_annotation.annotation.vcf_fields}'
-    >>>
-    output {
-        String custom_string = read_string(stdout())
-        File custom_file = custom_annotation.annotation.file
-        Array[File]? custom_file_tbi = custom_annotation.annotation.secondary_files
-    }
 }
 
 workflow wf {
@@ -121,35 +104,26 @@ workflow wf {
     Array[VepCustomAnnotation] custom_annotations = []
     Boolean coding_only = false
     Boolean everything = true
-    String pick = "flag_pick"       # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
-  }
-
-  scatter(custom_annotation in custom_annotations) {
-      call generateCustomString {
-          input: custom_annotation = custom_annotation
-      }
+    String pick = "pick"       # one of [pick, flag_pick, pick-allele, per_gene, pick_allele_gene, flag_pick_allele, flag_pick_allele_gene]
   }
 
   call vepTask {
-    input:
-    vcf=vcf,
-    cache_dir_zip=cache_dir_zip,
-    reference=reference,
-    reference_fai=reference_fai,
-    reference_dict=reference_dict,
-    plugins=plugins,
-    spliceAI_files=spliceAI_files,
-    ensembl_assembly=ensembl_assembly,
-    ensembl_version=ensembl_version,
-    ensembl_species=ensembl_species,
-    synonyms_file=synonyms_file,
-    custom_annotations = custom_annotations,
-    custom_annotation_string = generateCustomString.custom_string,
-    custom_annotation_files = generateCustomString.custom_file,
-    custom_annotation_files_tbi = generateCustomString.custom_file_tbi,
-    coding_only=coding_only,
-    everything=everything,
-    pick=pick
+      input:
+          vcf = vcf,
+          cache_dir_zip = cache_dir_zip,
+          reference = reference,
+          reference_fai = reference_fai,
+          reference_dict = reference_dict,
+          plugins = plugins,
+          spliceAI_files = spliceAI_files,
+          ensembl_assembly = ensembl_assembly,
+          ensembl_version = ensembl_version,
+          ensembl_species = ensembl_species,
+          synonyms_file = synonyms_file,
+          custom_annotations = custom_annotations,
+          coding_only = coding_only,
+          everything = everything,
+          pick = pick
   }
 
   output {
