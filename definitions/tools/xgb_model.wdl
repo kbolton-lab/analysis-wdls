@@ -36,5 +36,6 @@ task XGBModel {
         File mutect_complex = "mutect_complex_~{tumor_sample_name}.tsv.gz"
         File pindel_complex = "pindel_complex_~{tumor_sample_name}.tsv.gz"
         File lofreq_complex = "lofreq_complex_~{tumor_sample_name}.tsv.gz"
+        File caller_filters = "Caller_Filters.raw.tsv.gz"
     }
 }
