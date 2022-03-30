@@ -948,6 +948,7 @@ workflow archerdx {
         File mutect_complex = model.mutect_complex
         File pindel_complex = model.pindel_complex
         File lofreq_complex = model.lofreq_complex
+        File caller_filters = model.caller_filters
     }
 }
 
