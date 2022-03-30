@@ -9,7 +9,6 @@ task archerRAnnotate {
         File mut2_kelly
         File matches2
         File TSG_file
-        File oncoKB
         File oncoKB_curated
         File pd_annotation_file
         File truncating
@@ -74,7 +73,6 @@ workflow wf {
         File mut2_kelly
         File matches2
         File TSG_file
-        File oncoKB
         File oncoKB_curated
         File pd_annotation_file
         File truncating
@@ -90,7 +88,6 @@ workflow wf {
             mut2_kelly = mut2_kelly,
             matches2 = matches2,
             TSG_file = TSG_file,
-            oncoKB = oncoKB,
             oncoKB_curated = oncoKB_curated,
             pd_annotation_file = pd_annotation_file,
             truncating = truncating,
