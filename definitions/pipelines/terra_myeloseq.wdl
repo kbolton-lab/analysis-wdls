@@ -20,30 +20,27 @@ struct bam_and_bai_array {
     Array[File] bais
 }
 
-# ---- vep_custom_annotation ----
-struct Info {
-  File file
-  Array[File]? secondary_files
-  String data_format  # enum, ['bed', 'gff', 'gtf', 'vcf', 'bigwig']
-  String name
-  Array[String]? vcf_fields
-  Boolean? gnomad_filter
-  Boolean check_existing
-}
-
+# VEP can utilize other files for custom annotations outside of the normal available plugins
+# This structure format is ported over from MGI's CWL Pipelines so it could potentially be better integrated
 struct VepCustomAnnotation {
-  Boolean force_report_coordinates
-  String method  # enum, ['exact', 'overlap']
-  Info annotation
+    Boolean check_existing
+    File custom_file
+    String name
+    String data_format  # enum, ['bed', 'gff', 'gtf', 'vcf', 'bigwig']
+    String method  # enum, ['exact', 'overlap']
+    Boolean force_report_coordinates
+    Array[String]? vcf_fields
+    Array[File]? secondary_files
 }
 
+# The SpliceAI Plugin requires two files be provided, so rather than having 4 files passed individually
+# it makes things cleaner to have a single structure hold all four.
 struct VepSpliceAIPlugin {
     File? spliceAI_snv
     File? spliceAI_snv_tbi
     File? spliceAI_indel
     File? spliceAI_indel_tbi
 }
-
 
 workflow myeloseq {
     input {
@@ -1851,7 +1848,8 @@ task vep {
     Float cache_size = 3*size(cache_dir_zip, "GB")  # doubled to unzip
     Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
-    Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + size(synonyms_file, "GB"))
+    Float splice_AI_size = size([spliceAI_files.spliceAI_indel, spliceAI_files.spliceAI_snv], "GB")
+    Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + splice_AI_size +size(synonyms_file, "GB"))
     Int preemptible = 1
     Int maxRetries = 0
 
@@ -2718,5 +2716,6 @@ task xgb_model {
         File mutect_complex = "mutect_complex_~{tumor_sample_name}.tsv.gz"
         File pindel_complex = "pindel_complex_~{tumor_sample_name}.tsv.gz"
         File lofreq_complex = "lofreq_complex_~{tumor_sample_name}.tsv.gz"
+        File caller_filters = "Caller_Filters.raw.tsv.gz"
     }
 }

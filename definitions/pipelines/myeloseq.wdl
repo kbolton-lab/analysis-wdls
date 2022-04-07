@@ -113,7 +113,7 @@ workflow myeloseq {
         String vep_ensembl_version
         String vep_ensembl_species
         Array[String] vep_plugins = ["Frameshift", "Wildtype"]
-        VepSpliceAIPlugin? vep_plugin_spliceAI_files
+        VepSpliceAIPlugin vep_plugin_spliceAI_files = {}
         File? synonyms_file
         Boolean? annotate_coding_only = true
         Array[VepCustomAnnotation] vep_custom_annotations
