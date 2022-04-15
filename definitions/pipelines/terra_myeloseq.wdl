@@ -2698,7 +2698,7 @@ task xgb_model {
 
     runtime {
       cpu: cores
-      docker: "kboltonlab/xgb:latest"
+      docker: "kboltonlab/xgb:nomodel"
       memory: "6GB"
       disks: "local-disk ~{space_needed_gb} SSD"
       preemptible: preemptible
@@ -2706,16 +2706,16 @@ task xgb_model {
     }
 
     command <<<
-        /opt/bin/xgbappcompiled/bin/xgbapp ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon} ""
+        /opt/bin/xgbappcompiled_nomodel/bin/xgbapp_nomodel ~{lofreq_tsv} ~{mutect_tsv} ~{vardict_tsv} ~{pindel_full_vcf} ~{pon} ""
         echo "Model Finished..."
     >>>
 
     output {
         File model_output = "output_~{tumor_sample_name}.tsv.gz"
         File model_raw_output = "output_~{tumor_sample_name}.raw.tsv.gz"
-        File mutect_complex = "mutect_complex_~{tumor_sample_name}.tsv.gz"
-        File pindel_complex = "pindel_complex_~{tumor_sample_name}.tsv.gz"
-        File lofreq_complex = "lofreq_complex_~{tumor_sample_name}.tsv.gz"
+        File mutect_complex = "output_mutect_complex_~{tumor_sample_name}.tsv.gz"
+        File pindel_complex = "output_pindel_complex_~{tumor_sample_name}.tsv.gz"
+        File lofreq_complex = "output_lofreq_complex_~{tumor_sample_name}.tsv.gz"
         File caller_filters = "Caller_Filters.raw.tsv.gz"
     }
 }
