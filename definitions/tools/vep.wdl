@@ -2,7 +2,7 @@ version 1.0
 
 import "../types.wdl"
 
-task vepTask {
+task vep {
     input {
         File vcf
         File cache_dir_zip
@@ -24,10 +24,12 @@ task vepTask {
     }
 
     Float cache_size = 3*size(cache_dir_zip, "GB")  # doubled to unzip
-    Float vcf_size = 2*size([vcf, spliceAI_files.spliceAI_snv, spliceAI_files.spliceAI_indel], "GB")  # doubled for output vcf
+    Float vcf_size = 2*size(vcf, "GB")  # doubled for output vcf
     Float reference_size = size([reference, reference_fai, reference_dict], "GB")
     Float splice_AI_size = size([spliceAI_files.spliceAI_indel, spliceAI_files.spliceAI_snv], "GB")
     Int space_needed_gb = 50 + round(reference_size + vcf_size + cache_size + splice_AI_size +size(synonyms_file, "GB"))
+    Int preemptible = 1
+    Int maxRetries = 0
 
     runtime {
         memory: "64GB"
@@ -35,58 +37,65 @@ task vepTask {
         cpu: 4
         docker: "kboltonlab/ic_vep"
         disks: "local-disk ~{space_needed_gb} SSD"
+        preemptible: preemptible
+        maxRetries: maxRetries
     }
 
     String annotated_path = basename(basename(vcf, ".gz"), ".vcf") + "_annotated.vcf"
     String cache_dir = basename(cache_dir_zip, ".zip")
     Int annotation_len = length(custom_annotations)
+    File spliceAI_snv = spliceAI_files.spliceAI_snv
+    File spliceAI_indel = spliceAI_files.spliceAI_indel
 
-  command <<<
-    if [[ ~{annotation_len} -ge 1 ]]; then
-      custom_annotation=$(/usr/bin/python3 /opt/bin/jsonToVepString.py ~{write_json(custom_annotations)})
-    else
-      custom_annotation=""
-    fi
-    echo $custom_annotation
+    command <<<
+        if [[ ~{annotation_len} -ge 1 ]]; then
+            custom_annotation=$(/usr/bin/python3 /opt/bin/jsonToVepString.py ~{write_json(custom_annotations)})
+        else
+            custom_annotation=""
+        fi
+        echo $custom_annotation
 
-    #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
-    unzip -qq ~{cache_dir_zip}
+        echo ~{spliceAI_snv}
+        echo ~{spliceAI_indel}
 
-    /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
-    --format vcf \
-    --vcf \
-    --fork 4 \
-    --terms SO \
-    --transcript_version \
-    --offline \
-    --cache \
-    --symbol \
-    -o ~{annotated_path} \
-    -i ~{vcf} \
-    ~{if defined(synonyms_file) then "--synonyms ~{synonyms_file}" else ""} \
-    --sift p \
-    --polyphen p \
-    ~{if coding_only then "--coding_only" else ""} \
-    --~{pick} \
-    --dir ~{cache_dir} \
-    --fasta ~{reference} \
-    ~{sep=" " prefix("--plugin ", plugins)}  \
-    ~{if defined(spliceAI_files.spliceAI_snv) && defined(spliceAI_files.spliceAI_indel) then "--plugin SpliceAI,snv=~{spliceAI_files.spliceAI_snv},indel=~{spliceAI_files.spliceAI_indel}" else ""} \
-    ~{if everything then "--everything" else ""} \
-    --assembly ~{ensembl_assembly} \
-    --cache_version ~{ensembl_version} \
-    --species ~{ensembl_species} \
-    ~{additional_args} \
-    ${custom_annotation}
+        #mkdir ~{cache_dir} && unzip -qq ~{cache_dir_zip} -d ~{cache_dir}
+        unzip -qq ~{cache_dir_zip}
 
-    bgzip ~{annotated_path} && tabix ~{annotated_path}.gz
-  >>>
+        /usr/bin/perl -I /opt/lib/perl/VEP/Plugins /usr/bin/variant_effect_predictor.pl \
+        --format vcf \
+        --vcf \
+        --fork 4 \
+        --terms SO \
+        --transcript_version \
+        --offline \
+        --cache \
+        --symbol \
+        -o ~{annotated_path} \
+        -i ~{vcf} \
+        ~{if defined(synonyms_file) then "--synonyms ~{synonyms_file}" else ""} \
+        --sift p \
+        --polyphen p \
+        ~{if coding_only then "--coding_only" else ""} \
+        --~{pick} \
+        --dir ~{cache_dir} \
+        --fasta ~{reference} \
+        ~{sep=" " prefix("--plugin ", plugins)}  \
+        ~{if defined(spliceAI_snv) && defined(spliceAI_indel) then "--plugin SpliceAI,snv=~{spliceAI_snv},indel=~{spliceAI_indel}" else ""} \
+        ~{if everything then "--everything" else ""} \
+        --assembly ~{ensembl_assembly} \
+        --cache_version ~{ensembl_version} \
+        --species ~{ensembl_species} \
+        ~{additional_args} \
+        ${custom_annotation}
 
-  output {
-    File annotated_vcf = "~{annotated_path}.gz"
-    File annotated_vcf_tbi = "~{annotated_path}.gz.tbi"
-    File vep_summary = annotated_path + "_summary.html"
-  }
+        bgzip ~{annotated_path} && tabix ~{annotated_path}.gz
+    >>>
+
+    output {
+        File annotated_vcf = "~{annotated_path}.gz"
+        File annotated_vcf_tbi = "~{annotated_path}.gz.tbi"
+        File vep_summary = annotated_path + "_summary.html"
+    }
 }
 
 workflow wf {
