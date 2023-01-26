@@ -104,18 +104,25 @@ task vardictTumorOnly {
     }
 
     String output_name = "vardict"
+
     command <<<
         set -o pipefail
         set -o errexit
 
+        export VAR_DICT_OPTS='"-Xms256m" "-Xmx24g"'
+        echo ${VAR_DICT_OPTS}
+        echo ~{space_needed_gb}
 
+        samtools index ~{tumor_bam}
+        bedtools makewindows -b interval_bed -w 50150 -s 5000 > ~{basename(interval_bed, ".bed")}_windows.bed
 
         /opt/VarDictJava/build/install/VarDict/bin/VarDict \
             -U -G ~{reference} \
+            -X 1 \
             -f ~{min_var_freq} \
             -N ~{tumor_sample_name} \
             -b ~{tumor_bam} \
-            -c 1 -S 2 -E 3 -g 4 ~{interval_bed} \
+            -c 1 -S 2 -E 3 -g 4 ~{basename(interval_bed, ".bed")}_windows.bed \
             -th ~{cores} | \
         /opt/VarDictJava/build/install/VarDict/bin/teststrandbias.R | \
         /opt/VarDictJava/build/install/VarDict/bin/var2vcf_valid.pl \
