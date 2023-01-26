@@ -114,7 +114,7 @@ task vardictTumorOnly {
         echo ~{space_needed_gb}
 
         samtools index ~{tumor_bam}
-        bedtools makewindows -b interval_bed -w 50150 -s 5000 > ~{basename(interval_bed, ".bed")}_windows.bed
+        bedtools makewindows -b ~{interval_bed} -w 50150 -s 5000 > ~{basename(interval_bed, ".bed")}_windows.bed
 
         /opt/VarDictJava/build/install/VarDict/bin/VarDict \
             -U -G ~{reference} \
