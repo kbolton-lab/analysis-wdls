@@ -94,7 +94,7 @@ task vardictTumorOnly {
     Int maxRetries = 0
 
     runtime {
-        docker: "kboltonlab/vardictjava:1.0"
+        docker: "kboltonlab/vardictjava:bedtools"
         memory: "96GB"
         cpu: cores
         bootDiskSizeGb: space_needed_gb
